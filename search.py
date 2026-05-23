@@ -34,7 +34,82 @@ LOCATION_MULTIPLIERS = {
     "san-antonio-tx": 0.02, "san-diego-ca": 0.02, "dallas-tx": 0.03,
     "austin-tx": 0.02, "miami-fl": 0.03, "atlanta-ga": 0.03,
     "boston-ma": 0.03, "seattle-wa": 0.03, "denver-co": 0.02,
+    "orlando-fl": 0.02, "tampa-fl": 0.02, "charlotte-nc": 0.02,
+    "nashville-tn": 0.02, "portland-or": 0.02, "las-vegas-nv": 0.02,
+    "minneapolis-mn": 0.02, "detroit-mi": 0.02, "columbus-oh": 0.02,
+    "wilmington-de": 0.008, "newark-de": 0.005, "dover-de": 0.004,
 }
+
+
+def _normalize_location(raw: str) -> tuple:
+    """
+    Normalize free-form location text into (city_key, display_name, is_remote).
+    Handles: 'Miami', 'Miami, FL', 'Miami FL', 'Remote', '33101', 'New York City', etc.
+    """
+    if not raw or not raw.strip():
+        return ("remote", "Remote", True)
+    
+    raw = raw.strip()
+    
+    # Remote matches
+    if raw.lower() in ("remote", "work from home", "wfh", "anywhere", "online"):
+        return ("remote", "Remote", True)
+    
+    # Zip code → treat as "no specific city, national search"
+    if raw.replace("-", "").replace(" ", "").isdigit() and len(raw.replace("-", "").replace(" ", "")) >= 5:
+        return ("remote", raw, False)  # Zip code — national search, display the zip
+    
+    # Normalize "City, ST" or "City ST" format
+    import re
+    # Extract city name before comma or state abbreviation
+    # Match "City, ST" or "City ST" patterns
+    match = re.match(r'^([^,]+?)(?:,\s*([A-Za-z]{2}))?\s*$', raw)
+    city = match.group(1).strip().lower() if match else raw.lower()
+    state = match.group(2) if match and match.group(2) else ""
+    
+    # Remove "city" suffix
+    city = city.replace(" city", "").replace(" town", "")
+    
+    # Map common city names to our location keys
+    city_map = {
+        "new york": "new-york-ny", "new york city": "new-york-ny", "nyc": "new-york-ny",
+        "los angeles": "los-angeles-ca", "la": "los-angeles-ca",
+        "chicago": "chicago-il",
+        "houston": "houston-tx",
+        "phoenix": "phoenix-az",
+        "philadelphia": "philadelphia-pa", "philly": "philadelphia-pa",
+        "san antonio": "san-antonio-tx",
+        "san diego": "san-diego-ca",
+        "dallas": "dallas-tx",
+        "austin": "austin-tx",
+        "miami": "miami-fl",
+        "atlanta": "atlanta-ga",
+        "boston": "boston-ma",
+        "seattle": "seattle-wa",
+        "denver": "denver-co",
+        "orlando": "orlando-fl",  # fallback to miami multiplier
+        "tampa": "tampa-fl",      # fallback to miami multiplier
+        "charlotte": "charlotte-nc", # fallback to atlanta multiplier
+        "nashville": "nashville-tn",
+        "portland": "portland-or",
+        "las vegas": "las-vegas-nv", "vegas": "las-vegas-nv",
+        "minneapolis": "minneapolis-mn",
+        "detroit": "detroit-mi",
+        "columbus": "columbus-oh",
+        "wilmington": "wilmington-de",
+        "newark": "newark-de",
+        "dover": "dover-de",
+    }
+    
+    loc_key = city_map.get(city, None)
+    
+    # If state is given and city not in map, try "city-statecode" format
+    if not loc_key and state:
+        loc_key = f"{city.replace(' ', '-')}-{state.lower()}"
+    
+    display = raw.title() if not state else f"{city.title()}, {state.upper()}"
+    
+    return (loc_key or "remote", display, False)
 
 
 def search_jobs(keywords: str = "", location: str = "", category: str = "",
@@ -45,6 +120,8 @@ def search_jobs(keywords: str = "", location: str = "", category: str = "",
     2. USAJobs.gov API (real government positions)
     3. Only if ALL fail: return empty results with a clear note
     """
+    # Normalize the location input
+    loc_key, loc_display, is_remote = _normalize_location(location)
     # Determine base count from category
     if category and category in CATEGORY_COUNTS:
         cat_data = CATEGORY_COUNTS[category]
@@ -67,10 +144,9 @@ def search_jobs(keywords: str = "", location: str = "", category: str = "",
             label = keywords or "All Jobs"
             growth = "N/A"
 
-    # Location multiplier
-    loc_key = location.lower().replace(" ", "-").replace(",", "")
-    multiplier = LOCATION_MULTIPLIERS.get(loc_key, 0.05)
-    if "remote" in location.lower() or not location:
+    # Location multiplier using normalized location
+    multiplier = 1.0 if is_remote else LOCATION_MULTIPLIERS.get(loc_key, 0.05)
+    if is_remote or not location:
         multiplier = 1.0
 
     estimated_count = int(base_count * multiplier)

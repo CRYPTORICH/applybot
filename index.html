@@ -163,7 +163,34 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:10px;color:#111}
 <option value="sales">Sales & Business Development</option>
 <option value="manufacturing">Manufacturing & Production</option>
 </select>
-<input type="text" id="location" placeholder="City or 'Remote'" value="Remote">
+<input type="text" id="location" placeholder="City or 'Remote'" value="Remote" list="city-list" autocomplete="off">
+<datalist id="city-list">
+<option value="Remote">
+<option value="New York, NY">
+<option value="Los Angeles, CA">
+<option value="Chicago, IL">
+<option value="Houston, TX">
+<option value="Phoenix, AZ">
+<option value="Philadelphia, PA">
+<option value="San Antonio, TX">
+<option value="San Diego, CA">
+<option value="Dallas, TX">
+<option value="Austin, TX">
+<option value="Miami, FL">
+<option value="Atlanta, GA">
+<option value="Boston, MA">
+<option value="Seattle, WA">
+<option value="Denver, CO">
+<option value="Orlando, FL">
+<option value="Tampa, FL">
+<option value="Charlotte, NC">
+<option value="Nashville, TN">
+<option value="Portland, OR">
+<option value="Las Vegas, NV">
+<option value="Minneapolis, MN">
+<option value="Detroit, MI">
+<option value="Columbus, OH">
+</datalist>
 <button onclick="doSearch()" id="searchBtn">🔍 Search</button>
 </div>
 <div class="quick-picks">
@@ -291,7 +318,7 @@ async function doSearch() {
     const btn = document.getElementById('searchBtn');
     const results = document.getElementById('results');
     
-    if (!keywords && !category) {
+    if (!keywords && !category && !location) {
         document.getElementById('keywords').focus();
         return;
     }
