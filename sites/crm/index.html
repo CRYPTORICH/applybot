@@ -42,7 +42,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .badge-dead{background:rgba(255,23,68,.2);color:var(--dead)}
 .call-icon{background:var(--accent);color:#000;min-width:40px;height:40px;border-radius:10px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* ── DETAIL PANEL (slides up when you tap a lead) ── */
+/* ── ON-CALL BAR (shows after dialing, stays until user taps End Call) ── */
+.oncall-bar{position:fixed;top:0;left:0;right:0;z-index:250;background:#0d0;color:#000;padding:14px 12px;display:none;align-items:center;gap:10px;animation:slideDown .2s ease-out}
+.oncall-bar.on{display:flex}
+.oncall-bar .pulse{width:10px;height:10px;background:#000;border-radius:50%;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+.oncall-bar .info{flex:1;min-width:0}
+.oncall-bar .name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oncall-bar .hint{font-size:10px;opacity:.7}
+.oncall-bar button{background:#000;color:#0d0;border:none;padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+
+/* ── DETAIL PANEL ── */
 .detail-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:150;display:none;align-items:flex-end;justify-content:center}
 .detail-back.on{display:flex}
 .detail{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:500px;max-height:88dvh;overflow-y:auto;animation:slideUp .2s ease-out;padding-bottom:20px}
@@ -109,6 +120,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
+<!-- ── ON-CALL BAR (persistent, manual end) ── -->
+<div class="oncall-bar" id="oncallBar">
+  <div class="pulse"></div>
+  <div class="info">
+    <div class="name" id="oncallName"></div>
+    <div class="hint">On call — tap End Call when done</div>
+  </div>
+  <button onclick="endCallNow()">✕ End Call</button>
+</div>
+
 <!-- ── TOP BAR ── -->
 <div class="topbar">
   <h1>📞 Call CRM</h1>
@@ -117,7 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <input type="text" placeholder="Search name or phone..." id="search" oninput="renderLeads()">
     <button style="background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap" onclick="nextCall()">▶ Next</button>
   </div>
-  <div class="cat-row" id="catRow">
+  <div class="cat-row">
     <button class="on" onclick="setFilter('all',this)">All</button>
     <button onclick="setFilter('no-site',this)">No Site</button>
     <button onclick="setFilter('HVAC',this)">HVAC</button>
@@ -226,7 +247,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="toast" id="toast"></div>
 
 <script>
-let leads=[], filter='all', activeLead=null;
+let leads=[], filter='all', activeLead=null, onCall=false;
 
 function loadState(){
   return {
@@ -262,7 +283,7 @@ async function init(){
   const d=loadState();let imported=false;
   leads.forEach(l=>{if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imported=true}});
   if(imported){localStorage.setItem('ls',JSON.stringify(d.status));localStorage.setItem('ln',JSON.stringify(d.notes))}
-  setupVis();renderAll();
+  setupListeners();renderAll();
 }
 
 function renderAll(){renderLeads();updateSummary()}
@@ -311,6 +332,7 @@ function renderLeads(){
 
 // ── DETAIL PANEL ──
 function openDetail(name){
+  if(onCall)return; // Don't open detail while on a call
   const l=leads.find(x=>x.name===name);if(!l)return;
   activeLead=l;
   document.getElementById('dName').textContent=l.name;
@@ -320,12 +342,10 @@ function openDetail(name){
   document.getElementById('dSiteUrl').textContent=siteUrl(l);
   document.getElementById('dCallBtn').href='tel:+1'+l.phone;
 
-  // Show existing notes
   const nt=getNotes(l.name);
   if(nt){document.getElementById('dNotesLabel').style.display='';document.getElementById('dNotes').style.display='';document.getElementById('dNotes').textContent=nt}
   else{document.getElementById('dNotesLabel').style.display='none';document.getElementById('dNotes').style.display='none'}
 
-  // Show existing callback
   const cb=getCallback(l.name);
   if(cb){document.getElementById('dCbLabel').style.display='';document.getElementById('dCb').textContent='📅 '+new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
   else{document.getElementById('dCbLabel').style.display='none';document.getElementById('dCb').textContent=''}
@@ -335,8 +355,27 @@ function openDetail(name){
 
 function closeDetail(){
   document.getElementById('detailPanel').classList.remove('on');
-  activeLead=null;
-  renderAll();
+  activeLead=null;renderAll();
+}
+
+function startCall(){
+  // Called when user taps "📞 Call Now" in the detail panel
+  if(!activeLead)return;
+  onCall=true;
+  document.getElementById('oncallName').textContent=activeLead.name;
+  document.getElementById('oncallBar').classList.add('on');
+  document.getElementById('detailPanel').classList.remove('on');
+  // Note: the tel: link will trigger iOS confirmation dialog automatically
+  // We keep the onCallBar visible so user sees "On call" and can tap End Call when done
+}
+
+function endCallNow(){
+  // User tapped "✕ End Call" — show the result modal
+  onCall=false;
+  document.getElementById('oncallBar').classList.remove('on');
+  if(!activeLead)return;
+  // Small delay so the bar animation finishes
+  setTimeout(()=>showResultModal(),150);
 }
 
 function copySiteLink(){
@@ -355,9 +394,6 @@ function quickAction(action){
   if(st==='dead'){setTimeout(nextCall,600)}
 }
 
-// ── CALL FLOW ──
-// Detail panel has the call button. User taps it → dials → return → result modal.
-
 // ── RESULT MODAL ──
 let selectedResult=null,selectedCallback=null;
 
@@ -372,9 +408,8 @@ function showResultModal(){
   document.getElementById('cbPreview').style.display='none';
   const cb=getCallback(l.name);
   if(cb){selectedCallback=cb;document.getElementById('cbPreview').textContent=`Callback set: ${new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;document.getElementById('cbPreview').style.display='block'}
-  document.getElementById('detailPanel').classList.remove('on');
   document.getElementById('resultModal').classList.add('on');
-  document.getElementById('noteInput').focus();
+  setTimeout(()=>document.getElementById('noteInput').focus(),300);
 }
 
 function setResult(st){
@@ -430,6 +465,7 @@ function dismissModal(){
 }
 
 function nextCall(){
+  if(onCall)return; // Don't skip while on a call
   const d=loadState();
   let list=leads.filter(l=>{const s=d.status[l.name]||'new';return s!=='sold'&&s!=='dead'});
   list.sort((a,b)=>{
@@ -444,19 +480,22 @@ function nextCall(){
 
 function setFilter(f,btn){filter=f;document.querySelectorAll('.cat-row button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderLeads()}
 
-function setupVis(){
-  // Auto-show result modal when returning from phone call
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeLead)setTimeout(()=>{if(activeLead)showResultModal()},400)});
-  window.addEventListener('pageshow',e=>{if(e.persisted&&activeLead)setTimeout(()=>{if(activeLead)showResultModal()},400)});
+function setupListeners(){
+  // "Call Now" button → start the call, show oncall bar
+  document.getElementById('dCallBtn').addEventListener('click',function(e){
+    e.preventDefault();
+    startCall();
+    // Trigger the actual phone call after a tiny delay so the bar renders
+    setTimeout(()=>{window.location.href=this.href},100);
+  });
+
   // Close modals on backdrop tap
   document.getElementById('detailPanel').addEventListener('click',function(e){if(e.target===this)closeDetail()});
   document.getElementById('resultModal').addEventListener('click',function(e){if(e.target===this)dismissModal()});
   document.getElementById('checklistModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('on');renderAll()}});
-  // The call button in detail panel — track that we're about to call
-  document.getElementById('dCallBtn').addEventListener('click',function(){
-    // activeLead is already set by openDetail. The browser will navigate to tel: link.
-    // visibilitychange will fire when user returns.
-  });
+
+  // Oncall bar: don't close on backdrop (it's at the top, no backdrop needed)
+  // But keep it visible even if user taps around — only "End Call" dismisses it
 }
 
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
