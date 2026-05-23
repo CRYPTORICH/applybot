@@ -224,6 +224,12 @@ async function init(){
     l.zip=l.zip||'';
     l.slug=l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,50);
   });
+  // Import pre-populated status from leads.json (spreadsheet call history)
+  let imported=0;
+  leads.forEach(l=>{
+    if(l.status&&!statuses[l.name]){statuses[l.name]=l.status;notes[l.name]=l.notes||'';imported++}
+  });
+  if(imported){localStorage.setItem('ls',JSON.stringify(statuses));localStorage.setItem('ln',JSON.stringify(notes))}
   setupVis();renderAll();
 }
 function s(name){return statuses[name]||'new'}
@@ -232,8 +238,7 @@ function ss(name,st,nt){statuses[name]=st;if(nt)notes[name]=nt;localStorage.setI
 function siteUrl(l){return 'https://cryptorich.github.io/applybot/sites/'+l.slug+'/'}
 
 function nextCall(){
-  let list=leads.filter(l=>s(l.name)==='new');
-  if(!list.length){list=leads.filter(l=>s(l.name)!=='sold'&&s(l.name)!=='dead');}
+  let list=leads.filter(l=>s(l.name)!=='sold'&&s(l.name)!=='dead');
   if(!list.length){showToast('All leads contacted! 🎉');return}
   const l=list[0];
   document.getElementById('search').value='';filter='all';nav='all';
