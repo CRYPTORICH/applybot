@@ -130,11 +130,13 @@ def search_jobs(keywords: str = "", location: str = "", category: str = "",
         growth = cat_data["growth"]
     else:
         matched = None
-        for cat_key, cat_data in CATEGORY_COUNTS.items():
-            if keywords.lower() in cat_data["label"].lower() or \
-               cat_key.replace("-", " ") in keywords.lower():
-                matched = cat_data
-                break
+        if keywords and keywords.strip():
+            kw_lower = keywords.lower()
+            for cat_key, cat_data in CATEGORY_COUNTS.items():
+                if kw_lower in cat_data["label"].lower() or \
+                   cat_key.replace("-", " ") in kw_lower:
+                    matched = cat_data
+                    break
         if matched:
             base_count = matched["count"]
             label = matched["label"]
