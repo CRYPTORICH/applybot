@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApplyBot — Live Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:40px 20px}
+.container{max-width:900px;margin:0 auto}
+h1{font-size:2rem;margin-bottom:10px}
+.subtitle{color:#888;margin-bottom:30px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:40px}
+.stat{background:#1a1a2e;border-radius:12px;padding:24px;text-align:center;border:1px solid #2a2a3e}
+.stat .num{font-size:2.5rem;font-weight:800;background:linear-gradient(90deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .label{color:#888;margin-top:5px;font-size:.85rem}
+.stat.submitted .num{background:linear-gradient(90deg,#10b981,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-list{background:#1a1a2e;border-radius:16px;overflow:hidden;border:1px solid #2a2a3e}
+.app-list .header{display:grid;grid-template-columns:2fr 1fr 1fr 200px;padding:16px 20px;background:#16213e;font-weight:700;font-size:.85rem;color:#888}
+.app-item{display:grid;grid-template-columns:2fr 1fr 1fr 200px;padding:14px 20px;border-bottom:1px solid #1a1a2e;font-size:.9rem;align-items:center}
+.app-item:last-child{border-bottom:none}
+.app-item .status{font-weight:600}
+.status-pending{color:#f59e0b}
+.status-submitted{color:#10b981}
+.status-applying{color:#3b82f6;animation:pulse 1.5s infinite}
+.status-failed{color:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.empty{text-align:center;padding:60px;color:#555}
+.empty p{font-size:1.2rem}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>📊 Your Dashboard</h1>
+<p class="subtitle">Tokens remaining: <strong>{{user.tokens}}</strong> · Target: {{user.target_location or 'Not set'}} · {{user.target_titles or 'Any role'}}</p>
+
+<div class="stats">
+<div class="stat submitted"><div class="num" id="stat-submitted">{{apps|selectattr('status','equalto','submitted')|list|length}}</div><div class="label">Submitted</div></div>
+<div class="stat"><div class="num" id="stat-applying">{{apps|selectattr('status','equalto','applying')|list|length}}</div><div class="label">In Progress</div></div>
+<div class="stat"><div class="num" id="stat-pending">{{apps|selectattr('status','equalto','pending')|list|length}}</div><div class="label">Queued</div></div>
+<div class="stat"><div class="num" id="stat-failed">{{apps|selectattr('status','equalto','failed')|list|length}}</div><div class="label">Issues</div></div>
+</div>
+
+<div class="app-list">
+<div class="header"><span>Job</span><span>Platform</span><span>Status</span><span>Time</span></div>
+{% if apps %}
+{% for app in apps %}
+<div class="app-item">
+<span><strong>{{app.job_title}}</strong><br><small style="color:#888">{{app.company}}</small></span>
+<span>{{app.platform}}</span>
+<span class="status status-{{app.status}}">{{app.status|title}}</span>
+<span style="color:#666;font-size:.8rem">{{app.created_at[:16] if app.created_at else ''}}</span>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty"><p>🔄 Waiting for applications to start...</p><p style="color:#555;margin-top:10px">Your tokens are ready. Applications begin shortly.</p></div>
+{% endif %}
+</div>
+</div>
+
+<script>
+setInterval(async () => {
+    try {
+        const resp = await fetch('/api/status/{{user.id}}');
+        const data = await resp.json();
+        document.getElementById('stat-submitted').textContent = data.stats.submitted || 0;
+        document.getElementById('stat-applying').textContent = data.stats.applying || 0;
+        document.getElementById('stat-pending').textContent = data.stats.pending || 0;
+        document.getElementById('stat-failed').textContent = data.stats.failed || 0;
+        
+        if (!data.stats.applying && !data.stats.pending && data.total > 0) {
+            location.reload();
+        }
+    } catch(e) {}
+}, 5000);
+</script>
+</body>
+</html>

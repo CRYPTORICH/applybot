@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApplyBot — We Submit Job Applications For You</title>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
+header{border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto}
+header .logo{font-weight:800;font-size:1.2rem;color:#1a1a2e;text-decoration:none}
+header nav a{color:#6b7280;text-decoration:none;margin-left:24px;font-size:.9rem;font-weight:500}
+.hero{text-align:center;padding:80px 20px 60px;max-width:700px;margin:0 auto}
+.hero .badge{display:inline-block;background:#ecfdf5;color:#059669;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:16px}
+.hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px;margin-bottom:16px;line-height:1.2}
+.hero p{font-size:1.1rem;color:#6b7280;max-width:500px;margin:0 auto 32px}
+.hero .cta{display:inline-block;padding:14px 32px;font-size:1rem;font-weight:600;border-radius:8px;cursor:pointer;background:#1a1a2e;color:#fff;text-decoration:none}
+section{padding:60px 20px;max-width:900px;margin:0 auto}
+h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
+.section-sub{text-align:center;color:#6b7280;margin-bottom:40px;font-size:.95rem}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
+.how .step{text-align:center;padding:0 8px}
+.how .step .num{width:40px;height:40px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:700;font-size:1.1rem}
+.how .step h3{font-size:1rem;margin-bottom:8px}
+.how .step p{color:#6b7280;font-size:.85rem;line-height:1.5}
+.pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.plan{border:1px solid #e5e7eb;border-radius:10px;padding:28px 20px;text-align:center;transition:box-shadow .2s}
+.plan:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.plan.popular{border-color:#1a1a2e;border-width:2px;padding:26px 18px}
+.plan.popular::before{content:'Most Popular';display:block;font-size:.65rem;font-weight:700;color:#1a1a2e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.plan .name{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.plan .price{font-size:2rem;font-weight:800;margin:8px 0}
+.plan .apps{color:#059669;font-weight:600;margin-bottom:16px;font-size:.85rem}
+.plan button{width:100%;padding:10px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;border:1px solid #1a1a2e;background:#fff;color:#1a1a2e}
+.plan.popular button{background:#1a1a2e;color:#fff}
+.plan button:hover{background:#1a1a2e;color:#fff}
+.plan .per{color:#9ca3af;font-size:.7rem;margin-top:6px}
+.pricing-note{text-align:center;color:#9ca3af;font-size:.8rem}
+.compare{overflow-x:auto;margin-bottom:40px}
+.compare table{width:100%;border-collapse:collapse;font-size:.85rem}
+.compare td,.compare th{padding:12px 14px;text-align:center;border-bottom:1px solid #f3f4f6}
+.compare th{font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#fafafa}
+.compare td:first-child{text-align:left;font-weight:500;color:#111}
+.compare .us{color:#059669;font-weight:700}
+.compare .yes{color:#059669}
+.compare .no{color:#d1d5db}
+.faq{max-width:650px;margin:0 auto}
+.faq dt{font-weight:600;margin-top:20px;font-size:.9rem}
+.faq dd{color:#6b7280;font-size:.85rem;margin-top:4px;margin-left:0}
+.disclaimer{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-top:32px;font-size:.8rem;color:#6b7280;line-height:1.6}
+.disclaimer strong{color:#333}
+.trust{display:flex;justify-content:center;gap:40px;padding:20px;color:#9ca3af;font-size:.8rem;border-top:1px solid #f3f4f6;margin-top:56px;flex-wrap:wrap}
+.trust span{display:flex;align-items:center;gap:6px}
+.referral{background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:24px;text-align:center;max-width:550px;margin:0 auto}
+.referral h3{font-size:1.1rem;margin-bottom:8px}
+.referral p{color:#6b7280;margin-bottom:16px;font-size:.9rem}
+.referral code{background:#1a1a2e;color:#fff;padding:8px 16px;border-radius:6px;font-size:.85rem;word-break:break-all}
+.referral .bonus{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600;margin-top:8px}
+.footer{text-align:center;padding:32px 20px;color:#9ca3af;font-size:.75rem}
+.footer a{color:#1a1a2e;text-decoration:underline}
+@media(max-width:768px){
+.hero h1{font-size:1.8rem}
+.pricing{grid-template-columns:1fr 1fr}
+.how{grid-template-columns:1fr}
+.trust{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<a href="/" class="logo">ApplyBot</a>
+<nav>
+<a href="#how">How It Works</a>
+<a href="#pricing">Pricing</a>
+<a href="#faq">FAQ</a>
+</nav>
+</header>
+
+<div class="hero">
+<div class="badge">🔍 We search. We apply. You get confirmations.</div>
+<h1>Your job applications,<br>handled for you</h1>
+<p>Upload your resume. We search public job boards and submit applications on your behalf. You get an email for every one.</p>
+<a href="#pricing" class="cta">Get Started</a>
+</div>
+
+<section id="how">
+<h2>How It Works</h2>
+<p class="section-sub">Three steps from resume to applications</p>
+<div class="how">
+<div class="step"><div class="num">1</div><h3>Upload Your Resume</h3><p>Share your resume and tell us what kind of jobs you're looking for.</p></div>
+<div class="step"><div class="num">2</div><h3>We Search & Apply</h3><p>We find matching jobs on public boards and submit applications using your information.</p></div>
+<div class="step"><div class="num">3</div><h3>Confirmations In Your Inbox</h3><p>Every application comes with an email — job title, company, and link.</p></div>
+</div>
+</section>
+
+<section id="pricing">
+<h2>Simple Pricing</h2>
+<p class="section-sub">Pay once. No subscription. You're in control.</p>
+<div class="pricing">
+<div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div></div>
+<div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div></div>
+<div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div></div>
+<div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div></div>
+</div>
+<p class="pricing-note">All payments processed through Stripe. No refunds — paying for the application service, not a guaranteed outcome.</p>
+</section>
+
+<section>
+<h2>What You Get</h2>
+<div class="compare">
+<table>
+<tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
+<tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>LinkedIn + Indeed</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td>Price</td><td class="us">$5 – $79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr>
+</table>
+</div>
+</section>
+
+<section id="faq">
+<h2>FAQ</h2>
+<div class="faq">
+<dl>
+<dt>Where do the job listings come from?</dt>
+<dd>All listings are from publicly available sources — LinkedIn, Indeed, ZipRecruiter, and company career pages — found in real-time when your application runs.</dd>
+<dt>How do I know you actually applied?</dt>
+<dd>You receive an email confirmation for every application, including job title, company, and listing link. You can also verify by checking your LinkedIn "Applied Jobs" page — every application we submit appears there.</dd>
+<dt>Do you guarantee I'll get a job?</dt>
+<dd>No. We guarantee we submit the number of applications you purchased to real, currently-open job listings. Employers make hiring decisions — but applying to 150 jobs gives you dramatically better odds than 5.</dd>
+<dt>Can I get a refund?</dt>
+<dd>All sales are final. You're paying us to submit real applications to real job listings, which we do. You can verify every submission.</dd>
+<dt>Is this allowed by LinkedIn?</dt>
+<dd>ApplyBot uses browser automation to fill out LinkedIn Easy Apply forms — the same forms you'd fill manually, just faster. We recommend spacing out applications to stay within normal usage patterns.</dd>
+</dl>
+</div>
+<div class="disclaimer">
+<strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs using the information you provide. We do not guarantee interviews, job offers, or employment. We are not affiliated with LinkedIn, Indeed, or any employer. Your personal information is used only to complete the applications you've purchased.
+</div>
+</section>
+
+<div class="trust">
+<span>🔒 Stripe Secure Payments</span>
+<span>📧 Email Confirmations</span>
+<span>📊 Real Job Data</span>
+<span>🚫 No Subscription</span>
+<span>🎁 Referral Rewards</span>
+</div>
+
+<section>
+<div class="referral">
+<h3>🎁 Share & Earn Free Applications</h3>
+<p>After your first purchase, you'll get a unique referral link. When a friend buys tokens using your link, you <strong>BOTH</strong> get 2 free applications. No limit — share with everyone.</p>
+<div class="bonus">+2 free apps for you + 2 free apps for them</div>
+</div>
+</section>
+
+<div class="footer">
+<p>ApplyBot · <a href="mailto:support@applybot.ai">support@applybot.ai</a></p>
+<p style="margin-top:4px">Not affiliated with LinkedIn, Indeed, or any employer.</p>
+</div>
+
+<script>
+const API_BASE = '{{DOMAIN}}';
+const STRIPE_KEY = '{{STRIPE_KEY}}';
+const stripe = Stripe(STRIPE_KEY);
+
+async function checkout(plan) {
+    const btn = event.target;
+    const original = btn.textContent;
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+    try {
+        const resp = await fetch(API_BASE + '/api/create-checkout', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({plan})
+        });
+        if (!resp.ok) throw new Error('Server error');
+        const {sessionId} = await resp.json();
+        stripe.redirectToCheckout({sessionId});
+    } catch(e) {
+        btn.textContent = 'Try Again';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+}
+</script>
+</body>
+</html>

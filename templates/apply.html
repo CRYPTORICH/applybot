@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApplyBot — Submit Your Resume</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.card{background:#1a1a2e;border-radius:16px;padding:40px;max-width:600px;width:100%;border:1px solid #2a2a3e}
+.card h1{font-size:1.8rem;margin-bottom:8px}
+.card p{color:#888;margin-bottom:30px}
+.form-group{margin-bottom:20px}
+label{display:block;font-weight:600;margin-bottom:8px;color:#ccc}
+input,textarea,select{width:100%;padding:14px;background:#111;border:1px solid #2a2a3e;border-radius:10px;color:#fff;font-size:1rem;font-family:inherit}
+textarea{min-height:200px;resize:vertical}
+.upload-area{border:2px dashed #2a2a3e;padding:40px;text-align:center;border-radius:10px;cursor:pointer;transition:border-color .2s}
+.upload-area:hover{border-color:#7c3aed}
+.upload-area p{color:#666;margin-top:10px}
+button{width:100%;padding:16px;background:linear-gradient(135deg,#7c3aed,#3b82f6);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+button:hover{opacity:.9}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>📎 Submit Your Resume</h1>
+<p>We'll tailor it for every job and start applying immediately.</p>
+<form action="/apply/{{user_id}}" method="POST" enctype="multipart/form-data">
+<div class="form-group">
+<label>Upload Resume (PDF)</label>
+<div class="upload-area" onclick="document.getElementById('resume').click()">
+<input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" style="display:none" onchange="this.parentElement.querySelector('p').textContent=this.files[0]?.name||'Drop PDF here or click to browse'">
+<p>Drop PDF here or click to browse</p>
+</div>
+</div>
+<div class="form-group">
+<label>Or paste your resume text</label>
+<textarea name="resume_text" placeholder="Paste your full resume here..."></textarea>
+</div>
+<div class="form-group">
+<label>Target Location</label>
+<input type="text" name="location" placeholder="e.g. Wilmington, DE or Remote" required>
+</div>
+<div class="form-group">
+<label>Target Job Titles</label>
+<input type="text" name="titles" placeholder="e.g. IT Support Specialist, Desktop Support, Help Desk" required>
+</div>
+<button type="submit">Start Applying →</button>
+</form>
+</div>
+</body>
+</html>

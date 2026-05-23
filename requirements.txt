@@ -1,0 +1,5 @@
+flask>=3.0
+stripe>=9.0
+pymupdf>=1.23
+gunicorn>=21.0
+websockets>=12.0
