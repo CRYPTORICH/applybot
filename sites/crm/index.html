@@ -214,7 +214,16 @@ let leads=[],statuses=JSON.parse(localStorage.getItem('ls')||'{}'),notes=JSON.pa
 
 async function init(){
   try{leads=await(await fetch('leads.json')).json()}catch(e){try{leads=await(await fetch('../leads.json')).json()}catch(e2){console.log('no leads')}}
-  leads.forEach(l=>{l.name=(l.name||'').trim();l.phone=(l.phone||'').replace(/\D/g,'');l.category=l.category||'Unknown';l.type=l.type||'FAKE';l.slug=l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,50)});
+  leads.forEach(l=>{
+    l.name=(l.name||'').trim();
+    l.phone=(l.phone||'').replace(/\D/g,'');
+    l.category=l.cat||l.category||'Unknown';
+    l.type=l.no_site?'NO_SITE':'FAKE';
+    l.website=l.website||'';
+    l.opener=l.opener||'';
+    l.zip=l.zip||'';
+    l.slug=l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,50);
+  });
   setupVis();renderAll();
 }
 function s(name){return statuses[name]||'new'}
