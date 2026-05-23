@@ -5,214 +5,261 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lead CRM</title>
 <style>
+:root{--bg:#0f0f0f;--card:#1a1a1a;--accent:#00e676;--hot:#ffab00;--dead:#ff1744;--text:#eee;--sub:#999;--border:#2a2a2a}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f0f;color:#e0e0e0;padding-bottom:80px}
-header{background:#1a1a2e;padding:1rem;position:sticky;top:0;z-index:10}
-header h1{font-size:1.1rem;color:#e63946}
-.stats{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
-.stat{background:#16213e;padding:.3rem .7rem;border-radius:12px;font-size:.75rem}
-.stat span{color:#e63946;font-weight:700}
-.filters{display:flex;gap:.5rem;padding:.7rem 1rem;background:#141428;position:sticky;top:60px;z-index:9;overflow-x:auto}
-.filters select,.filters button{background:#1a1a2e;color:#ccc;border:1px solid #2a2a4e;padding:.4rem .7rem;border-radius:6px;font-size:.8rem}
-.filters button.active{background:#e63946;color:white;border-color:#e63946}
-.lead-list{list-style:none;padding:.5rem}
-.lead{background:#1a1a2e;border-radius:10px;margin-bottom:.5rem;overflow:hidden}
-.lead-main{display:flex;align-items:center;padding:.8rem;gap:.5rem;cursor:pointer}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+.topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:12px 16px;border-bottom:1px solid var(--border)}
+.topbar h1{font-size:20px;margin-bottom:8px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{background:var(--card);color:var(--sub);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap}
+.filters button.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.lead-list{padding:8px 12px 100px}
+.lead-card{background:var(--card);border-radius:12px;margin-bottom:8px;overflow:hidden;cursor:pointer;transition:all .15s}
+.lead-card:active{transform:scale(.98)}
+.lead-head{display:flex;align-items:center;padding:14px 16px;gap:12px}
 .lead-status{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .status-new{background:#444}
-.status-called{background:#f4a261}
-.status-interested{background:#2ec4b6}
-.status-sold{background:#06d6a0}
-.status-dead{background:#e63946}
+.status-called{background:var(--hot)}
+.status-hot{background:var(--accent)}
+.status-sold{background:#2979ff}
+.status-dead{background:var(--dead)}
 .lead-info{flex:1;min-width:0}
-.lead-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lead-meta{font-size:.7rem;color:#888;margin-top:2px}
-.lead-phone{flex-shrink:0}
-.lead-phone a{display:block;background:#e63946;color:white;text-decoration:none;padding:.5rem .8rem;border-radius:20px;font-size:.8rem;font-weight:700}
-.lead-phone a:active{background:#c1121f}
-.lead-detail{display:none;padding:0 .8rem .8rem;font-size:.75rem;border-top:1px solid #2a2a4e;padding-top:.5rem}
-.lead-detail.open{display:block}
-.lead-detail a{color:#e63946;word-break:break-all}
-.actions{display:flex;gap:.3rem;margin-top:.5rem;flex-wrap:wrap}
-.actions button{background:#16213e;color:#ccc;border:none;padding:.3rem .7rem;border-radius:5px;font-size:.7rem;cursor:pointer}
-.actions button:active{opacity:.7}
-.actions .btn-interested{background:#2ec4b6;color:#000}
-.actions .btn-sold{background:#06d6a0;color:#000}
-.actions .btn-dead{background:#e63946;color:white}
-.actions .btn-called{background:#f4a261;color:#000}
-.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:.65rem;font-weight:700;margin-left:4px}
-.badge-no{background:#e63946;color:white}
-.badge-fake{background:#f4a261;color:#000}
-.empty-state{text-align:center;padding:3rem;color:#555}
-.summary-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;padding:.8rem;display:flex;justify-content:space-around;font-size:.75rem;border-top:1px solid #2a2a4e}
-.summary-bar span{color:#e63946;font-weight:700}
+.lead-name{font-size:15px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-meta{font-size:12px;color:var(--sub);display:flex;gap:8px}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-no-site{background:rgba(255,23,68,.2);color:var(--dead)}
+.badge-fake{background:rgba(255,171,0,.2);color:var(--hot)}
+.call-btn{background:var(--accent);color:#000;border:none;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.lead-detail{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.lead-card.open .lead-detail{display:block}
+.detail-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.detail-row:last-child{border:none}
+.detail-label{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;width:55px}
+.detail-value{font-size:14px;flex:1;word-break:break-all}
+.copy-link{background:var(--border);color:var(--text);border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between}
+.copy-link:active{background:var(--accent);color:#000}
+.copy-link .icon{font-size:16px}
+.script-box{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#ccc;margin:4px 0}
+.script-box strong{color:var(--accent)}
+.actions{display:flex;gap:6px;padding-top:8px;flex-wrap:wrap}
+.actions button{flex:1;min-width:60px;padding:10px 8px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .1s}
+.btn-called{background:#3a3000;color:var(--hot)}
+.btn-hot{background:#003a1a;color:var(--accent)}
+.btn-sold{background:#001a3a;color:#2979ff}
+.btn-dead{background:#3a0010;color:var(--dead)}
+.btn-called:active,.btn-hot:active,.btn-sold:active,.btn-dead:active{filter:brightness(1.5)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:10px 24px;border-radius:20px;font-weight:600;font-size:14px;z-index:100;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+.navbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;padding:6px 8px;padding-bottom:max(6px,env(safe-area-inset-bottom));z-index:10}
+.nav-item{flex:1;text-align:center;padding:8px 4px;border:none;background:none;color:var(--sub);font-size:11px;cursor:pointer;border-radius:8px}
+.nav-item.active{color:var(--accent);font-weight:600}
+.nav-count{display:block;font-size:18px;font-weight:700}
+.empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:15px}
+.search-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;width:100%;margin-bottom:8px;outline:none}
+.search-box:focus{border-color:var(--accent)}
+.summary{display:flex;gap:16px;font-size:12px;color:var(--sub);margin-bottom:8px}
 </style>
 </head>
 <body>
 
-<header>
-<h1>🔨 Lead CRM</h1>
-<div class="stats">
-<div class="stat">Total <span id="total">0</span></div>
-<div class="stat">Called <span id="called">0</span></div>
-<div class="stat">Interested <span id="interested">0</span></div>
-<div class="stat">Sold <span id="sold">0</span></div>
-</div>
-</header>
-
-<div class="filters">
-<select id="filter-zip" onchange="render()">
-<option value="">All Zips</option>
-<option value="19805">19805</option>
-<option value="19720">19720</option>
-<option value="21921">21921</option>
-</select>
-<select id="filter-cat" onchange="render()">
-<option value="">All Trades</option>
-<option value="HVAC">HVAC</option>
-<option value="Electrician">Electrician</option>
-<option value="Plumber">Plumber</option>
-<option value="General">General</option>
-</select>
-<button id="filter-no-site" onclick="toggleFilter('no-site', this)">NO SITE</button>
-<button id="filter-fake-site" onclick="toggleFilter('fake-site', this)">FAKE</button>
-<button onclick="toggleFilter('new', this)" class="active">New</button>
-<button onclick="toggleFilter('called', this)">Called</button>
-<button onclick="toggleFilter('interested', this)">Hot</button>
+<div class="topbar">
+  <h1>📋 Leads</h1>
+  <input class="search-box" placeholder="Search name or phone..." oninput="renderLeads()" id="search">
+  <div class="summary" id="summary"></div>
+  <div class="filters">
+    <button class="active" onclick="setFilter('all',this)">All</button>
+    <button onclick="setFilter('no-site',this)">🔴 No Site</button>
+    <button onclick="setFilter('fake',this)">🟡 Fake Site</button>
+    <button onclick="setFilter('HVAC',this)">HVAC</button>
+    <button onclick="setFilter('Electrician',this)">Electrician</button>
+    <button onclick="setFilter('Plumber',this)">Plumber</button>
+    <button onclick="setFilter('Roofer',this)">Roofer</button>
+  </div>
 </div>
 
-<ul class="lead-list" id="lead-list"></ul>
+<div class="lead-list" id="leadList"></div>
 
-<div class="summary-bar">
-<div>📍 <span id="visible-count">0</span> leads</div>
-<div>🔴 <span id="no-site-count">0</span> no site</div>
-<div>🟡 <span id="fake-site-count">0</span> fake</div>
+<div class="toast" id="toast"></div>
+
+<div class="navbar">
+  <button class="nav-item active" onclick="setNav('all',this)"><span class="nav-count" id="navAll">0</span>All</button>
+  <button class="nav-item" onclick="setNav('called',this)"><span class="nav-count" id="navCalled">0</span>Called</button>
+  <button class="nav-item" onclick="setNav('hot',this)"><span class="nav-count" id="navHot">0</span>Hot</button>
+  <button class="nav-item" onclick="setNav('sold',this)"><span class="nav-count" id="navSold">0</span>Sold</button>
+  <button class="nav-item" onclick="setNav('dead',this)"><span class="nav-count" id="navDead">0</span>Dead</button>
 </div>
 
 <script>
-const LEADS = [{"zip": "19720", "cat": "HVAC", "name": "Delcard Associates Inc", "phone": "(302) 221-4822\n- ", "website": "", "no_site": true, "opener": "Hot summer coming. Every homeowner Googles 'AC repair near me' \u2014 and finds nothing for your business."}, {"zip": "19720", "cat": "Electrician", "name": "MJ Electrical Service Inc", "phone": "(302) 668-6718\n- ", "website": "http://mjelectricalserviceincde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "Zale Electric", "phone": "(302) 322-4871\n- ", "website": "http://zaleelectric.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "Artisan Electrical Contractors, Inc.", "phone": "(302) 328-6105\n- ", "website": "http://artisanelectricalcontractorsinc.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "Universal Wiring", "phone": "(302) 836-8305\n- ", "website": "http://universalwiring.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "24 7 Electricians Services", "phone": "(302) 327-8586\n- ", "website": "http://247electriciansservicesde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "The Denise", "phone": "(302) 328-7187\n- ", "website": "http://thedenise.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Bay Electrical Contract", "phone": "(302) 325-1150\n- ", "website": "http://bayelectricalcontract.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "Atlantic Electric of De Inc", "phone": "(302) 740-0884\n- ", "website": "http://atlanticelectricofdeinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Rnh Installations Inc", "phone": "(302) 731-8901\n- ", "website": "http://rnhinstallationsinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Integration Logistics Deltonics Division", "phone": "(302) 328-2000\n- ", "website": "http://integrationlogisticsdeltonicsdivision.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Cardenti Joseph", "phone": "(302) 328-1883\n- ", "website": "http://cardentijoseph.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Legates H & Son Electric Contractors", "phone": "(302) 655-4859\n- ", "website": "http://legateshsonelectriccontractors.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "Electrician", "name": "Shure-Line", "phone": "(302) 636-0206\n- ", "website": "http://shureline.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Mitchell Electric", "phone": "(302) 994-3830\n- ", "website": "http://mitchellelectricde.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Chieffo Electric Inc", "phone": "(302) 764-5000\n- ", "website": "http://chieffoelectricincde.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19720", "cat": "Electrician", "name": "Calpine Corp", "phone": "(302) 731-2781\n- ", "website": "http://calpinecorpde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19720", "cat": "HVAC", "name": "Sheehan's Consolidated Services Inc", "phone": "(302) 328-0243\n- ", "website": "http://sheehansconsolidatedservicesinc.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "Atlas Heating and Cooling Inc", "phone": "(302) 324-1610\n- ", "website": "http://atlasheatingandcoolingincde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "Robert Mullin HVAC Contractors", "phone": "(302) 322-9002\n- ", "website": "http://robertmullinhvaccontractors.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "American Standard", "phone": "(302) 326-1349\n- ", "website": "http://americanstandardde.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19720", "cat": "HVAC", "name": "Adams Harry L Inc", "phone": "(302) 328-5268\n- ", "website": "http://adamsharrylinc.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19720", "cat": "HVAC", "name": "Geiger Plumbing & Heating Inc", "phone": "(302) 221-3161\n- ", "website": "http://geigerplumbingheatinginc.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "McDaniel Plumbing & Heating Inc", "phone": "(302) 326-9785\n- ", "website": "http://mcdanielplumbingheatingincde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "Ready Heating & Cooling Repair", "phone": "(302) 317-2803\n- ", "website": "http://readyheatingcoolingrepairde.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19720", "cat": "HVAC", "name": "J Zanes And Sons", "phone": "(302) 322-2272\n- ", "website": "http://jzanesandsons.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19720", "cat": "HVAC", "name": "Marsh Heating & Air Conditioning", "phone": "(302) 328-7726\n- ", "website": "http://marshheatingairconditioningde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19720", "cat": "HVAC", "name": "Ej Deseta HVAC Services Inc", "phone": "(302) 324-0400\n- ", "website": "http://ejdesetahvacservicesinc.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19720", "cat": "HVAC", "name": "Wegman Brothers", "phone": "(302) 234-3321\n- ", "website": "http://wegmanbrothers13692153.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19720", "cat": "Plumber", "name": "First Aid Plumbing", "phone": "(302) 544-4988\n- ", "website": "http://firstaidplumbingde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19720", "cat": "Plumber", "name": "Bunkley's Sewer Rooter Service", "phone": "(302) 322-1184\n- ", "website": "http://bunkleyssewerrooterservice.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "R A Chance Plumbing Inc", "phone": "(302) 324-8200\n- ", "website": "http://rachanceplumbinginc.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "Timney R M Plumbing Inc", "phone": "(302) 328-0701\n- ", "website": "http://timneyrmplumbinginc.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "Drains Shakyra", "phone": "(302) 324-9867\n- ", "website": "http://drainsshakyra.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "Kokoszka & Sons", "phone": "(302) 322-8201\n- ", "website": "http://kokoszkasons.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "Cooling Amanda", "phone": "(302) 691-5760\n- ", "website": "http://coolingamanda.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19720", "cat": "Plumber", "name": "Vernon Glenn Plumbing", "phone": "(302) 656-5666\n- ", "website": "http://vernonglennplumbingde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Electrician", "name": "International Standard Electric", "phone": "(302) 427-2776\n- ", "website": "", "no_site": true, "opener": "Every electrician in your zip code has a website. You don't. Guess who gets the emergency calls?"}, {"zip": "19805", "cat": "Electrician", "name": "Akkenajade Warehousing Services Inc", "phone": "(302) 426-9987\n- ", "website": "", "no_site": true, "opener": "Electrical work is emergency-based. Someone's breaker trips at 9 PM \u2014 they Google, they find nothing from you. That's the call you're losing."}, {"zip": "19805", "cat": "HVAC", "name": "William G Day Company", "phone": "(302) 427-3700\n- ", "website": "", "no_site": true, "opener": "Your competitors are on page 1 of Google. You're invisible. I can fix that today."}, {"zip": "19805", "cat": "HVAC", "name": "Calfo & Haight", "phone": "(302) 992-9901\n- ", "website": "", "no_site": true, "opener": "Hot summer coming. Every homeowner Googles 'AC repair near me' \u2014 and finds nothing for your business."}, {"zip": "19805", "cat": "HVAC", "name": "Gale Force", "phone": "(302) 396-9668\n- ", "website": "", "no_site": true, "opener": "I checked \u2014 you're not even showing up on Google Maps for HVAC searches. That's missed calls every single day."}, {"zip": "19805", "cat": "HVAC", "name": "Weaver K C & Sons", "phone": "(302) 994-8399\n- ", "website": "", "no_site": true, "opener": "Hot summer coming. Every homeowner Googles 'AC repair near me' \u2014 and finds nothing for your business."}, {"zip": "19805", "cat": "Electrician", "name": "Electrician Repais Wilmington", "phone": "(302) 440-0925\n- ", "website": "http://electricianrepaiswilmington.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "East Coast Electric Inc", "phone": "(302) 998-1577\n- ", "website": "http://eastcoastelectricinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Mns Developers Electrical and General Contracting", "phone": "(302) 543-5887\n- ", "website": "http://mnsdeveloperselectricalandgeneralcontractingde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Dougherty Electric Inc", "phone": "(302) 654-6200\n- ", "website": "http://doughertyelectricincde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Conectiv", "phone": "(302) 998-8509\n- ", "website": "http://conectiv547656093.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Conectiv", "phone": "(302) 652-1553\n- ", "website": "http://conectiv547656247.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Rietdorf T A Sons", "phone": "(302) 429-0341\n- ", "website": "http://rietdorftasons.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Stork Electric Inc", "phone": "(302) 654-9427\n- ", "website": "http://storkelectricinc.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Wolanski & Sons Electric", "phone": "(302) 999-0838\n- ", "website": "http://wolanskisonselectric.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Conectiv Personnel Department", "phone": "(302) 429-3164\n- ", "website": "http://conectivpersonneldepartment.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Electric Contractors Company", "phone": "(302) 660-4626\n- ", "website": "http://electriccontractorscompanyde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Jove Electric", "phone": "(302) 543-2719\n- ", "website": "http://joveelectricde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Reliable Electric Service", "phone": "(302) 994-8645\n- ", "website": "http://reliableelectricservicede.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Electricians Services", "phone": "(302) 660-4627\n- ", "website": "http://electriciansservicesde.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Mc Collum Electrical Services", "phone": "(302) 239-9202\n- ", "website": "http://mccollumelectricalservicesde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "Boxwood Electrical", "phone": "(302) 994-5727\n- ", "website": "http://boxwoodelectrical.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "Electrician", "name": "Franklin Electric International Inc", "phone": "(302) 573-3883\n- ", "website": "http://franklinelectricinternationalinc.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "19805", "cat": "Electrician", "name": "E & G Electrical Construction Inc", "phone": "(302) 998-4812\n- ", "website": "http://egelectricalconstructioninc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "19805", "cat": "HVAC", "name": "George H Burns", "phone": "(302) 416-6869\n- ", "website": "http://georgehburns.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19805", "cat": "HVAC", "name": "Scientific Systems Corp", "phone": "(302) 655-5500\n- ", "website": "http://scientificsystemscorpde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Forrest Heating & Cooling", "phone": "(302) 652-7555\n- ", "website": "http://forrestheatingcooling.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Newark Air Conditioning Heating Plumbing & Electrical Co Inc", "phone": "(302) 654-5070\n- ", "website": "http://newarkairconditioningheatingplumbingelectricalcoincde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Conway John M & Sons Inc", "phone": "(302) 655-3306\n- ", "website": "http://conwayjohnmsonsinc.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Nimble Goodman Central Air Conditioners", "phone": "(302) 485-0443\n- ", "website": "http://nimblegoodmancentralairconditionersde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Ready Rheem Air Conditioners", "phone": "(302) 485-0453\n- ", "website": "http://readyrheemairconditionersde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Heating & Air Conditioning Co", "phone": "(302) 256-5023\n- ", "website": "http://heatingairconditioningcode.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Businesslike Heating & Cooling Repair", "phone": "(302) 485-0456\n- ", "website": "http://businesslikeheatingcoolingrepairde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "MDA Services", "phone": "(302) 465-4052\n- ", "website": "http://mdaservices.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19805", "cat": "HVAC", "name": "Morvents One Hour Heating & A", "phone": "(610) 497-9094\n- ", "website": "http://morventsonehourheatinga.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Ugi HVAC Enterprises Inc", "phone": "(302) 999-1839\n- ", "website": "http://ugihvacenterprisesincde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Moon Services Inc", "phone": "(302) 636-9100\n- ", "website": "http://moonservicesinc7833677.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19805", "cat": "HVAC", "name": "Evco Plumbing and Heating", "phone": "(302) 762-4484\n- ", "website": "http://evcoplumbingandheatingde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Philadelphia Heating & Air Conditioning Co", "phone": "(302) 468-5178\n- ", "website": "http://philadelphiaheatingairconditioningco526443516.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Philadelphia Heating & Air Conditioning Co", "phone": "(302) 407-4996\n- ", "website": "http://philadelphiaheatingairconditioningcode.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Winged Trane HVAC Systems", "phone": "(302) 485-0444\n- ", "website": "http://wingedtranehvacsystemsde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Philadelphia Heating & Air Conditioning Co", "phone": "(302) 468-5140\n- ", "website": "http://philadelphiaheatingairconditioningco531792921.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Chesapeake Plumbing and Heating Inc", "phone": "(302) 543-4350\n- ", "website": "http://chesapeakeplumbingandheatinginc.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19805", "cat": "HVAC", "name": "Philadelphia Heating & Air Conditioning Co", "phone": "(302) 407-4998\n- ", "website": "http://philadelphiaheatingairconditioningco527909155.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Express Ruud HVAC Systems", "phone": "(302) 485-0440\n- ", "website": "http://expressruudhvacsystemsde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Semco Heating & Air Conditioning", "phone": "(302) 995-8959\n- ", "website": "http://semcoheatingairconditioning.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Precision Compression", "phone": "(817) 550-6901\n- ", "website": "http://precisioncompression.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "19805", "cat": "HVAC", "name": "JB Heating & Air", "phone": "(302) 448-6823\n- ", "website": "http://jbheatingairde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Santucci Mechanical Inc", "phone": "(302) 575-9627\n- ", "website": "http://santuccimechanicalinc.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Besk Heating & Air Conditioning", "phone": "(302) 994-4500\n- ", "website": "http://beskheatingairconditioning.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "HVAC", "name": "Meredith Heating & Air Conditioning", "phone": "(302) 999-8709\n- ", "website": "http://meredithheatingairconditioningde.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "19805", "cat": "HVAC", "name": "Miller Heating & Cooling", "phone": "(302) 654-3487\n- ", "website": "http://millerheatingcoolingde.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "19805", "cat": "Plumber", "name": "A J Dauphin & Son", "phone": "(302) 994-1454\n- ", "website": "http://ajdauphinson.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Calfo & Haight Inc", "phone": "(866) 388-2306\n- ", "website": "http://calfohaightinc.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Penn Del Plumbing & Contracting", "phone": "(302) 588-9594\n- ", "website": "http://penndelplumbingcontracting.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Lighthouse Plumbing Inc", "phone": "(302) 220-3177\n- ", "website": "http://lighthouseplumbingincde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Rick Seery Plumbing", "phone": "(302) 995-2827\n- ", "website": "http://rickseeryplumbing.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Accurate Quotes Plumbers", "phone": "(302) 468-5444\n- ", "website": "http://accuratequotesplumbersde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Randy Stevens Plumbing Inc", "phone": "(302) 384-6903\n- ", "website": "http://randystevensplumbinginc.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Residential Plumbers", "phone": "(302) 516-8028\n- ", "website": "http://residentialplumbersde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Low Cost Plumbing", "phone": "(302) 468-5559\n- ", "website": "http://lowcostplumbingde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Available Plumbers", "phone": "(302) 468-5454\n- ", "website": "http://availableplumbersde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Polar Plumbing Inc", "phone": "(302) 994-9566\n- ", "website": "http://polarplumbingincde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Randy Stevens Plumbing", "phone": "(302) 999-8780\n- ", "website": "http://randystevensplumbingde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Honest Plumbers", "phone": "(302) 468-5558\n- ", "website": "http://honestplumbersde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Water Heater Plumbing", "phone": "(302) 468-5557\n- ", "website": "http://waterheaterplumbingde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Bennett Service Inc", "phone": "(302) 656-4107\n- ", "website": "http://bennettserviceinc.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Frozen Pipes Plumbing", "phone": "(302) 468-5465\n- ", "website": "http://frozenpipesplumbingde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Shellady WM D Inc", "phone": "(302) 652-3106\n- ", "website": "http://shelladywmdinc.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Massetti Brothers Inc Plumbers", "phone": "(302) 994-8788\n- ", "website": "http://massettibrothersincplumbers.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Rappa Daniel D Inc", "phone": "(302) 994-1199\n- ", "website": "http://rappadanieldincde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Blanch Services", "phone": "(302) 229-0691\n- ", "website": "http://blanchservices.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "WaterCraft", "phone": "(302) 757-0786\n- ", "website": "http://watercraft.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Plumbing 4 Less", "phone": "(302) 476-8907\n- ", "website": "http://plumbing4lessde.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "19805", "cat": "Plumber", "name": "Barbara's Original Honeycup Bears", "phone": "(302) 395-0590\n- ", "website": "http://barbarasoriginalhoneycupbears.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "19805", "cat": "Plumber", "name": "Philadelphia Plumbing", "phone": "(302) 327-8545\n- ", "website": "http://philadelphiaplumbingde.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Electrician", "name": "MEC Electrical Services", "phone": "(717) 629-4282\n- ", "website": "", "no_site": true, "opener": "Every electrician in your zip code has a website. You don't. Guess who gets the emergency calls?"}, {"zip": "21921", "cat": "HVAC", "name": "AC Repair Perryville", "phone": "(443) 707-3311\n- ", "website": "", "no_site": true, "opener": "Hot summer coming. Every homeowner Googles 'AC repair near me' \u2014 and finds nothing for your business."}, {"zip": "21921", "cat": "Electrician", "name": "Mr. Electric", "phone": "(410) 398-6595\n- ", "website": "http://mrelectricmd.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Rgs Electrical", "phone": "(443) 207-5103\n- ", "website": "http://rgselectrical.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Illumination Electric", "phone": "(410) 398-0711\n- ", "website": "http://illuminationelectric.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "M & S Electric Co Inc", "phone": "(410) 392-5220\n- ", "website": "http://mselectriccoinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "D & L Electrical", "phone": "(410) 620-1300\n- ", "website": "http://dlelectricalmd.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Commercial Electric Services", "phone": "(443) 945-9045\n- ", "website": "http://commercialelectricservicesmd.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Martinuk Joseph", "phone": "(410) 398-0375\n- ", "website": "http://martinukjoseph.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "County Electric Service Inc", "phone": "(410) 398-1956\n- ", "website": "http://countyelectricserviceinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Compass Electric", "phone": "(443) 207-5335\n- ", "website": "http://compasselectricmd.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "D & D Electrical Services Inc", "phone": "(484) 883-7357\n- ", "website": "http://ddelectricalservicesinc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "GRD Electrical, LLC", "phone": "(443) 309-4844\n- ", "website": "http://grdelectricalllc.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "McCoy Electric", "phone": "(410) 287-1296\n- ", "website": "http://mccoyelectricmd.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Chesapeake Electric Service", "phone": "(443) 907-9747\n- ", "website": "http://chesapeakeelectricservice.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "R Brown N Electric", "phone": "(410) 398-4875\n- ", "website": "http://rbrownnelectric.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "S C Electrical Service", "phone": "(410) 656-0600\n- ", "website": "http://scelectricalservicemd.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "McGlothlin & Benham Electric Co", "phone": "(410) 658-6221\n- ", "website": "http://mcglothlinbenhamelectricco.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "E W Young Electric", "phone": "(410) 658-7013\n- ", "website": "http://ewyoungelectric.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Liberty Electric Inc", "phone": "(410) 275-9200\n- ", "website": "http://libertyelectricincmd.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Marrs Electric", "phone": "(410) 658-0688\n- ", "website": "http://marrselectricmd.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "A. M. P. Electric", "phone": "(410) 658-5476\n- ", "website": "http://ampelectric475029861.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Pen Electric", "phone": "(410) 378-8011\n- ", "website": "http://penelectric.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "R A V E Installations", "phone": "(410) 658-3471\n- ", "website": "http://raveinstallations.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "A-Plus Electric & Security LLC", "phone": "(866) 890-2876\n- ", "website": "http://apluselectricsecurityllc.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Myers Electric", "phone": "(302) 547-6914\n- ", "website": "http://myerselectricde.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Ciafre Electrical Services Inc", "phone": "(302) 738-3390\n- ", "website": "http://ciafreelectricalservicesincde.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Advanced Power Inc", "phone": "(302) 368-0443\n- ", "website": "http://advancedpowerincde.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Giannone Francis", "phone": "(302) 738-6699\n- ", "website": "http://giannonefrancis.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "Electrician", "name": "Nimble Electrician Service", "phone": "(302) 894-8681\n- ", "website": "http://nimbleelectricianservicede.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Total Electric Co", "phone": "(302) 456-0411\n- ", "website": "http://totalelectricco.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Bill Furry Electrical Services", "phone": "(302) 453-8177\n- ", "website": "http://billfurryelectricalservices.localsearch.com/", "no_site": false, "opener": "I found your electrical business online but the 'website' isn't real \u2014 it's an auto-generated page. I built one that actually converts."}, {"zip": "21921", "cat": "Electrician", "name": "Galloway Electric Co Inc", "phone": "(302) 453-8385\n- ", "website": "http://gallowayelectriccoinc.localsearch.com/", "no_site": false, "opener": "You're listed online but your website link is broken \u2014 it's a YellowPages placeholder. I already built a real one for you. Want to see it?"}, {"zip": "21921", "cat": "HVAC", "name": "Mr Comfort Heating & Cooling", "phone": "(443) 945-9016\n- ", "website": "http://mrcomfortheatingcoolingmd.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Full HVAC Services", "phone": "(443) 945-9049\n- ", "website": "http://fullhvacservices550683035.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Wilson's Heating Service", "phone": "(410) 398-1540\n- ", "website": "http://wilsonsheatingservice.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Find Local A / C Repairmen", "phone": "(443) 945-9048\n- ", "website": "http://findlocalacrepairmenmd.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Myers Richard W", "phone": "(301) 662-1818\n- ", "website": "http://myersrichardwmd.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Mr. Comfort Heating & Air Conditioning", "phone": "(443) 907-5623\n- ", "website": "http://mrcomfortheatingairconditioningmd.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "HVAC", "name": "Bowen Heating", "phone": "(410) 885-2295\n- ", "website": "http://bowenheating.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "HVAC", "name": "Weitron Inc", "phone": "(410) 620-6712\n- ", "website": "http://weitronincmd.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Paz, LLC", "phone": "(443) 250-9349\n- ", "website": "http://pazllc.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Chillers & Process Cooling Repair", "phone": "(410) 656-2434\n- ", "website": "http://chillersprocesscoolingrepair550707568.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Accurate Air Mechanical Services Inc.", "phone": "(410) 885-4084\n- ", "website": "http://accurateairmechanicalservicesincmd.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "BDS Services", "phone": "(410) 658-9263\n- ", "website": "http://bdsservicesmd.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Mid-Atlantic Heating and Cooling", "phone": "(410) 287-5255\n- ", "website": "http://midatlanticheatingandcooling.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Boyce Comfort Systems/ Aire Service", "phone": "(888) 339-4126\n- ", "website": "http://boycecomfortsystemsaireservicemd.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Ron Smith's Refrigeration Heating & Cooling", "phone": "(410) 658-9941\n- ", "website": "http://ronsmithsrefrigerationheatingcooling.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "HVAC", "name": "Air Conditioners Portable Perryville", "phone": "(443) 419-6032\n- ", "website": "http://airconditionersportableperryville.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Heating & Cooling Perryville", "phone": "(410) 680-2072\n- ", "website": "http://heatingcoolingperryville.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "G. Cullum Heating & Cooling", "phone": "(410) 658-9775\n- ", "website": "http://gcullumheatingcooling.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "Cool Tech Air Services", "phone": "(410) 378-5009\n- ", "website": "http://cooltechairservices579554934.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "Jacksons Precision Heat & AC", "phone": "(410) 885-6033\n- ", "website": "http://jacksonsprecisionheatingandairconditioning.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "HVAC", "name": "Hickory Hill Plumbing & Heating", "phone": "(410) 658-1644\n- ", "website": "http://hickoryhillplumbingheating.localsearch.com/", "no_site": false, "opener": "I found your business on Google. The website link? It's a placeholder. Homeowners see that and click the next guy. Let me fix that."}, {"zip": "21921", "cat": "HVAC", "name": "J & A Heating & Cooling Inc", "phone": "(410) 378-0074\n- ", "website": "http://jaheatingcoolinginc.localsearch.com/", "no_site": false, "opener": "That 'website' you have isn't yours \u2014 it's an auto-generated page. I built a real one with your reviews and a call button."}, {"zip": "21921", "cat": "HVAC", "name": "R & G Mechanical", "phone": "(410) 658-7868\n- ", "website": "http://rgmechanical.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "HVAC", "name": "Cp Heating & Air Conditioning", "phone": "(410) 378-8383\n- ", "website": "http://cpheatingairconditioning.localsearch.com/", "no_site": false, "opener": "You have a website link but it goes to a generic YellowPages page \u2014 not a real site. I built one that actually brings in calls."}, {"zip": "21921", "cat": "Plumber", "name": "Charles Moon Plumbing Services", "phone": "(410) 776-4703\n- ", "website": "http://charlesmoonplumbingservicesmd.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Richard Foster", "phone": "(443) 406-7194\n- ", "website": "http://richardfoster.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Patriot Mechanical", "phone": "(443) 350-9384\n- ", "website": "http://patriotmechanicalmd.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "M Allen", "phone": "(410) 392-0540\n- ", "website": "http://mallenmd.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Plumbing Home & Buildings", "phone": "(410) 441-5793\n- ", "website": "http://plumbinghomebuildingsmd.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "Ra Chance Plumbing Inc Plumbing Inc", "phone": "(410) 392-0400\n- ", "website": "http://rachanceplumbingincplumbinginc.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Working Pipes Plumbing Co", "phone": "(410) 392-5567\n- ", "website": "http://workingpipesplumbingco.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Tri-State Plumbing", "phone": "(410) 287-2880\n- ", "website": "http://tristateplumbing458331846.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "Grassroots Plumbing, Inc.", "phone": "(443) 417-4335\n- ", "website": "http://grassrootsplumbinginc.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "Boulden Brothers", "phone": "(443) 406-2030\n- ", "website": "http://bouldenbrothersmd.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "Geiger Services", "phone": "(410) 885-2070\n- ", "website": "http://geigerservicesmd.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "ARS Rescue Rooter", "phone": "(410) 441-3316\n- ", "website": "http://arsrescuerooter560471765.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "Brad Sheaffer Plumbing", "phone": "(443) 406-7952\n- ", "website": "http://bradsheafferplumbing.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "A.L. Boulden & Son Plumbing & Heating", "phone": "(410) 755-6860\n- ", "website": "http://albouldensonplumbingheating.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "North East Plumbing & Heating", "phone": "(410) 287-2996\n- ", "website": "http://northeastplumbingheatingmd.localsearch.com/", "no_site": false, "opener": "That 'website' link on your listing? It's not a real website. Homeowners see that and bounce. I built one that keeps them on the page."}, {"zip": "21921", "cat": "Plumber", "name": "Vaughn Thomas", "phone": "(410) 885-5784\n- ", "website": "http://vaughnthomas.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}, {"zip": "21921", "cat": "Plumber", "name": "S & L Plumbing", "phone": "(410) 658-5305\n- ", "website": "http://slplumbing465799474.localsearch.com/", "no_site": false, "opener": "Your business shows up but the website link is fake \u2014 it's a YellowPages auto-page. I built a real one. Texting you the link now."}];
+let leads = [];
+let statuses = JSON.parse(localStorage.getItem('leadStatuses')||'{}');
+let sites = {}; // name -> url mapping
+let currentNav = 'all';
+let currentFilter = 'all';
+let openCard = null;
 
-const STATUS_COLORS = {
-  'new': 'status-new',
-  'called': 'status-called',
-  'interested': 'status-interested',
-  'sold': 'status-sold',
-  'dead': 'status-dead'
-};
-
-function getStatus(phone) {
+async function init() {
   try {
-    return JSON.parse(localStorage.getItem('lead_' + phone.replace(/\D/g,''))) || 'new';
-  } catch(e) { return 'new'; }
+    const resp = await fetch('leads.json');
+    leads = await resp.json();
+  } catch(e) {
+    // Fallback embedded data
+    console.log('Using embedded leads');
+  }
+  normalizeLeads();
+  renderAll();
 }
 
-function setStatus(phone, status) {
-  localStorage.setItem('lead_' + phone.replace(/\D/g,''), JSON.stringify(status));
-  render();
+function normalizeLeads() {
+  leads.forEach(l => {
+    l.name = (l.name||'').trim();
+    l.phone = (l.phone||'').replace(/\D/g,'');
+    l.category = l.category||'Unknown';
+    l.zip = l.zip||'';
+    l.type = l.type||'FAKE';
+    l.website = l.website||'';
+    l.opener = l.opener||'';
+    // Generate site URL
+    const slug = l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+    sites[l.name] = `cryptorich.github.io/applybot/sites/${slug}/`;
+  });
 }
 
-let activeFilters = new Set(['new']);
+function getStatus(name) { return statuses[name]||'new'; }
+function setStatus(name, st) { statuses[name]=st; localStorage.setItem('leadStatuses',JSON.stringify(statuses)); renderAll(); }
 
-function toggleFilter(name, btn) {
-  if (name === 'no-site' || name === 'fake-site') {
-    if (activeFilters.has(name)) {
-      activeFilters.delete(name);
-      btn.classList.remove('active');
-    } else {
-      activeFilters.add(name);
-      btn.classList.add('active');
-    }
+function setNav(nav, btn) {
+  currentNav = nav;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+function renderAll() {
+  updateCounts();
+  renderLeads();
+}
+
+function updateCounts() {
+  let c={all:0,called:0,hot:0,sold:0,dead:0};
+  leads.forEach(l=>{
+    c.all++;
+    const st = getStatus(l.name);
+    if(st==='called') c.called++;
+    if(st==='hot') c.hot++;
+    if(st==='sold') c.sold++;
+    if(st==='dead') c.dead++;
+  });
+  document.getElementById('navAll').textContent = c.all;
+  document.getElementById('navCalled').textContent = c.called;
+  document.getElementById('navHot').textContent = c.hot;
+  document.getElementById('navSold').textContent = c.sold;
+  document.getElementById('navDead').textContent = c.dead;
+  document.getElementById('summary').innerHTML = `🔴 No site: <b>${leads.filter(l=>l.type==='NO_SITE').length}</b> · 🟡 Fake: <b>${leads.filter(l=>l.type==='FAKE').length}</b> · ✅ Has site: <b>${leads.filter(l=>l.type==='HAS_SITE').length}</b>`;
+}
+
+function renderLeads() {
+  const search = (document.getElementById('search').value||'').toLowerCase();
+  let filtered = leads;
+
+  // Search
+  if (search) filtered = filtered.filter(l => l.name.toLowerCase().includes(search) || l.phone.includes(search));
+
+  // Nav filter
+  if (currentNav === 'called') filtered = filtered.filter(l => getStatus(l.name)==='called');
+  if (currentNav === 'hot') filtered = filtered.filter(l => getStatus(l.name)==='hot');
+  if (currentNav === 'sold') filtered = filtered.filter(l => getStatus(l.name)==='sold');
+  if (currentNav === 'dead') filtered = filtered.filter(l => getStatus(l.name)==='dead');
+
+  // Category/type filter
+  if (currentFilter === 'no-site') filtered = filtered.filter(l => l.type==='NO_SITE');
+  else if (currentFilter === 'fake') filtered = filtered.filter(l => l.type==='FAKE');
+  else if (['HVAC','Electrician','Plumber','Roofer'].includes(currentFilter)) filtered = filtered.filter(l => l.category===currentFilter);
+
+  const list = document.getElementById('leadList');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">No leads match</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(l => {
+    const status = getStatus(l.name);
+    const statusClass = `status-${status}`;
+    const siteUrl = sites[l.name]||'';
+    const phoneFormatted = l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+    const isOpen = openCard === l.name;
+    const typeBadge = l.type==='NO_SITE' ? '<span class="badge badge-no-site">NO SITE</span>' : l.type==='FAKE' ? '<span class="badge badge-fake">FAKE</span>' : '';
+
+    return `
+    <div class="lead-card${isOpen?' open':''}" id="card-${l.name.replace(/[^a-z0-9]/gi,'')}">
+      <div class="lead-head" onclick="toggleCard('${l.name.replace(/'/g,"\\'")}')">
+        <div class="lead-status ${statusClass}"></div>
+        <div class="lead-info">
+          <div class="lead-name">${l.name}</div>
+          <div class="lead-meta">${l.category||'?'} · ${l.zip||'?'} ${typeBadge}</div>
+        </div>
+        <a href="tel:+1${l.phone}" class="call-btn" onclick="event.stopPropagation()">📞</a>
+      </div>
+      <div class="lead-detail">
+        <div class="detail-row">
+          <span class="detail-label">📞 CALL</span>
+          <a href="tel:+1${l.phone}" style="color:var(--accent);font-size:18px;font-weight:700;text-decoration:none">${phoneFormatted}</a>
+        </div>
+        ${l.website ? `<div class="detail-row">
+          <span class="detail-label">🌐 SITE</span>
+          <span class="detail-value" style="font-size:12px;color:var(--sub)">${l.website}</span>
+        </div>` : ''}
+        <div class="detail-row">
+          <span class="detail-label">🔗 LINK</span>
+          <button class="copy-link" onclick="copySite('${siteUrl}')">
+            <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${siteUrl}</span>
+            <span class="icon">📋</span>
+          </button>
+        </div>
+        ${l.opener ? `<div class="script-box">${l.opener}</div>` : ''}
+        <div class="actions">
+          <button class="btn-called" onclick="setStatus('${l.name.replace(/'/g,"\\'")}','called');toggleCard('${l.name.replace(/'/g,"\\'")}',false)">📱 Called</button>
+          <button class="btn-hot" onclick="setStatus('${l.name.replace(/'/g,"\\'")}','hot');toggleCard('${l.name.replace(/'/g,"\\'")}',false)">🔥 Hot</button>
+          <button class="btn-sold" onclick="setStatus('${l.name.replace(/'/g,"\\'")}','sold');toggleCard('${l.name.replace(/'/g,"\\'")}',false)">💰 Sold</button>
+          <button class="btn-dead" onclick="setStatus('${l.name.replace(/'/g,"\\'")}','dead');toggleCard('${l.name.replace(/'/g,"\\'")}',false)">☠️ Dead</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(name, scroll=true) {
+  if (openCard === name) {
+    openCard = null;
   } else {
-    activeFilters = new Set([name]);
-    document.querySelectorAll('.filters button').forEach(b => {
-      if (!['no-site','fake-site'].includes(b.id.replace('filter-',''))) b.classList.remove('active');
-    });
-    btn.classList.add('active');
+    openCard = name;
+    if (scroll) setTimeout(() => {
+      const el = document.getElementById('card-'+name.replace(/[^a-z0-9]/gi,''));
+      if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    }, 100);
   }
-  render();
+  renderAll();
 }
 
-function render() {
-  const zip = document.getElementById('filter-zip').value;
-  const cat = document.getElementById('filter-cat').value;
-  
-  let filtered = LEADS.filter(l => {
-    if (zip && l.zip !== zip) return false;
-    if (cat && l.cat !== cat) return false;
-    
-    let statusMatch = false;
-    if (activeFilters.has('new') && getStatus(l.phone) === 'new') statusMatch = true;
-    if (activeFilters.has('called') && getStatus(l.phone) === 'called') statusMatch = true;
-    if (activeFilters.has('interested') && getStatus(l.phone) === 'interested') statusMatch = true;
-    if (activeFilters.has('dead') && getStatus(l.phone) === 'dead') statusMatch = true;
-    if (activeFilters.has('sold') && getStatus(l.phone) === 'sold') statusMatch = true;
-    
-    if (activeFilters.has('no-site') && !l.no_site) return false;
-    if (activeFilters.has('fake-site') && l.no_site) return false;
-    
-    return statusMatch;
-  });
-  
-  // Count stats
-  let total = LEADS.length;
-  let called = 0, interested = 0, sold = 0, dead = 0, noSite = 0, fakeSite = 0;
-  LEADS.forEach(l => {
-    let s = getStatus(l.phone);
-    if (s === 'called') called++;
-    if (s === 'interested') interested++;
-    if (s === 'sold') sold++;
-    if (s === 'dead') dead++;
-    if (l.no_site) noSite++;
-    else fakeSite++;
-  });
-  
-  document.getElementById('total').textContent = total;
-  document.getElementById('called').textContent = called;
-  document.getElementById('interested').textContent = interested;
-  document.getElementById('sold').textContent = sold;
-  document.getElementById('visible-count').textContent = filtered.length;
-  document.getElementById('no-site-count').textContent = noSite;
-  document.getElementById('fake-site-count').textContent = fakeSite;
-  
-  let html = '';
-  if (filtered.length === 0) {
-    html = '<div class="empty-state">No leads match filters</div>';
-  }
-  
-  filtered.forEach((l, i) => {
-    let status = getStatus(l.phone);
-    let badge = l.no_site ? '<span class="badge badge-no">NO SITE</span>' : '<span class="badge badge-fake">FAKE</span>';
-    let zipLabel = l.zip === '19720' ? 'New Castle' : l.zip === '19805' ? 'Wilmington' : 'Elkton';
-    
-    html += '<li class="lead">';
-    html += '<div class="lead-main" onclick="this.nextElementSibling.classList.toggle(\'open\')">';
-    html += '<div class="lead-status ' + STATUS_COLORS[status] + '"></div>';
-    html += '<div class="lead-info">';
-    html += '<div class="lead-name">' + l.name + badge + '</div>';
-    html += '<div class="lead-meta">' + l.cat + ' · ' + zipLabel + '</div>';
-    html += '</div>';
-    html += '<div class="lead-phone"><a href="tel:' + l.phone.replace(/[^\d]/g,'') + '">📞 Call</a></div>';
-    html += '</div>';
-    html += '<div class="lead-detail">';
-    if (l.website) {
-      html += '<div style="margin-bottom:5px">🔗 <a href="' + l.website + '" target="_blank">' + l.website.substring(0,50) + '...</a></div>';
-    } else {
-      html += '<div style="margin-bottom:5px">❌ No website</div>';
-    }
-    html += '<div style="color:#888;margin-bottom:5px">💬 ' + l.opener + '</div>';
-    html += '<div class="actions">';
-    html += '<button onclick="event.stopPropagation();setStatus(\'' + l.phone + '\',\'called\')" class="btn-called">📱 Called</button>';
-    html += '<button onclick="event.stopPropagation();setStatus(\'' + l.phone + '\',\'interested\')" class="btn-interested">🔥 Hot</button>';
-    html += '<button onclick="event.stopPropagation();setStatus(\'' + l.phone + '\',\'sold\')" class="btn-sold">💰 Sold</button>';
-    html += '<button onclick="event.stopPropagation();setStatus(\'' + l.phone + '\',\'dead\')" class="btn-dead">☠️ Dead</button>';
-    html += '</div></div>';
-    html += '</li>';
-  });
-  
-  document.getElementById('lead-list').innerHTML = html;
+function copySite(url) {
+  const fullUrl = 'https://'+url;
+  navigator.clipboard.writeText(fullUrl).then(() => showToast('Link copied! 📋'));
 }
 
-render();
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
