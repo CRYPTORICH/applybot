@@ -5,341 +5,544 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Call CRM</title>
 <style>
-:root{--bg:#0a0a0a;--card:#141414;--accent:#00e676;--hot:#ffab00;--dead:#ff1744;--sold:#2979ff;--text:#fff;--sub:#999;--border:#222;--surface:#1c1c1c}
+:root{--bg:#080808;--card:#111;--surface:#1a1a1a;--border:#222;--accent:#00e676;--hot:#ffab00;--sold:#2979ff;--dead:#ff1744;--text:#fff;--sub:#888;--danger-zone:#660000}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;user-select:none}
-.topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:8px 12px 6px;border-bottom:1px solid var(--border)}
-.topbar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.topbar h1{font-size:16px;flex:1}
-.topbar .counts{font-size:11px;color:var(--sub)}
-.quick-actions{display:flex;gap:6px}
-.quick-btn{flex:1;background:var(--surface);color:var(--text);border:1px solid var(--border);padding:8px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:center}
-.quick-btn.accent{background:var(--accent);color:#000;border-color:var(--accent)}
-.filters{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-top:6px}
-.filters::-webkit-scrollbar{display:none}
-.filters button{background:var(--surface);color:var(--sub);border:1px solid var(--border);padding:5px 10px;border-radius:12px;font-size:10px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.filters button.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;user-select:none;overflow-x:hidden}
 
-.lead-list{padding:4px 8px 100px}
-.lead-card{background:var(--card);border-radius:8px;margin-bottom:4px;border-left:3px solid transparent}
-.lead-card.status-called{border-left-color:var(--hot)}
-.lead-card.status-hot{border-left-color:var(--accent)}
-.lead-card.status-sold{border-left-color:var(--sold)}
-.lead-card.status-dead{border-left-color:var(--dead)}
-.lead-row{display:flex;align-items:center;padding:10px 8px;gap:8px;cursor:pointer;min-height:50px}
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 10px;border-bottom:1px solid var(--border)}
+.topbar h1{font-size:15px;display:inline}
+.topbar .summary{font-size:10px;color:var(--sub);float:right;margin-top:3px}
+.search-row{display:flex;gap:6px;margin-top:5px}
+.search-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:14px;outline:none}
+.search-row input:focus{border-color:var(--accent)}
+.cat-row{display:flex;gap:4px;margin-top:5px;overflow-x:auto;scrollbar-width:none}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-row button{flex-shrink:0;background:var(--surface);color:var(--sub);border:1px solid var(--border);padding:4px 10px;border-radius:10px;font-size:10px;cursor:pointer;white-space:nowrap}
+.cat-row button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+
+/* ── LEAD LIST ── */
+.lead-list{padding:4px 8px 70px}
+.lead-row{display:flex;align-items:center;background:var(--card);border-radius:8px;margin-bottom:4px;padding:10px 8px;gap:8px;cursor:pointer;border-left:3px solid transparent;min-height:52px}
 .lead-row:active{background:var(--surface)}
-.call-btn{background:var(--accent);color:#000;border:none;min-width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;text-decoration:none}
+.lead-row.status-called{border-left-color:var(--hot)}
+.lead-row.status-hot{border-left-color:var(--accent)}
+.lead-row.status-sold{border-left-color:var(--sold)}
+.lead-row.status-dead{border-left-color:var(--dead)}
 .lead-info{flex:1;min-width:0}
 .lead-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lead-sub{font-size:11px;color:var(--sub);margin-top:1px;display:flex;gap:5px;align-items:center}
-.badge{font-size:8px;padding:1px 5px;border-radius:6px;font-weight:700}
-.badge-no-site{background:rgba(255,23,68,.2);color:var(--dead)}
+.lead-meta{font-size:10px;color:var(--sub);margin-top:2px;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lead-note{font-size:10px;color:var(--hot);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-cb{font-size:9px;color:var(--accent);background:rgba(0,230,118,.1);padding:1px 5px;border-radius:4px;display:inline-block}
+.badge{font-size:8px;padding:1px 5px;border-radius:5px;font-weight:700}
+.badge-nosite{background:rgba(255,23,68,.2);color:var(--dead)}
 .badge-fake{background:rgba(255,171,0,.2);color:var(--hot)}
-.badge-called{background:rgba(255,171,0,.2);color:var(--hot)}
 .badge-hot{background:rgba(0,230,118,.2);color:var(--accent)}
 .badge-sold{background:rgba(41,121,255,.2);color:var(--sold)}
+.badge-dead{background:rgba(255,23,68,.2);color:var(--dead)}
+.call-icon{background:var(--accent);color:#000;min-width:40px;height:40px;border-radius:10px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* Call overlay */
-.overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column}
-.overlay.active{display:flex}
-.overlay-top{display:flex;align-items:center;padding:12px;gap:8px;border-bottom:1px solid var(--border);background:var(--card)}
-.overlay-top .name{font-size:15px;font-weight:700;flex:1}
-.overlay-top .phone{font-size:13px;color:var(--accent);font-weight:600}
-.hangup-btn{background:var(--dead);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer}
-.script-scroll{flex:1;overflow-y:auto;padding:12px}
-.script-card{background:var(--surface);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border)}
-.script-card .tag{font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.script-card .line{font-size:14px;line-height:1.5;color:#ddd}
-.script-card .line em{color:var(--accent);font-style:normal;font-weight:600}
-.script-card.objection{background:rgba(255,171,0,.08);border-color:rgba(255,171,0,.2);display:none}
-.script-card.objection.show{display:block}
-.objection-toggle{background:rgba(255,171,0,.15);color:var(--hot);border:1px solid rgba(255,171,0,.2);padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%;text-align:center;margin-bottom:8px}
-.bottom-actions{padding:10px 12px 16px;display:flex;gap:8px}
-.bottom-actions button{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer}
-.btn-copy{background:var(--accent);color:#000}
-.btn-end{background:var(--surface);color:var(--dead);border:1px solid var(--dead)}
-
-/* Result modal */
-.result-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.result-modal.active{display:flex}
-.result-panel{background:var(--card);border-radius:16px 16px 0 0;width:100%;max-width:500px;padding:24px 16px 30px;animation:slideUp .25s ease-out}
+/* ── RESULT MODAL (the main interaction) ── */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-back.on{display:flex}
+.modal{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:500px;padding:16px 12px 24px;max-height:85dvh;overflow-y:auto;animation:slideUp .2s ease-out}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.result-panel h3{font-size:16px;margin-bottom:4px}
-.result-panel .sub{font-size:12px;color:var(--sub);margin-bottom:14px}
-.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.result-btn{padding:12px 8px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;text-align:center;background:var(--surface);color:var(--text)}
-.result-btn:active{filter:brightness(1.3)}
-.result-btn.sold{background:rgba(41,121,255,.2);color:var(--sold);grid-column:span 2}
-.result-btn.hot{background:rgba(0,230,118,.15);color:var(--accent)}
-.result-btn.called{background:rgba(255,171,0,.15);color:var(--hot)}
-.result-btn.dead{background:rgba(255,23,68,.15);color:var(--dead)}
-.quick-notes{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
-.note-chip{background:var(--surface);border:1px solid var(--border);color:var(--sub);padding:5px 10px;border-radius:12px;font-size:11px;cursor:pointer}
-.note-chip.selected{background:var(--accent);color:#000;border-color:var(--accent)}
-.skip-btn{background:none;color:var(--sub);border:none;padding:10px;font-size:12px;cursor:pointer;width:100%;margin-top:4px}
+.modal h2{font-size:15px;margin-bottom:2px}
+.modal .msub{font-size:11px;color:var(--sub);margin-bottom:10px}
 
-.navbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;padding:4px 4px;padding-bottom:max(4px,env(safe-area-inset-bottom));z-index:10}
-.nav-item{flex:1;text-align:center;padding:4px 2px;border:none;background:none;color:var(--sub);font-size:9px;cursor:pointer;border-radius:6px}
-.nav-item.active{color:var(--accent);font-weight:700}
-.nav-count{display:block;font-size:15px;font-weight:700;margin-bottom:1px}
+/* Big status buttons — 2x2 grid */
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.stat-btn{padding:14px 8px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;text-align:center;color:var(--text);background:var(--surface)}
+.stat-btn:active{filter:brightness(1.3)}
+.stat-btn.voicemail{background:rgba(255,171,0,.15);color:var(--hot)}
+.stat-btn.interested{background:rgba(0,230,118,.15);color:var(--accent)}
+.stat-btn.notinterested{background:rgba(255,23,68,.1);color:var(--dead)}
+.stat-btn.sold{background:rgba(41,121,255,.2);color:var(--sold)}
 
-.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 20px;border-radius:20px;font-weight:700;font-size:13px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+/* Note input */
+.note-section{margin-bottom:8px}
+.note-section textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:10px;font-size:14px;resize:none;min-height:60px;outline:none;font-family:inherit}
+.note-section textarea:focus{border-color:var(--accent)}
+
+/* Quick chips that INSERT into textarea */
+.chip-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.chip{background:var(--surface);border:1px solid var(--border);color:var(--sub);padding:5px 10px;border-radius:12px;font-size:10px;cursor:pointer}
+.chip:active{background:var(--accent);color:#000;border-color:var(--accent)}
+
+/* Callback row */
+.cb-section{margin:8px 0}
+.cb-section .label{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.cb-row{display:flex;gap:4px;flex-wrap:wrap}
+.cb-btn{background:rgba(0,230,118,.1);color:var(--accent);border:1px solid rgba(0,230,118,.2);padding:6px 10px;border-radius:8px;font-size:10px;cursor:pointer;white-space:nowrap}
+.cb-btn:active{background:var(--accent);color:#000}
+.cb-clear{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
+
+/* Action row */
+.action-row{display:flex;gap:8px;margin-top:10px}
+.action-row button{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer}
+.btn-save{background:var(--accent);color:#000}
+.btn-dismiss{background:none;color:var(--sub);font-weight:400;font-size:12px}
+
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:20px;font-weight:700;font-size:12px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
-.empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:14px}
+
+/* Delivery checklist */
+.check-item{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:13px;margin-bottom:4px;cursor:pointer}
+.check-item input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* Empty state */
+.empty{text-align:center;padding:50px 16px;color:var(--sub);font-size:13px}
+.empty strong{color:var(--text)}
 </style>
 </head>
 <body>
 
+<!-- ── TOP BAR ── -->
 <div class="topbar">
-  <div class="topbar-row">
-    <h1>📞 Call CRM</h1>
-    <span class="counts" id="summary"></span>
+  <h1>📞 Call CRM</h1>
+  <span class="summary" id="summary"></span>
+  <div class="search-row">
+    <input type="text" placeholder="Search name or phone..." id="search" oninput="renderLeads()">
+    <button style="background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap" onclick="nextCall()">▶ Next</button>
   </div>
-  <div class="quick-actions">
-    <button class="quick-btn accent" onclick="nextCall()">▶ Next Call</button>
-    <button class="quick-btn" onclick="setFilter('no-site',this);document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🔴 No Site</button>
-    <button class="quick-btn" onclick="setFilter('HVAC',this)">HVAC</button>
-    <button class="quick-btn" onclick="setFilter('Plumber',this)">Plumber</button>
-  </div>
-  <div class="filters">
-    <button class="active" onclick="setFilter('all',this)">All</button>
+  <div class="cat-row" id="catRow">
+    <button class="on" onclick="setFilter('all',this)">All</button>
     <button onclick="setFilter('no-site',this)">No Site</button>
-    <button onclick="setFilter('fake',this)">Fake</button>
+    <button onclick="setFilter('HVAC',this)">HVAC</button>
     <button onclick="setFilter('Electrician',this)">Electrician</button>
+    <button onclick="setFilter('Plumber',this)">Plumber</button>
     <button onclick="setFilter('Roofer',this)">Roofer</button>
+    <button onclick="setFilter('callback',this)">📅 Callback</button>
   </div>
 </div>
 
+<!-- ── LEAD LIST ── -->
 <div class="lead-list" id="leadList"></div>
 
-<div class="navbar">
-  <button class="nav-item active" onclick="setNav('all',this)"><span class="nav-count" id="navAll">0</span>All</button>
-  <button class="nav-item" onclick="setNav('called',this)"><span class="nav-count" id="navCalled">0</span>Called</button>
-  <button class="nav-item" onclick="setNav('hot',this)"><span class="nav-count" id="navHot">0</span>Hot</button>
-  <button class="nav-item" onclick="setNav('sold',this)"><span class="nav-count" id="navSold">0</span>Sold</button>
-  <button class="nav-item" onclick="setNav('dead',this)"><span class="nav-count" id="navDead">0</span>Dead</button>
+<!-- ── RESULT MODAL ── -->
+<div class="modal-back" id="resultModal">
+  <div class="modal">
+    <h2 id="modalTitle">How'd it go?</h2>
+    <div class="msub" id="modalSub"></div>
+
+    <!-- Status grid -->
+    <div class="status-grid">
+      <button class="stat-btn voicemail" onclick="setResult('voicemail')">📱 Voicemail</button>
+      <button class="stat-btn interested" onclick="setResult('interested')">🔥 Interested</button>
+      <button class="stat-btn notinterested" onclick="setResult('notinterested')">🚫 Not Interested</button>
+      <button class="stat-btn sold" onclick="setResult('sold')">💰 SOLD</button>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+      <textarea id="noteInput" placeholder="Add notes... (voicemail, office closed, call back Tuesday, etc.)" oninput="saveDraftNotes()"></textarea>
+    </div>
+
+    <!-- Quick chips -->
+    <div class="chip-row">
+      <span class="chip" onclick="insertChip('Voicemail')">📱 Voicemail</span>
+      <span class="chip" onclick="insertChip('No answer')">📵 No answer</span>
+      <span class="chip" onclick="insertChip('Wrong number')">❌ Wrong #</span>
+      <span class="chip" onclick="insertChip('Sent site')">🔗 Sent site</span>
+      <span class="chip" onclick="insertChip('Think about it')">🤔 Think about it</span>
+      <span class="chip" onclick="insertChip('Not interested')">🚫 Not interested</span>
+      <span class="chip" onclick="insertChip('Has website already')">🌐 Has website</span>
+      <span class="chip" onclick="insertChip('Office closed')">🏢 Office closed</span>
+    </div>
+
+    <!-- Callback scheduling -->
+    <div class="cb-section">
+      <div class="label">Schedule callback</div>
+      <div class="cb-row">
+        <span class="cb-btn" onclick="setCallback('tomorrow')">📅 Tomorrow</span>
+        <span class="cb-btn" onclick="setCallback('monday')">📅 Monday</span>
+        <span class="cb-btn" onclick="setCallback('2days')">📅 In 2 days</span>
+        <span class="cb-btn" onclick="setCallback('3days')">📅 In 3 days</span>
+        <span class="cb-btn" onclick="setCallback('1week')">📅 1 week</span>
+        <span class="cb-btn cb-clear" onclick="setCallback('clear')">✕ Clear</span>
+      </div>
+      <div id="cbPreview" style="font-size:11px;color:var(--accent);margin-top:4px;display:none"></div>
+    </div>
+
+    <!-- Save / Dismiss -->
+    <div class="action-row">
+      <button class="btn-dismiss" onclick="dismissModal()">Skip</button>
+      <button class="btn-save" onclick="saveAndNext()">💾 Save & Next →</button>
+    </div>
+  </div>
 </div>
 
-<!-- Call overlay -->
-<div class="overlay" id="callOverlay">
-  <div class="overlay-top">
-    <div>
-      <div class="name" id="ovName"></div>
-      <div class="phone" id="ovPhone"></div>
-    </div>
-    <button class="hangup-btn" onclick="endCall()">✕ End</button>
-  </div>
-  <div class="script-scroll" id="scriptScroll">
-    <div class="script-card">
-      <div class="tag">🗣️ OPENER</div>
-      <div class="line" id="scriptOpener"></div>
-    </div>
-    <div class="script-card">
-      <div class="tag">💰 CLOSE</div>
-      <div class="line">So here's the deal — <em>$500 and it's yours.</em> I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live under your name. Want to do this?</div>
-    </div>
-    <button class="objection-toggle" onclick="document.getElementById('objBlock').classList.toggle('show');this.style.display='none'">👇 Objection Handlers</button>
-    <div class="script-card objection" id="objBlock">
-      <div class="tag">😐 "I already have a website"</div>
-      <div class="line">"Actually — I looked at it. It's a <em>generic placeholder page</em>, not a real website. Here, let me text you what I built — you'll see the difference."</div>
-    </div>
-    <div class="script-card objection" id="objBlock2" style="display:none">
-      <div class="tag">💸 "Too expensive / can't afford it"</div>
-      <div class="line">"What's <em>one new customer</em> worth to you? This site costs less than one AC repair call. If it brings you even one job, it paid for itself."</div>
-    </div>
-    <div class="script-card objection" id="objBlock3" style="display:none">
-      <div class="tag">📞 "Not interested / don't need it"</div>
-      <div class="line">"No problem — keep looking at the site anyway. I already built it. If you change your mind, <em>text me at this number</em>. Site's done, just needs your name on it."</div>
-    </div>
-    <div class="script-card objection" id="objBlock4" style="display:none">
-      <div class="tag">🤔 "Let me think about it"</div>
-      <div class="line">"Totally fair. Let me ask — is it the <em>price</em> or the <em>idea</em> you're not sure about? Because I can work with one of those."</div>
-    </div>
-    <div class="script-card">
-      <div class="tag">🔗 SITE LINK</div>
-      <div class="line" style="color:var(--accent);font-family:monospace;font-size:12px;word-break:break-all" id="scriptSiteUrl"></div>
-    </div>
-  </div>
-  <div class="bottom-actions">
-    <button class="btn-copy" onclick="copySite()">📋 Copy Link</button>
-    <button class="btn-end" onclick="endCall()">✕ End Call</button>
-  </div>
-</div>
-
-<!-- Result modal -->
-<div class="result-modal" id="resultModal">
-  <div class="result-panel">
-    <h3 id="resultTitle">Call Complete</h3>
-    <div class="sub" id="resultSub"></div>
-    <div class="result-grid">
-      <button class="result-btn sold" onclick="saveResult('sold')">💰 Sold — got the $$$</button>
-      <button class="result-btn hot" onclick="saveResult('hot')">🔥 Interested</button>
-      <button class="result-btn called" onclick="saveResult('called')">📱 Voicemail</button>
-      <button class="result-btn dead" onclick="saveResult('dead')">☠️ Dead</button>
-    </div>
-    <div class="quick-notes">
-      <span class="note-chip" onclick="this.classList.toggle('selected')">Sent site</span>
-      <span class="note-chip" onclick="this.classList.toggle('selected')">Think about it</span>
-      <span class="note-chip" onclick="this.classList.toggle('selected')">Wrong #</span>
-      <span class="note-chip" onclick="this.classList.toggle('selected')">No answer</span>
-      <span class="note-chip" onclick="this.classList.toggle('selected')">Call Tue</span>
-      <span class="note-chip" onclick="this.classList.toggle('selected')">Has site</span>
-    </div>
-    <button class="skip-btn" onclick="saveResult('called')">Skip → mark called</button>
+<!-- ── DELIVERY CHECKLIST ── -->
+<div class="modal-back" id="checklistModal">
+  <div class="modal">
+    <h2>🎉 Sold! Delivery Checklist</h2>
+    <div class="msub" id="checklistSub"></div>
+    <label class="check-item"><input type="checkbox">💰 Collect $500 payment</label>
+    <label class="check-item"><input type="checkbox">🌐 Buy domain (Cloudflare $12/yr)</label>
+    <label class="check-item"><input type="checkbox">🔗 Point DNS to GitHub Pages</label>
+    <label class="check-item"><input type="checkbox">📧 Set up email forwarding</label>
+    <label class="check-item"><input type="checkbox">📍 Update Google Business Profile</label>
+    <label class="check-item"><input type="checkbox">📱 Text client: "Live at yourdomain.com!"</label>
+    <label class="check-item"><input type="checkbox">📅 Schedule 2-week check-in</label>
+    <button class="btn-save" style="width:100%;margin-top:10px" onclick="document.getElementById('checklistModal').classList.remove('on');renderAll()">✓ Done</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- Delivery Checklist Modal (appears after marking Sold) -->
-<div class="result-modal" id="checklistModal">
-  <div class="result-panel" style="padding-bottom:40px">
-    <h3>🎉 Sold! Delivery Checklist</h3>
-    <div class="sub" id="checklistSub"></div>
-    <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0">
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">💰 Collect $500 payment (Stripe link)</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">🌐 Buy domain (Cloudflare $12/yr)</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">🔗 Point DNS to GitHub Pages</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📧 Set up email forwarding</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📍 Update Google Business Profile</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📱 Text client: "Live at yourdomain.com!"</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📅 Schedule 2-week check-in</label>
-    </div>
-    <button class="done-btn" onclick="document.getElementById('checklistModal').classList.remove('active');renderAll()">✓ Done</button>
-  </div>
-</div>
-
 <script>
-let leads=[],statuses=JSON.parse(localStorage.getItem('ls')||'{}'),notes=JSON.parse(localStorage.getItem('ln')||'{}'),nav='all',filter='all',activeCall=null;
+// ── STATE ──
+let leads=[], filter='all', activeLead=null;
+// Storage keys: ls=statuses, ln=notes, lc=callbacks (ISO date strings)
 
+function loadState(){
+  return {
+    status: JSON.parse(localStorage.getItem('ls')||'{}'),
+    notes: JSON.parse(localStorage.getItem('ln')||'{}'),
+    callbacks: JSON.parse(localStorage.getItem('lc')||'{}')
+  };
+}
+
+function saveStatus(name,st){let d=loadState();d.status[name]=st;localStorage.setItem('ls',JSON.stringify(d.status))}
+function saveNotes(name,txt){let d=loadState();d.notes[name]=txt;localStorage.setItem('ln',JSON.stringify(d.notes))}
+function saveCallback(name,iso){let d=loadState();if(iso)d.callbacks[name]=iso;else delete d.callbacks[name];localStorage.setItem('lc',JSON.stringify(d.callbacks))}
+
+function getStatus(name){return loadState().status[name]||'new'}
+function getNotes(name){return loadState().notes[name]||''}
+function getCallback(name){return loadState().callbacks[name]||null}
+
+// ── INIT ──
 async function init(){
-  try{leads=await(await fetch('leads.json')).json()}catch(e){try{leads=await(await fetch('../leads.json')).json()}catch(e2){console.log('no leads')}}
-  leads.forEach(l=>{
-    l.name=(l.name||'').trim();
-    l.phone=(l.phone||'').replace(/\D/g,'');
-    l.category=l.cat||l.category||'Unknown';
-    l.type=l.no_site?'NO_SITE':'FAKE';
-    l.website=l.website||'';
-    l.opener=l.opener||'';
-    l.zip=l.zip||'';
-    l.slug=l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').substring(0,50);
-  });
-  // Import pre-populated status from leads.json (spreadsheet call history)
-  let imported=0;
-  leads.forEach(l=>{
-    if(l.status&&!statuses[l.name]){statuses[l.name]=l.status;notes[l.name]=l.notes||'';imported++}
-  });
-  if(imported){localStorage.setItem('ls',JSON.stringify(statuses));localStorage.setItem('ln',JSON.stringify(notes))}
-  setupVis();renderAll();
-}
-function s(name){return statuses[name]||'new'}
-function n(name){return notes[name]||''}
-function ss(name,st,nt){statuses[name]=st;if(nt)notes[name]=nt;localStorage.setItem('ls',JSON.stringify(statuses));localStorage.setItem('ln',JSON.stringify(notes))}
-function siteUrl(l){return 'https://cryptorich.github.io/applybot/sites/'+l.slug+'/'}
+  // Load leads
+  try{leads=await(await fetch('leads.json')).json()}catch(e){try{leads=await(await fetch('../leads.json')).json()}catch(e2){}}
+  leads=leads.map(l=>({
+    ...l,
+    name:(l.name||'').trim(),
+    phone:(l.phone||'').replace(/\D/g,''),
+    category:l.category||l.cat||'Unknown',
+    type:l.no_site?'NO_SITE':'FAKE',
+    website:l.website||'',
+    opener:l.opener||'',
+    zip:l.zip||'',
+    slug:(l.slug||(l.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')).substring(0,50)
+  }));
 
-function nextCall(){
-  let list=leads.filter(l=>s(l.name)!=='sold'&&s(l.name)!=='dead');
-  if(!list.length){showToast('All leads contacted! 🎉');return}
-  const l=list[0];
-  document.getElementById('search').value='';filter='all';nav='all';
-  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.filters button').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.nav-item').classList.add('active');
-  renderLeads();
-  startCall(l);
+  // Import pre-populated status/notes from leads.json
+  let imported=false;
+  const d=loadState();
+  leads.forEach(l=>{
+    if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imported=true}
+  });
+  if(imported){localStorage.setItem('ls',JSON.stringify(d.status));localStorage.setItem('ln',JSON.stringify(d.notes))}
+
+  setupVis(); renderAll();
 }
 
-function setNav(v,btn){nav=v;document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLeads()}
-function setFilter(f,btn){filter=f;document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderLeads()}
-function renderAll(){updateCounts();renderLeads()}
+// ── RENDER ──
+function renderAll(){renderLeads();updateSummary()}
 
-function updateCounts(){
-  let c={all:0,called:0,hot:0,sold:0,dead:0};
-  leads.forEach(l=>{c.all++;const st=s(l.name);if(st==='called')c.called++;if(st==='hot')c.hot++;if(st==='sold')c.sold++;if(st==='dead')c.dead++});
-  ['All','Called','Hot','Sold','Dead'].forEach(k=>{document.getElementById('nav'+k).textContent=c[k.toLowerCase()]});
-  document.getElementById('summary').textContent=c.all+' leads · '+c.sold+' sold · '+c.hot+' hot';
+function updateSummary(){
+  const d=loadState();
+  let c={all:leads.length,hot:0,sold:0,cb:0};
+  leads.forEach(l=>{
+    const s=d.status[l.name]||'new';
+    if(s==='hot')c.hot++;
+    if(s==='sold')c.sold++;
+    if(d.callbacks[l.name])c.cb++;
+  });
+  document.getElementById('summary').textContent=`${leads.length} leads · ${c.sold} sold · ${c.hot} hot · ${c.cb} cb`;
+}
+
+function siteUrl(l){
+  return 'https://cryptorich.github.io/applybot/sites/'+(l.slug||l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''))+'/';
 }
 
 function renderLeads(){
-  const q=(document.getElementById('search')?document.getElementById('search').value:'').toLowerCase();
-  let f=leads;
+  const q=(document.getElementById('search')?.value||'').toLowerCase();
+  const d=loadState();
+  let f=[...leads];
+
+  // Search
   if(q)f=f.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q));
-  if(nav==='called')f=f.filter(l=>s(l.name)==='called');
-  if(nav==='hot')f=f.filter(l=>s(l.name)==='hot');
-  if(nav==='sold')f=f.filter(l=>s(l.name)==='sold');
-  if(nav==='dead')f=f.filter(l=>s(l.name)==='dead');
+
+  // Filter
   if(filter==='no-site')f=f.filter(l=>l.type==='NO_SITE');
-  else if(filter==='fake')f=f.filter(l=>l.type==='FAKE');
+  else if(filter==='callback')f=f.filter(l=>!!d.callbacks[l.name]);
   else if(['HVAC','Electrician','Plumber','Roofer'].includes(filter))f=f.filter(l=>l.category===filter);
-  
+
+  // Sort: new first, then callbacks by date, then called, then rest
+  f.sort((a,b)=>{
+    const sa=getStatus(a.name),sb=getStatus(b.name);
+    const ca=getCallback(a.name),cb=getCallback(b.name);
+    // Callbacks first (soonest first)
+    if(ca&&cb)return new Date(ca)-new Date(cb);
+    if(ca)return -1;
+    if(cb)return 1;
+    // New leads first
+    if(sa==='new'&&sb!=='new')return -1;
+    if(sb==='new'&&sa!=='new')return 1;
+    return 0;
+  });
+
   const lst=document.getElementById('leadList');
-  if(!f.length){lst.innerHTML='<div class="empty">No leads match</div>';return}
+  if(!f.length){lst.innerHTML='<div class="empty"><strong>No leads</strong><br>Try a different filter or add more leads</div>';return}
+
   lst.innerHTML=f.map(l=>{
-    const st=s(l.name),nt=n(l.name),pf=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-    let badge='';
-    if(l.type==='NO_SITE')badge='<span class="badge badge-no-site">NO SITE</span>';
-    else if(l.type==='FAKE')badge='<span class="badge badge-fake">FAKE</span>';
-    if(st==='called')badge+=' <span class="badge badge-called">CALLED</span>';
-    else if(st==='hot')badge+=' <span class="badge badge-hot">HOT</span>';
-    else if(st==='sold')badge+=' <span class="badge badge-sold">SOLD</span>';
-    const np=nt?' · 💬 '+nt:'';
-    return '<div class="lead-card status-'+st+'" id="card-'+l.slug+'"><div class="lead-row" onclick="startCallByName(\''+l.name.replace(/'/g,"\\'")+'\')"><div class="lead-info"><div class="lead-name">'+l.name+'</div><div class="lead-sub">'+l.category+' · '+pf+np+' '+badge+'</div></div><a href="tel:+1'+l.phone+'" class="call-btn" onclick="event.stopPropagation();startCallByName(\''+l.name.replace(/'/g,"\\'")+'\')">📞</a></div></div>';
+    const st=getStatus(l.name);
+    const nt=getNotes(l.name);
+    const cb=getCallback(l.name);
+    const pf=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+
+    let badges='';
+    if(l.type==='NO_SITE')badges+='<span class="badge badge-nosite">NO SITE</span> ';
+    else badges+='<span class="badge badge-fake">FAKE</span> ';
+    if(st==='hot')badges+='<span class="badge badge-hot">HOT</span> ';
+    if(st==='sold')badges+='<span class="badge badge-sold">SOLD</span> ';
+    if(st==='dead')badges+='<span class="badge badge-dead">DEAD</span> ';
+
+    let noteLine='';
+    if(nt)noteLine=`<div class="lead-note">💬 ${nt.substring(0,60)}${nt.length>60?'…':''}</div>`;
+
+    let cbLine='';
+    if(cb){
+      const d=new Date(cb);
+      const now=new Date();
+      const diffDays=Math.ceil((d-now)/(1000*60*60*24));
+      const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const label=diffDays<=0?'Today':diffDays===1?'Tomorrow':diffDays<=7?dayNames[d.getDay()]:`${d.getMonth()+1}/${d.getDate()}`;
+      cbLine=`<span class="lead-cb">📅 Call ${label}</span> `;
+    }
+
+    return `<div class="lead-row status-${st}" onclick="tapLead('${l.name.replace(/'/g,"\\'")}')">
+      <div class="lead-info">
+        <div class="lead-name">${l.name}</div>
+        <div class="lead-meta">${cbLine}${l.category} · ${pf} ${badges}</div>
+        ${noteLine}
+      </div>
+      <div class="call-icon">📞</div>
+    </div>`;
   }).join('');
 }
 
-function startCallByName(name){startCall(leads.find(l=>l.name===name))}
-function startCall(l){
+// ── ACTIONS ──
+function tapLead(name){
+  const l=leads.find(x=>x.name===name);
   if(!l)return;
-  activeCall=l.name;
-  document.getElementById('ovName').textContent=l.name;
-  document.getElementById('ovPhone').textContent=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-  document.getElementById('scriptOpener').innerHTML=(l.opener||'Hey, is this <em>'+l.name.split(' ')[0]+'</em>? I\'m Rick with <em>SiteLaunch</em> — I was looking for a <em>'+l.category.toLowerCase()+'</em> in the area and couldn\'t find a real website for your business. I actually went ahead and <em>built one</em>. Want me to text you the link?');
-  document.getElementById('scriptSiteUrl').textContent=siteUrl(l);
-  document.getElementById('objBlock').classList.remove('show');
-  document.querySelector('.objection-toggle').style.display='';
-  document.getElementById('callOverlay').classList.add('active');
+  activeLead=l;
+  // Go straight to call
   window.location.href='tel:+1'+l.phone;
 }
-function copySite(){
-  const l=leads.find(x=>x.name===activeCall);
-  if(l){navigator.clipboard.writeText(siteUrl(l)).then(()=>showToast('Link copied! 📋'))}
+
+function nextCall(){
+  const d=loadState();
+  // Priority: callback due today → new → called
+  const today=new Date().toDateString();
+  let list=leads.filter(l=>{
+    const s=d.status[l.name]||'new';
+    if(s==='sold'||s==='dead')return false;
+    return true;
+  });
+  // Sort: callbacks first
+  list.sort((a,b)=>{
+    const ca=d.callbacks[a.name],cb=d.callbacks[b.name];
+    if(ca&&cb)return new Date(ca)-new Date(cb);
+    if(ca)return -1;
+    if(cb)return 1;
+    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
+    if(sa==='new'&&sb!=='new')return -1;
+    if(sb==='new'&&sa!=='new')return 1;
+    return 0;
+  });
+  if(!list.length){showToast('All leads contacted! 🎉');return}
+  tapLead(list[0].name);
 }
-function endCall(){
-  document.getElementById('callOverlay').classList.remove('active');
-  if(!activeCall)return;
-  const l=leads.find(x=>x.name===activeCall);
-  if(!l)return;
-  if(s(activeCall)==='new')ss(activeCall,'called','');
-  document.getElementById('resultTitle').textContent="How'd it go with "+l.name.split(' ')[0]+'?';
-  document.getElementById('resultSub').textContent=l.category+' · '+l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-  document.querySelectorAll('.note-chip').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('resultModal').classList.add('active');
+
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('.cat-row button').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderLeads();
 }
-function saveResult(st){
-  if(!activeCall)return;
-  const l=leads.find(x=>x.name===activeCall);
-  const sel=[...document.querySelectorAll('.note-chip.selected')].map(c=>c.textContent).join(', ');
-  ss(activeCall,st,sel);
-  document.getElementById('resultModal').classList.remove('active');
-  showToast({sold:'💰 Sold!',hot:'🔥 Hot!',called:'📱 Called',dead:'☠️ Dead'}[st]||'✓ Saved');
-  
-  // Sold → show delivery checklist
-  if(st==='sold'&&l){
-    document.getElementById('checklistSub').textContent=l.name+' · '+l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-    document.getElementById('checklistModal').classList.add('active');
+
+// ── RESULT MODAL ──
+let selectedResult=null, selectedCallback=null;
+
+function showResultModal(){
+  if(!activeLead)return;
+  const l=activeLead;
+  document.getElementById('modalTitle').textContent=`How'd it go with ${l.name.split(' ')[0]}?`;
+  document.getElementById('modalSub').textContent=`${l.category} · ${l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')}`;
+
+  // Pre-fill note from localStorage
+  document.getElementById('noteInput').value=getNotes(l.name)||'';
+
+  // Reset selections
+  selectedResult=null;
+  selectedCallback=null;
+  document.querySelectorAll('.stat-btn').forEach(b=>b.style.outline='none');
+  document.getElementById('cbPreview').style.display='none';
+
+  // Show existing callback if any
+  const cb=getCallback(l.name);
+  if(cb){
+    selectedCallback=cb;
+    const d=new Date(cb);
+    document.getElementById('cbPreview').textContent=`Callback set: ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+    document.getElementById('cbPreview').style.display='block';
   }
-  
-  activeCall=null;renderAll();
-  if(st==='dead'||st==='called'){setTimeout(nextCall,800)}
+
+  document.getElementById('resultModal').classList.add('on');
+  document.getElementById('noteInput').focus();
 }
+
+function setResult(st){
+  selectedResult=st;
+  document.querySelectorAll('.stat-btn').forEach(b=>b.style.outline='none');
+  // Highlight selected
+  const map={voicemail:0,interested:1,notinterested:2,sold:3};
+  if(map[st]!==undefined){
+    document.querySelectorAll('.stat-btn')[map[st]].style.outline='2px solid white';
+  }
+}
+
+function insertChip(text){
+  const ta=document.getElementById('noteInput');
+  const current=ta.value;
+  // Add comma if needed
+  const sep=current&&!current.endsWith(',')&&!current.endsWith(' ')&&current.length>0?', ':'';
+  ta.value=current+sep+text;
+  ta.focus();
+  saveDraftNotes();
+}
+
+function setCallback(when){
+  const now=new Date();
+  let target=new Date(now);
+
+  if(when==='clear'){
+    selectedCallback=null;
+    document.getElementById('cbPreview').style.display='none';
+    return;
+  }
+
+  switch(when){
+    case 'tomorrow': target.setDate(target.getDate()+1); target.setHours(9,0,0,0); break;
+    case 'monday':
+      const daysUntilMonday=(8-now.getDay())%7||7;
+      target.setDate(target.getDate()+daysUntilMonday);
+      target.setHours(9,0,0,0);
+      break;
+    case '2days': target.setDate(target.getDate()+2); target.setHours(9,0,0,0); break;
+    case '3days': target.setDate(target.getDate()+3); target.setHours(9,0,0,0); break;
+    case '1week': target.setDate(target.getDate()+7); target.setHours(9,0,0,0); break;
+  }
+
+  selectedCallback=target.toISOString();
+  document.getElementById('cbPreview').textContent=`Callback set: ${target.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+  document.getElementById('cbPreview').style.display='block';
+}
+
+function saveDraftNotes(){
+  if(!activeLead)return;
+  saveNotes(activeLead.name, document.getElementById('noteInput').value);
+}
+
+function saveAndNext(){
+  if(!activeLead)return;
+
+  const notes=document.getElementById('noteInput').value.trim();
+
+  // If no result selected, default to 'called' (they called, that's something)
+  const result=selectedResult||'called';
+
+  // Map to our statuses
+  const statusMap={voicemail:'called',interested:'hot',notinterested:'dead',sold:'sold',called:'called'};
+  const status=statusMap[result]||'called';
+
+  saveStatus(activeLead.name, status);
+  saveNotes(activeLead.name, notes);
+
+  if(selectedCallback){
+    saveCallback(activeLead.name, selectedCallback);
+  } else {
+    saveCallback(activeLead.name, null);
+  }
+
+  // If sold, show checklist
+  if(status==='sold'){
+    document.getElementById('resultModal').classList.remove('on');
+    const l=activeLead;
+    document.getElementById('checklistSub').textContent=`${l.name} · ${l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')}`;
+    document.getElementById('checklistModal').classList.add('on');
+  } else {
+    document.getElementById('resultModal').classList.remove('on');
+  }
+
+  const labels={hot:'🔥 Hot!',sold:'💰 Sold!',called:'📱 Called',dead:'☠️ Dead'};
+  showToast(labels[status]||'✓ Saved');
+
+  activeLead=null;
+  renderAll();
+
+  // Auto-advance after 1s
+  if(status==='dead'||status==='called'){
+    setTimeout(()=>{if(!activeLead)nextCall()},1000);
+  }
+}
+
+function dismissModal(){
+  // Save notes even on dismiss
+  if(activeLead){
+    saveNotes(activeLead.name, document.getElementById('noteInput').value);
+    if(selectedCallback)saveCallback(activeLead.name,selectedCallback);
+    // Mark as called if never called
+    if(getStatus(activeLead.name)==='new')saveStatus(activeLead.name,'called');
+  }
+  document.getElementById('resultModal').classList.remove('on');
+  activeLead=null;
+  renderAll();
+}
+
+// ── VISIBILITY (auto-detect return from phone call) ──
 function setupVis(){
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeCall)setTimeout(endCall,500)});
-  document.getElementById('callOverlay').addEventListener('click',function(e){if(e.target===this)endCall()});
-  document.getElementById('resultModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');activeCall=null;renderAll()}});
-  document.getElementById('checklistModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');renderAll()}});
+  // When user returns from phone app, show result modal
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden && activeLead){
+      setTimeout(()=>{
+        if(activeLead)showResultModal();
+      },400);
+    }
+  });
+
+  // Also handle pageshow (iOS Safari)
+  window.addEventListener('pageshow',(e)=>{
+    if(e.persisted && activeLead){
+      setTimeout(()=>{
+        if(activeLead)showResultModal();
+      },400);
+    }
+  });
+
+  // Close modals on backdrop tap
+  document.getElementById('resultModal').addEventListener('click',function(e){
+    if(e.target===this)dismissModal();
+  });
+  document.getElementById('checklistModal').addEventListener('click',function(e){
+    if(e.target===this){this.classList.remove('on');renderAll()}
+  });
+
+  // Save notes on any input change
+  document.getElementById('noteInput').addEventListener('input',saveDraftNotes);
 }
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1500);
+}
+
+// ── BOOT ──
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
