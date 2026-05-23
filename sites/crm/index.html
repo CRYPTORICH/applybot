@@ -99,7 +99,7 @@ let openCard = null;
 
 async function init() {
   try {
-    const resp = await fetch('leads.json');
+    const resp = await fetch('../leads.json');
     leads = await resp.json();
   } catch(e) {
     // Fallback embedded data
