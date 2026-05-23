@@ -191,6 +191,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg
 
 <div class="toast" id="toast"></div>
 
+<!-- Delivery Checklist Modal (appears after marking Sold) -->
+<div class="result-modal" id="checklistModal">
+  <div class="result-panel" style="padding-bottom:40px">
+    <h3>🎉 Sold! Delivery Checklist</h3>
+    <div class="sub" id="checklistSub"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0">
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">💰 Collect $500 payment (Stripe link)</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">🌐 Buy domain (Cloudflare $12/yr)</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">🔗 Point DNS to GitHub Pages</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📧 Set up email forwarding</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📍 Update Google Business Profile</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📱 Text client: "Live at yourdomain.com!"</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:14px"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?'0.5':'1'">📅 Schedule 2-week check-in</label>
+    </div>
+    <button class="done-btn" onclick="document.getElementById('checklistModal').classList.remove('active');renderAll()">✓ Done</button>
+  </div>
+</div>
+
 <script>
 let leads=[],statuses=JSON.parse(localStorage.getItem('ls')||'{}'),notes=JSON.parse(localStorage.getItem('ln')||'{}'),nav='all',filter='all',activeCall=null;
 
@@ -286,18 +304,26 @@ function endCall(){
 }
 function saveResult(st){
   if(!activeCall)return;
+  const l=leads.find(x=>x.name===activeCall);
   const sel=[...document.querySelectorAll('.note-chip.selected')].map(c=>c.textContent).join(', ');
   ss(activeCall,st,sel);
-  document.getElementById('resultModal').classList.remove('active');activeCall=null;
+  document.getElementById('resultModal').classList.remove('active');
   showToast({sold:'💰 Sold!',hot:'🔥 Hot!',called:'📱 Called',dead:'☠️ Dead'}[st]||'✓ Saved');
-  renderAll();
-  // Auto-advance: if marked dead/voicemail, jump to next lead after 800ms
+  
+  // Sold → show delivery checklist
+  if(st==='sold'&&l){
+    document.getElementById('checklistSub').textContent=l.name+' · '+l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+    document.getElementById('checklistModal').classList.add('active');
+  }
+  
+  activeCall=null;renderAll();
   if(st==='dead'||st==='called'){setTimeout(nextCall,800)}
 }
 function setupVis(){
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeCall)setTimeout(endCall,500)});
   document.getElementById('callOverlay').addEventListener('click',function(e){if(e.target===this)endCall()});
   document.getElementById('resultModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');activeCall=null;renderAll()}});
+  document.getElementById('checklistModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('active');renderAll()}});
 }
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 document.addEventListener('DOMContentLoaded',init);
