@@ -37,6 +37,18 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 .plan button:hover{background:#1a1a2e;color:#fff}
 .plan .per{color:#9ca3af;font-size:.7rem;margin-top:6px}
 .pricing-note{text-align:center;color:#9ca3af;font-size:.8rem}
+.free-trial{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:32px 24px;max-width:520px;margin:0 auto 20px;text-align:center}
+.free-trial h3{font-size:1.15rem;margin-bottom:6px;color:#065f46}
+.free-trial p{color:#6b7280;font-size:.85rem;margin-bottom:18px}
+.free-trial .form-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.free-trial input,.free-trial select{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.85rem;font-family:inherit;flex:1;min-width:140px;background:#fff}
+.free-trial button{padding:10px 24px;background:#059669;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.free-trial button:hover{background:#047857}
+.free-trial button:disabled{opacity:.6}
+.free-trial .result{margin-top:12px;padding:10px;border-radius:8px;font-size:.85rem;display:none}
+.free-trial .result.success{display:block;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.free-trial .result.error{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.free-trial .trust-line{margin-top:12px;font-size:.7rem;color:#9ca3af}
 .compare{overflow-x:auto;margin-bottom:40px}
 .compare table{width:100%;border-collapse:collapse;font-size:.85rem}
 .compare td,.compare th{padding:12px 14px;text-align:center;border-bottom:1px solid #f3f4f6}
@@ -84,6 +96,36 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 <p>Upload your resume. We search public job boards and submit applications on your behalf. You get an email for every one.</p>
 <a href="#pricing" class="cta">Get Started</a>
 </div>
+
+<!-- FREE TRIAL -->
+<section style="padding-top:0">
+<div class="free-trial" id="free-trial-section">
+<h3>🎉 Try 2 Free Applications — No Credit Card</h3>
+<p>See it work before you pay. We'll submit 2 real job applications and email you confirmations.</p>
+<div class="form-row">
+<input type="email" id="ft-email" placeholder="your@email.com">
+<input type="text" id="ft-name" placeholder="Your name">
+</div>
+<div class="form-row">
+<select id="ft-category">
+<option value="">Job Category</option>
+<option value="it-support">IT Support & Help Desk</option>
+<option value="software-dev">Software Development</option>
+<option value="healthcare">Healthcare & Nursing</option>
+<option value="retail">Retail & Customer Service</option>
+<option value="warehouse">Warehouse & Logistics</option>
+<option value="admin">Administrative & Office</option>
+<option value="finance">Finance & Banking</option>
+<option value="sales">Sales & Business Development</option>
+<option value="remote" selected>Remote / Work From Home</option>
+</select>
+<input type="text" id="ft-location" placeholder="City or 'Remote'" value="Remote" list="city-list">
+</div>
+<button onclick="startFreeTrial()" id="ft-btn">Get 2 Free Applications →</button>
+<div class="trust-line">No spam. No credit card. Applications sent via LinkedIn Easy Apply.</div>
+<div class="result" id="ft-result"></div>
+</div>
+</section>
 
 <section id="how">
 <h2>How It Works</h2>
@@ -186,6 +228,78 @@ async function checkout(plan) {
         btn.textContent = 'Try Again';
         btn.disabled = false;
         setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+}
+
+async function startFreeTrial() {
+    const email = document.getElementById('ft-email').value.trim();
+    const name = document.getElementById('ft-name').value.trim();
+    const category = document.getElementById('ft-category').value;
+    const location = document.getElementById('ft-location').value.trim();
+    const btn = document.getElementById('ft-btn');
+    const result = document.getElementById('ft-result');
+    
+    if (!email || !email.includes('@')) {
+        result.className = 'result error';
+        result.textContent = 'Please enter a valid email address.';
+        return;
+    }
+    
+    // Map category value to label
+    const categoryMap = {
+        'it-support': 'IT Support Specialist',
+        'software-dev': 'Software Developer',
+        'healthcare': 'Healthcare Professional',
+        'retail': 'Retail Associate',
+        'warehouse': 'Warehouse Associate',
+        'admin': 'Administrative Assistant',
+        'finance': 'Finance Professional',
+        'sales': 'Sales Representative',
+        'remote': 'Remote Worker',
+    };
+    const jobTitle = categoryMap[category] || 'IT Support Specialist';
+    
+    btn.textContent = 'Setting up...';
+    btn.disabled = true;
+    
+    try {
+        const resp = await fetch(API_BASE + '/api/free-trial', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: email,
+                name: name,
+                job_title: jobTitle,
+                location: location || 'Remote'
+            })
+        });
+        
+        const data = await resp.json();
+        
+        if (resp.ok) {
+            result.className = 'result success';
+            result.innerHTML = `
+                ${data.message}<br><br>
+                <a href="${data.next}" style="color:#059669;font-weight:600">View your dashboard →</a><br><br>
+                <span style="font-size:.8rem;color:#6b7280">Check your email for confirmation!</span>
+            `;
+            btn.textContent = '✓ Queued!';
+            
+            // Scroll to pricing for upgrade
+            setTimeout(() => {
+                document.getElementById('pricing').scrollIntoView({behavior: 'smooth'});
+            }, 2000);
+        } else {
+            result.className = 'result error';
+            result.textContent = data.error || 'Something went wrong. Try again.';
+            btn.textContent = 'Get 2 Free Applications →';
+            btn.disabled = false;
+        }
+    } catch(e) {
+        result.className = 'result error';
+        result.textContent = 'Connection error. Check your internet and try again.';
+        btn.textContent = 'Get 2 Free Applications →';
+        btn.disabled = false;
     }
 }
 </script>

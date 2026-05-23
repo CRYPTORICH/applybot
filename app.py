@@ -2,7 +2,9 @@
 ApplyBot Backend — Flask + Stripe + CDP Auto-Apply Engine
 v2: Fair pricing, legal compliance, email confirmations, queue system
 """
-import os, json, time, uuid, threading, sqlite3, logging
+import os, json, time, uuid, threading, sqlite3, logging, smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, redirect
@@ -190,6 +192,121 @@ def create_checkout():
     )
     
     return jsonify({"sessionId": session.id})
+
+
+# === FREE TRIAL (S10 Malkuth: trust before payment) ===
+FREE_TRIAL_TOKENS = 2
+FREE_TRIAL_LIMIT = {}  # in-memory rate limit per email (reset on deploy)
+
+@app.route("/api/free-trial", methods=["POST", "OPTIONS"])
+def free_trial():
+    """Create a free trial user with 2 application tokens. No payment required."""
+    if request.method == "OPTIONS":
+        return "", 200
+    
+    data = request.json or {}
+    email = (data.get("email", "") or "").strip().lower()
+    name = (data.get("name", "") or "").strip()
+    job_title = (data.get("job_title", "") or "IT Support Specialist").strip()
+    location = (data.get("location", "") or "Remote").strip()
+    
+    # Basic validation
+    if not email or "@" not in email:
+        return jsonify({"error": "Valid email required"}), 400
+    
+    # Rate limit: 1 free trial per email
+    if email in FREE_TRIAL_LIMIT:
+        return jsonify({"error": "You've already claimed your free trial. Upgrade to continue!"}), 429
+    
+    FREE_TRIAL_LIMIT[email] = time.time()
+    
+    # Create user
+    user_id = str(uuid.uuid4())
+    db = get_db()
+    
+    # Check if this email already has a paid account
+    existing = db.execute("SELECT id, tokens FROM users WHERE email=?", (email,)).fetchone()
+    if existing and existing["tokens"] > FREE_TRIAL_TOKENS:
+        db.close()
+        return jsonify({"error": "You already have an account with tokens!", "user_id": existing["id"]}), 409
+    
+    if existing:
+        # Top up existing free user (they used their 2 tokens and came back)
+        db.execute("UPDATE users SET tokens = tokens + ? WHERE id=?", 
+                   (FREE_TRIAL_TOKENS, existing["id"]))
+        db.commit()
+        user_id = existing["id"]
+    else:
+        db.execute(
+            """INSERT INTO users (id, email, name, tokens, target_titles, target_location)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (user_id, email, name, FREE_TRIAL_TOKENS, job_title, location)
+        )
+        db.commit()
+    
+    # Persist
+    user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    _persist_user(user)
+    db.close()
+    
+    # Send welcome email in background
+    if email and GMAIL_ADDRESS:
+        threading.Thread(target=_send_free_trial_email, 
+                        args=(email, name, user_id, job_title, location), 
+                        daemon=True).start()
+    
+    logging.info(f"Free trial: {email} gets {FREE_TRIAL_TOKENS} tokens (id={user_id})")
+    
+    return jsonify({
+        "success": True,
+        "user_id": user_id,
+        "tokens": FREE_TRIAL_TOKENS,
+        "message": f"🎉 {FREE_TRIAL_TOKENS} free applications queued! We'll search for '{job_title}' jobs in {location}.",
+        "next": f"{DOMAIN}/dashboard/{user_id}"
+    })
+
+
+def _send_free_trial_email(email, name, user_id, job_title, location):
+    """Send welcome email for free trial users with upgrade prompt."""
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = f"ApplyBot <{GMAIL_ADDRESS}>"
+        msg["To"] = email
+        msg["Subject"] = f"🎉 Your {FREE_TRIAL_TOKENS} free applications are queued!"
+        
+        body = f"""Hi {name or 'there'},
+
+Your {FREE_TRIAL_TOKENS} free job applications are being processed!
+
+    🔍 Searching: {job_title}
+    📍 Location: {location}
+    📧 Confirmations: You'll get an email for each application
+
+Track your applications live:
+{DOMAIN}/dashboard/{user_id}
+
+━━━━━━━━━━━━━━━━━━━━
+Want to apply to MORE jobs?
+━━━━━━━━━━━━━━━━━━━━
+
+    ⚡ 50 applications — $19
+    🚀 150 applications — $39
+    🔥 500 applications — $79
+
+Upgrade here: {DOMAIN}/#pricing
+
+— ApplyBot
+"""
+        msg.attach(MIMEText(body, "plain"))
+        
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(GMAIL_ADDRESS, os.environ.get("GMAIL_APP_PASSWORD", ""))
+        server.sendmail(GMAIL_ADDRESS, email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        logging.warning(f"Free trial email failed: {e}")
+
 
 # === JOB SEARCH API ===
 @app.route("/api/job-search")
