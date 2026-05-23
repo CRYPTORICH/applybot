@@ -171,8 +171,8 @@ def job_search():
     location = request.args.get("location", "")
     category = request.args.get("category", "")
     
-    if not keywords and not category:
-        return jsonify({"error": "keywords or category required"}), 400
+    if not keywords and not category and not location:
+        return jsonify({"error": "keywords, category, or location required"}), 400
     
     results = search_jobs(
         keywords=keywords,
