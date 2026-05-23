@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Call CRM</title>
 <style>
-:root{--bg:#080808;--card:#111;--surface:#1a1a1a;--border:#222;--accent:#00e676;--hot:#ffab00;--sold:#2979ff;--dead:#ff1744;--text:#fff;--sub:#888;--danger-zone:#660000}
+:root{--bg:#080808;--card:#111;--surface:#1a1a1a;--border:#222;--accent:#00e676;--hot:#ffab00;--sold:#2979ff;--dead:#ff1744;--text:#fff;--sub:#888}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;user-select:none;overflow-x:hidden}
 
@@ -42,15 +42,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .badge-dead{background:rgba(255,23,68,.2);color:var(--dead)}
 .call-icon{background:var(--accent);color:#000;min-width:40px;height:40px;border-radius:10px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* ── RESULT MODAL (the main interaction) ── */
+/* ── DETAIL PANEL (slides up when you tap a lead) ── */
+.detail-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:150;display:none;align-items:flex-end;justify-content:center}
+.detail-back.on{display:flex}
+.detail{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:500px;max-height:88dvh;overflow-y:auto;animation:slideUp .2s ease-out;padding-bottom:20px}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.detail-header{padding:16px 14px 8px;border-bottom:1px solid var(--border)}
+.detail-header .dname{font-size:17px;font-weight:700}
+.detail-header .dphone{font-size:14px;color:var(--accent);font-weight:600;margin-top:2px}
+.detail-header .dcat{font-size:11px;color:var(--sub);margin-top:2px}
+.detail-body{padding:12px 14px}
+.detail-body .section-label{font-size:9px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px}
+.detail-body .script-box{background:var(--surface);border-radius:10px;padding:12px;font-size:13px;line-height:1.6;color:#ddd;border:1px solid var(--border)}
+.detail-body .script-box em{color:var(--accent);font-style:normal;font-weight:600}
+.detail-body .site-url{font-family:monospace;font-size:11px;color:var(--accent);word-break:break-all;background:var(--surface);padding:8px 10px;border-radius:8px;display:block;margin-top:4px}
+.detail-actions{padding:10px 14px 16px;display:flex;flex-direction:column;gap:8px}
+.detail-actions .call-btn{display:block;width:100%;background:var(--accent);color:#000;border:none;padding:16px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.detail-actions .call-btn:active{filter:brightness(1.2)}
+.detail-actions .row{display:flex;gap:6px}
+.detail-actions .row button{flex:1;padding:12px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-copy{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+.btn-dead{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
+.btn-skip{background:rgba(255,171,0,.1);color:var(--hot);border:1px solid rgba(255,171,0,.2)}
+.btn-close-detail{background:none;color:var(--sub);border:none;padding:12px;font-size:12px;cursor:pointer;width:100%}
+
+/* ── RESULT MODAL ── */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
 .modal-back.on{display:flex}
 .modal{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:500px;padding:16px 12px 24px;max-height:85dvh;overflow-y:auto;animation:slideUp .2s ease-out}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal h2{font-size:15px;margin-bottom:2px}
 .modal .msub{font-size:11px;color:var(--sub);margin-bottom:10px}
-
-/* Big status buttons — 2x2 grid */
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
 .stat-btn{padding:14px 8px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;text-align:center;color:var(--text);background:var(--surface)}
 .stat-btn:active{filter:brightness(1.3)}
@@ -58,40 +79,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .stat-btn.interested{background:rgba(0,230,118,.15);color:var(--accent)}
 .stat-btn.notinterested{background:rgba(255,23,68,.1);color:var(--dead)}
 .stat-btn.sold{background:rgba(41,121,255,.2);color:var(--sold)}
-
-/* Note input */
 .note-section{margin-bottom:8px}
 .note-section textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:10px;font-size:14px;resize:none;min-height:60px;outline:none;font-family:inherit}
 .note-section textarea:focus{border-color:var(--accent)}
-
-/* Quick chips that INSERT into textarea */
 .chip-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .chip{background:var(--surface);border:1px solid var(--border);color:var(--sub);padding:5px 10px;border-radius:12px;font-size:10px;cursor:pointer}
 .chip:active{background:var(--accent);color:#000;border-color:var(--accent)}
-
-/* Callback row */
 .cb-section{margin:8px 0}
 .cb-section .label{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .cb-row{display:flex;gap:4px;flex-wrap:wrap}
 .cb-btn{background:rgba(0,230,118,.1);color:var(--accent);border:1px solid rgba(0,230,118,.2);padding:6px 10px;border-radius:8px;font-size:10px;cursor:pointer;white-space:nowrap}
 .cb-btn:active{background:var(--accent);color:#000}
 .cb-clear{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
-
-/* Action row */
 .action-row{display:flex;gap:8px;margin-top:10px}
-.action-row button{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer}
-.btn-save{background:var(--accent);color:#000}
-.btn-dismiss{background:none;color:var(--sub);font-weight:400;font-size:12px}
-
-/* Toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:20px;font-weight:700;font-size:12px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
-.toast.show{opacity:1}
+.btn-save{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;background:var(--accent);color:#000}
+.btn-dismiss{flex:1;padding:14px;border-radius:10px;border:none;font-size:12px;font-weight:400;cursor:pointer;background:none;color:var(--sub)}
 
 /* Delivery checklist */
 .check-item{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface);border-radius:8px;font-size:13px;margin-bottom:4px;cursor:pointer}
 .check-item input{width:18px;height:18px;accent-color:var(--accent)}
 
-/* Empty state */
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:8px 16px;border-radius:20px;font-weight:700;font-size:12px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+
 .empty{text-align:center;padding:50px 16px;color:var(--sub);font-size:13px}
 .empty strong{color:var(--text)}
 </style>
@@ -120,26 +131,53 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ── LEAD LIST ── -->
 <div class="lead-list" id="leadList"></div>
 
+<!-- ── DETAIL PANEL ── -->
+<div class="detail-back" id="detailPanel">
+  <div class="detail">
+    <div class="detail-header">
+      <div class="dname" id="dName"></div>
+      <div class="dphone" id="dPhone"></div>
+      <div class="dcat" id="dCat"></div>
+    </div>
+    <div class="detail-body">
+      <div class="section-label">🗣️ OPENER</div>
+      <div class="script-box" id="dOpener"></div>
+      <div class="section-label">🔗 SITE LINK</div>
+      <span class="site-url" id="dSiteUrl"></span>
+      <div class="section-label" id="dNotesLabel" style="display:none">💬 NOTES</div>
+      <div class="script-box" id="dNotes" style="display:none;color:var(--hot);font-size:12px"></div>
+      <div class="section-label" id="dCbLabel" style="display:none">📅 CALLBACK</div>
+      <div style="color:var(--accent);font-size:12px;font-weight:600" id="dCb"></div>
+    </div>
+    <div class="detail-actions">
+      <a class="call-btn" id="dCallBtn" href="#">📞 Call Now</a>
+      <div class="row">
+        <button class="btn-copy" onclick="copySiteLink()">📋 Copy Link</button>
+        <button class="btn-skip" onclick="quickAction('voicemail')">📱 Left VM</button>
+      </div>
+      <div class="row">
+        <button class="btn-dead" onclick="quickAction('dead')">☠️ Dead / Wrong #</button>
+        <button class="btn-skip" onclick="quickAction('notinterested')">🚫 Not Interested</button>
+      </div>
+      <button class="btn-close-detail" onclick="closeDetail()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── RESULT MODAL ── -->
 <div class="modal-back" id="resultModal">
   <div class="modal">
     <h2 id="modalTitle">How'd it go?</h2>
     <div class="msub" id="modalSub"></div>
-
-    <!-- Status grid -->
     <div class="status-grid">
       <button class="stat-btn voicemail" onclick="setResult('voicemail')">📱 Voicemail</button>
       <button class="stat-btn interested" onclick="setResult('interested')">🔥 Interested</button>
       <button class="stat-btn notinterested" onclick="setResult('notinterested')">🚫 Not Interested</button>
       <button class="stat-btn sold" onclick="setResult('sold')">💰 SOLD</button>
     </div>
-
-    <!-- Notes -->
     <div class="note-section">
       <textarea id="noteInput" placeholder="Add notes... (voicemail, office closed, call back Tuesday, etc.)" oninput="saveDraftNotes()"></textarea>
     </div>
-
-    <!-- Quick chips -->
     <div class="chip-row">
       <span class="chip" onclick="insertChip('Voicemail')">📱 Voicemail</span>
       <span class="chip" onclick="insertChip('No answer')">📵 No answer</span>
@@ -150,8 +188,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span class="chip" onclick="insertChip('Has website already')">🌐 Has website</span>
       <span class="chip" onclick="insertChip('Office closed')">🏢 Office closed</span>
     </div>
-
-    <!-- Callback scheduling -->
     <div class="cb-section">
       <div class="label">Schedule callback</div>
       <div class="cb-row">
@@ -164,8 +200,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div id="cbPreview" style="font-size:11px;color:var(--accent);margin-top:4px;display:none"></div>
     </div>
-
-    <!-- Save / Dismiss -->
     <div class="action-row">
       <button class="btn-dismiss" onclick="dismissModal()">Skip</button>
       <button class="btn-save" onclick="saveAndNext()">💾 Save & Next →</button>
@@ -192,9 +226,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
 let leads=[], filter='all', activeLead=null;
-// Storage keys: ls=statuses, ln=notes, lc=callbacks (ISO date strings)
 
 function loadState(){
   return {
@@ -203,18 +235,18 @@ function loadState(){
     callbacks: JSON.parse(localStorage.getItem('lc')||'{}')
   };
 }
+function saveStatus(n,s){let d=loadState();d.status[n]=s;localStorage.setItem('ls',JSON.stringify(d.status))}
+function saveNotes(n,t){let d=loadState();d.notes[n]=t;localStorage.setItem('ln',JSON.stringify(d.notes))}
+function saveCallback(n,iso){let d=loadState();iso?d.callbacks[n]=iso:delete d.callbacks[n];localStorage.setItem('lc',JSON.stringify(d.callbacks))}
+function getStatus(n){return loadState().status[n]||'new'}
+function getNotes(n){return loadState().notes[n]||''}
+function getCallback(n){return loadState().callbacks[n]||null}
 
-function saveStatus(name,st){let d=loadState();d.status[name]=st;localStorage.setItem('ls',JSON.stringify(d.status))}
-function saveNotes(name,txt){let d=loadState();d.notes[name]=txt;localStorage.setItem('ln',JSON.stringify(d.notes))}
-function saveCallback(name,iso){let d=loadState();if(iso)d.callbacks[name]=iso;else delete d.callbacks[name];localStorage.setItem('lc',JSON.stringify(d.callbacks))}
+function siteUrl(l){
+  return 'https://cryptorich.github.io/applybot/sites/'+l.slug+'/';
+}
 
-function getStatus(name){return loadState().status[name]||'new'}
-function getNotes(name){return loadState().notes[name]||''}
-function getCallback(name){return loadState().callbacks[name]||null}
-
-// ── INIT ──
 async function init(){
-  // Load leads
   try{leads=await(await fetch('leads.json')).json()}catch(e){try{leads=await(await fetch('../leads.json')).json()}catch(e2){}}
   leads=leads.map(l=>({
     ...l,
@@ -227,322 +259,207 @@ async function init(){
     zip:l.zip||'',
     slug:(l.slug||(l.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')).substring(0,50)
   }));
-
-  // Import pre-populated status/notes from leads.json
-  let imported=false;
-  const d=loadState();
-  leads.forEach(l=>{
-    if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imported=true}
-  });
+  const d=loadState();let imported=false;
+  leads.forEach(l=>{if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imported=true}});
   if(imported){localStorage.setItem('ls',JSON.stringify(d.status));localStorage.setItem('ln',JSON.stringify(d.notes))}
-
-  setupVis(); renderAll();
+  setupVis();renderAll();
 }
 
-// ── RENDER ──
 function renderAll(){renderLeads();updateSummary()}
-
 function updateSummary(){
-  const d=loadState();
-  let c={all:leads.length,hot:0,sold:0,cb:0};
-  leads.forEach(l=>{
-    const s=d.status[l.name]||'new';
-    if(s==='hot')c.hot++;
-    if(s==='sold')c.sold++;
-    if(d.callbacks[l.name])c.cb++;
-  });
+  const d=loadState();let c={all:leads.length,hot:0,sold:0,cb:0};
+  leads.forEach(l=>{const s=d.status[l.name]||'new';if(s==='hot')c.hot++;if(s==='sold')c.sold++;if(d.callbacks[l.name])c.cb++});
   document.getElementById('summary').textContent=`${leads.length} leads · ${c.sold} sold · ${c.hot} hot · ${c.cb} cb`;
 }
 
-function siteUrl(l){
-  return 'https://cryptorich.github.io/applybot/sites/'+(l.slug||l.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''))+'/';
-}
-
 function renderLeads(){
-  const q=(document.getElementById('search')?.value||'').toLowerCase();
-  const d=loadState();
-  let f=[...leads];
-
-  // Search
+  const q=(document.getElementById('search')?.value||'').toLowerCase();const d=loadState();let f=[...leads];
   if(q)f=f.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q));
-
-  // Filter
   if(filter==='no-site')f=f.filter(l=>l.type==='NO_SITE');
   else if(filter==='callback')f=f.filter(l=>!!d.callbacks[l.name]);
   else if(['HVAC','Electrician','Plumber','Roofer'].includes(filter))f=f.filter(l=>l.category===filter);
-
-  // Sort: new first, then callbacks by date, then called, then rest
   f.sort((a,b)=>{
-    const sa=getStatus(a.name),sb=getStatus(b.name);
-    const ca=getCallback(a.name),cb=getCallback(b.name);
-    // Callbacks first (soonest first)
+    const ca=d.callbacks[a.name],cb=d.callbacks[b.name];
     if(ca&&cb)return new Date(ca)-new Date(cb);
-    if(ca)return -1;
-    if(cb)return 1;
-    // New leads first
+    if(ca)return -1;if(cb)return 1;
+    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
     if(sa==='new'&&sb!=='new')return -1;
     if(sb==='new'&&sa!=='new')return 1;
     return 0;
   });
-
   const lst=document.getElementById('leadList');
-  if(!f.length){lst.innerHTML='<div class="empty"><strong>No leads</strong><br>Try a different filter or add more leads</div>';return}
-
+  if(!f.length){lst.innerHTML='<div class="empty"><strong>No leads</strong><br>Try a different filter</div>';return}
   lst.innerHTML=f.map(l=>{
-    const st=getStatus(l.name);
-    const nt=getNotes(l.name);
-    const cb=getCallback(l.name);
+    const st=d.status[l.name]||'new',nt=d.notes[l.name]||'',cb=d.callbacks[l.name];
     const pf=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-
     let badges='';
     if(l.type==='NO_SITE')badges+='<span class="badge badge-nosite">NO SITE</span> ';
     else badges+='<span class="badge badge-fake">FAKE</span> ';
     if(st==='hot')badges+='<span class="badge badge-hot">HOT</span> ';
     if(st==='sold')badges+='<span class="badge badge-sold">SOLD</span> ';
     if(st==='dead')badges+='<span class="badge badge-dead">DEAD</span> ';
-
-    let noteLine='';
-    if(nt)noteLine=`<div class="lead-note">💬 ${nt.substring(0,60)}${nt.length>60?'…':''}</div>`;
-
-    let cbLine='';
-    if(cb){
-      const d=new Date(cb);
-      const now=new Date();
-      const diffDays=Math.ceil((d-now)/(1000*60*60*24));
-      const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const label=diffDays<=0?'Today':diffDays===1?'Tomorrow':diffDays<=7?dayNames[d.getDay()]:`${d.getMonth()+1}/${d.getDate()}`;
-      cbLine=`<span class="lead-cb">📅 Call ${label}</span> `;
-    }
-
-    return `<div class="lead-row status-${st}" onclick="tapLead('${l.name.replace(/'/g,"\\'")}')">
-      <div class="lead-info">
-        <div class="lead-name">${l.name}</div>
-        <div class="lead-meta">${cbLine}${l.category} · ${pf} ${badges}</div>
-        ${noteLine}
-      </div>
-      <div class="call-icon">📞</div>
-    </div>`;
+    let nl='';if(nt)nl=`<div class="lead-note">💬 ${nt.substring(0,60)}${nt.length>60?'…':''}</div>`;
+    let cbl='';if(cb){const dt=new Date(cb),now=new Date(),diff=Math.ceil((dt-now)/86400000);
+      const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const label=diff<=0?'Today':diff===1?'Tomorrow':diff<=7?dn[dt.getDay()]:`${dt.getMonth()+1}/${dt.getDate()}`;
+      cbl=`<span class="lead-cb">📅 Call ${label}</span> `;}
+    return `<div class="lead-row status-${st}" onclick="openDetail('${l.name.replace(/'/g,"\\'")}')">
+      <div class="lead-info"><div class="lead-name">${l.name}</div><div class="lead-meta">${cbl}${l.category} · ${pf} ${badges}</div>${nl}</div>
+      <div class="call-icon">📞</div></div>`;
   }).join('');
 }
 
-// ── ACTIONS ──
-function tapLead(name){
-  const l=leads.find(x=>x.name===name);
-  if(!l)return;
+// ── DETAIL PANEL ──
+function openDetail(name){
+  const l=leads.find(x=>x.name===name);if(!l)return;
   activeLead=l;
-  // Go straight to call
-  window.location.href='tel:+1'+l.phone;
+  document.getElementById('dName').textContent=l.name;
+  document.getElementById('dPhone').textContent=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+  document.getElementById('dCat').textContent=l.category+' · '+l.zip;
+  document.getElementById('dOpener').innerHTML=(l.opener||`Hey, is this <em>${l.name.split(' ')[0]}</em>? I'm Rick with <em>SiteLaunch</em> — I was looking for a <em>${l.category.toLowerCase()}</em> in the area and couldn't find a real website for your business. I actually went ahead and <em>built one</em>. Want me to text you the link?`);
+  document.getElementById('dSiteUrl').textContent=siteUrl(l);
+  document.getElementById('dCallBtn').href='tel:+1'+l.phone;
+
+  // Show existing notes
+  const nt=getNotes(l.name);
+  if(nt){document.getElementById('dNotesLabel').style.display='';document.getElementById('dNotes').style.display='';document.getElementById('dNotes').textContent=nt}
+  else{document.getElementById('dNotesLabel').style.display='none';document.getElementById('dNotes').style.display='none'}
+
+  // Show existing callback
+  const cb=getCallback(l.name);
+  if(cb){document.getElementById('dCbLabel').style.display='';document.getElementById('dCb').textContent='📅 '+new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+  else{document.getElementById('dCbLabel').style.display='none';document.getElementById('dCb').textContent=''}
+
+  document.getElementById('detailPanel').classList.add('on');
 }
 
-function nextCall(){
-  const d=loadState();
-  // Priority: callback due today → new → called
-  const today=new Date().toDateString();
-  let list=leads.filter(l=>{
-    const s=d.status[l.name]||'new';
-    if(s==='sold'||s==='dead')return false;
-    return true;
-  });
-  // Sort: callbacks first
-  list.sort((a,b)=>{
-    const ca=d.callbacks[a.name],cb=d.callbacks[b.name];
-    if(ca&&cb)return new Date(ca)-new Date(cb);
-    if(ca)return -1;
-    if(cb)return 1;
-    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
-    if(sa==='new'&&sb!=='new')return -1;
-    if(sb==='new'&&sa!=='new')return 1;
-    return 0;
-  });
-  if(!list.length){showToast('All leads contacted! 🎉');return}
-  tapLead(list[0].name);
+function closeDetail(){
+  document.getElementById('detailPanel').classList.remove('on');
+  activeLead=null;
+  renderAll();
 }
 
-function setFilter(f,btn){
-  filter=f;
-  document.querySelectorAll('.cat-row button').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  renderLeads();
+function copySiteLink(){
+  if(!activeLead)return;
+  navigator.clipboard.writeText(siteUrl(activeLead)).then(()=>showToast('Link copied! 📋'));
 }
+
+function quickAction(action){
+  if(!activeLead)return;
+  const map={voicemail:'called',dead:'dead',notinterested:'dead'};
+  const st=map[action]||'called';
+  saveStatus(activeLead.name,st);
+  const labels={voicemail:'📱 Left VM',dead:'☠️ Dead',notinterested:'🚫 Not interested'};
+  showToast(labels[action]||'✓ Saved');
+  closeDetail();
+  if(st==='dead'){setTimeout(nextCall,600)}
+}
+
+// ── CALL FLOW ──
+// Detail panel has the call button. User taps it → dials → return → result modal.
 
 // ── RESULT MODAL ──
-let selectedResult=null, selectedCallback=null;
+let selectedResult=null,selectedCallback=null;
 
 function showResultModal(){
   if(!activeLead)return;
   const l=activeLead;
   document.getElementById('modalTitle').textContent=`How'd it go with ${l.name.split(' ')[0]}?`;
   document.getElementById('modalSub').textContent=`${l.category} · ${l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')}`;
-
-  // Pre-fill note from localStorage
   document.getElementById('noteInput').value=getNotes(l.name)||'';
-
-  // Reset selections
-  selectedResult=null;
-  selectedCallback=null;
+  selectedResult=null;selectedCallback=null;
   document.querySelectorAll('.stat-btn').forEach(b=>b.style.outline='none');
   document.getElementById('cbPreview').style.display='none';
-
-  // Show existing callback if any
   const cb=getCallback(l.name);
-  if(cb){
-    selectedCallback=cb;
-    const d=new Date(cb);
-    document.getElementById('cbPreview').textContent=`Callback set: ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
-    document.getElementById('cbPreview').style.display='block';
-  }
-
+  if(cb){selectedCallback=cb;document.getElementById('cbPreview').textContent=`Callback set: ${new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;document.getElementById('cbPreview').style.display='block'}
+  document.getElementById('detailPanel').classList.remove('on');
   document.getElementById('resultModal').classList.add('on');
   document.getElementById('noteInput').focus();
 }
 
 function setResult(st){
-  selectedResult=st;
-  document.querySelectorAll('.stat-btn').forEach(b=>b.style.outline='none');
-  // Highlight selected
+  selectedResult=st;document.querySelectorAll('.stat-btn').forEach(b=>b.style.outline='none');
   const map={voicemail:0,interested:1,notinterested:2,sold:3};
-  if(map[st]!==undefined){
-    document.querySelectorAll('.stat-btn')[map[st]].style.outline='2px solid white';
-  }
+  if(map[st]!==undefined)document.querySelectorAll('.stat-btn')[map[st]].style.outline='2px solid white';
 }
 
 function insertChip(text){
   const ta=document.getElementById('noteInput');
-  const current=ta.value;
-  // Add comma if needed
-  const sep=current&&!current.endsWith(',')&&!current.endsWith(' ')&&current.length>0?', ':'';
-  ta.value=current+sep+text;
-  ta.focus();
-  saveDraftNotes();
+  const sep=ta.value&&!ta.value.endsWith(',')&&!ta.value.endsWith(' ')&&ta.value.length>0?', ':'';
+  ta.value=ta.value+sep+text;ta.focus();saveDraftNotes();
 }
 
 function setCallback(when){
-  const now=new Date();
-  let target=new Date(now);
-
-  if(when==='clear'){
-    selectedCallback=null;
-    document.getElementById('cbPreview').style.display='none';
-    return;
-  }
-
+  if(when==='clear'){selectedCallback=null;document.getElementById('cbPreview').style.display='none';return}
+  const now=new Date();let t=new Date(now);
   switch(when){
-    case 'tomorrow': target.setDate(target.getDate()+1); target.setHours(9,0,0,0); break;
-    case 'monday':
-      const daysUntilMonday=(8-now.getDay())%7||7;
-      target.setDate(target.getDate()+daysUntilMonday);
-      target.setHours(9,0,0,0);
-      break;
-    case '2days': target.setDate(target.getDate()+2); target.setHours(9,0,0,0); break;
-    case '3days': target.setDate(target.getDate()+3); target.setHours(9,0,0,0); break;
-    case '1week': target.setDate(target.getDate()+7); target.setHours(9,0,0,0); break;
+    case 'tomorrow':t.setDate(t.getDate()+1);t.setHours(9,0,0,0);break;
+    case 'monday':{const d=(8-now.getDay())%7||7;t.setDate(t.getDate()+d);t.setHours(9,0,0,0);break}
+    case '2days':t.setDate(t.getDate()+2);t.setHours(9,0,0,0);break;
+    case '3days':t.setDate(t.getDate()+3);t.setHours(9,0,0,0);break;
+    case '1week':t.setDate(t.getDate()+7);t.setHours(9,0,0,0);break;
   }
-
-  selectedCallback=target.toISOString();
-  document.getElementById('cbPreview').textContent=`Callback set: ${target.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+  selectedCallback=t.toISOString();
+  document.getElementById('cbPreview').textContent=`Callback set: ${t.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
   document.getElementById('cbPreview').style.display='block';
 }
 
-function saveDraftNotes(){
-  if(!activeLead)return;
-  saveNotes(activeLead.name, document.getElementById('noteInput').value);
-}
+function saveDraftNotes(){if(activeLead)saveNotes(activeLead.name,document.getElementById('noteInput').value)}
 
 function saveAndNext(){
   if(!activeLead)return;
-
   const notes=document.getElementById('noteInput').value.trim();
-
-  // If no result selected, default to 'called' (they called, that's something)
-  const result=selectedResult||'called';
-
-  // Map to our statuses
   const statusMap={voicemail:'called',interested:'hot',notinterested:'dead',sold:'sold',called:'called'};
-  const status=statusMap[result]||'called';
-
-  saveStatus(activeLead.name, status);
-  saveNotes(activeLead.name, notes);
-
-  if(selectedCallback){
-    saveCallback(activeLead.name, selectedCallback);
-  } else {
-    saveCallback(activeLead.name, null);
-  }
-
-  // If sold, show checklist
+  const status=statusMap[selectedResult||'called'];
+  saveStatus(activeLead.name,status);saveNotes(activeLead.name,notes);
+  selectedCallback?saveCallback(activeLead.name,selectedCallback):saveCallback(activeLead.name,null);
   if(status==='sold'){
     document.getElementById('resultModal').classList.remove('on');
-    const l=activeLead;
-    document.getElementById('checklistSub').textContent=`${l.name} · ${l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')}`;
+    document.getElementById('checklistSub').textContent=`${activeLead.name} · ${activeLead.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')}`;
     document.getElementById('checklistModal').classList.add('on');
-  } else {
-    document.getElementById('resultModal').classList.remove('on');
-  }
-
+  }else{document.getElementById('resultModal').classList.remove('on')}
   const labels={hot:'🔥 Hot!',sold:'💰 Sold!',called:'📱 Called',dead:'☠️ Dead'};
   showToast(labels[status]||'✓ Saved');
-
-  activeLead=null;
-  renderAll();
-
-  // Auto-advance after 1s
-  if(status==='dead'||status==='called'){
-    setTimeout(()=>{if(!activeLead)nextCall()},1000);
-  }
+  activeLead=null;renderAll();
+  if(status==='dead'||status==='called'){setTimeout(()=>{if(!activeLead)nextCall()},1000)}
 }
 
 function dismissModal(){
-  // Save notes even on dismiss
-  if(activeLead){
-    saveNotes(activeLead.name, document.getElementById('noteInput').value);
-    if(selectedCallback)saveCallback(activeLead.name,selectedCallback);
-    // Mark as called if never called
-    if(getStatus(activeLead.name)==='new')saveStatus(activeLead.name,'called');
-  }
-  document.getElementById('resultModal').classList.remove('on');
-  activeLead=null;
-  renderAll();
+  if(activeLead){saveNotes(activeLead.name,document.getElementById('noteInput').value);if(selectedCallback)saveCallback(activeLead.name,selectedCallback);if(getStatus(activeLead.name)==='new')saveStatus(activeLead.name,'called')}
+  document.getElementById('resultModal').classList.remove('on');activeLead=null;renderAll();
 }
 
-// ── VISIBILITY (auto-detect return from phone call) ──
+function nextCall(){
+  const d=loadState();
+  let list=leads.filter(l=>{const s=d.status[l.name]||'new';return s!=='sold'&&s!=='dead'});
+  list.sort((a,b)=>{
+    const ca=d.callbacks[a.name],cb=d.callbacks[b.name];
+    if(ca&&cb)return new Date(ca)-new Date(cb);
+    if(ca)return -1;if(cb)return 1;
+    return 0;
+  });
+  if(!list.length){showToast('All leads contacted! 🎉');return}
+  openDetail(list[0].name);
+}
+
+function setFilter(f,btn){filter=f;document.querySelectorAll('.cat-row button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderLeads()}
+
 function setupVis(){
-  // When user returns from phone app, show result modal
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden && activeLead){
-      setTimeout(()=>{
-        if(activeLead)showResultModal();
-      },400);
-    }
-  });
-
-  // Also handle pageshow (iOS Safari)
-  window.addEventListener('pageshow',(e)=>{
-    if(e.persisted && activeLead){
-      setTimeout(()=>{
-        if(activeLead)showResultModal();
-      },400);
-    }
-  });
-
+  // Auto-show result modal when returning from phone call
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&activeLead)setTimeout(()=>{if(activeLead)showResultModal()},400)});
+  window.addEventListener('pageshow',e=>{if(e.persisted&&activeLead)setTimeout(()=>{if(activeLead)showResultModal()},400)});
   // Close modals on backdrop tap
-  document.getElementById('resultModal').addEventListener('click',function(e){
-    if(e.target===this)dismissModal();
+  document.getElementById('detailPanel').addEventListener('click',function(e){if(e.target===this)closeDetail()});
+  document.getElementById('resultModal').addEventListener('click',function(e){if(e.target===this)dismissModal()});
+  document.getElementById('checklistModal').addEventListener('click',function(e){if(e.target===this){this.classList.remove('on');renderAll()}});
+  // The call button in detail panel — track that we're about to call
+  document.getElementById('dCallBtn').addEventListener('click',function(){
+    // activeLead is already set by openDetail. The browser will navigate to tel: link.
+    // visibilitychange will fire when user returns.
   });
-  document.getElementById('checklistModal').addEventListener('click',function(e){
-    if(e.target===this){this.classList.remove('on');renderAll()}
-  });
-
-  // Save notes on any input change
-  document.getElementById('noteInput').addEventListener('input',saveDraftNotes);
 }
 
-function showToast(m){
-  const t=document.getElementById('toast');
-  t.textContent=m;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),1500);
-}
-
-// ── BOOT ──
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
 document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
