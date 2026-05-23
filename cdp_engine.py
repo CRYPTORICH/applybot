@@ -3,6 +3,7 @@ ApplyBot CDP Engine — Real Chrome DevTools Protocol automation for LinkedIn Ea
 Connects to Chrome via remote debugging (port 9224).
 """
 import json, time, re, logging, urllib.request, socket, ssl, uuid
+from pathlib import Path
 
 CDP_HOST = "localhost"
 CDP_PORT = 9224
@@ -151,6 +152,49 @@ class CDPClient:
             "expression": expression,
             "returnByValue": True
         })
+    
+    def upload_file(self, selector: str, file_path: str) -> bool:
+        """
+        Upload a file to a file input element using CDP.
+        S5 Gevurah: this was the missing piece — resume uploads were broken.
+        
+        Uses DOM.querySelector to find the element, then DOM.setFileInputFiles.
+        """
+        # Enable DOM domain
+        self.send("DOM.enable")
+        
+        # Get the document root
+        doc = self.send("DOM.getDocument", {"depth": 0})
+        root_node_id = doc.get("root", {}).get("nodeId")
+        if not root_node_id:
+            log.warning("[cdp] upload_file: no root node")
+            return False
+        
+        # Find the file input element
+        try:
+            result = self.send("DOM.querySelector", {
+                "nodeId": root_node_id,
+                "selector": selector
+            })
+            node_id = result.get("nodeId")
+            if not node_id or node_id == 0:
+                log.warning(f"[cdp] upload_file: file input not found for '{selector}'")
+                return False
+        except Exception as e:
+            log.warning(f"[cdp] upload_file: querySelector failed: {e}")
+            return False
+        
+        # Set the file
+        try:
+            self.send("DOM.setFileInputFiles", {
+                "files": [file_path],
+                "nodeId": node_id
+            })
+            log.info(f"[cdp] ✓ File uploaded: {file_path}")
+            return True
+        except Exception as e:
+            log.warning(f"[cdp] upload_file: setFileInputFiles failed: {e}")
+            return False
     
     def close(self):
         if self.sock:
@@ -488,7 +532,31 @@ def apply_to_job(client: CDPClient, job: dict, user_data: dict) -> dict:
         """
         
         fill_result = client.evaluate(fill_js)
-        log.info(f"  Filled: {fill_result.get('result', {}).get('value', {}).get('filled', [])}")
+        filled_fields = fill_result.get('result', {}).get('value', {}).get('filled', [])
+        log.info(f"  Filled: {filled_fields}")
+        
+        # ── RESUME UPLOAD (S5 Gevurah: was broken) ──
+        if 'resume-upload-available' in filled_fields:
+            resume_path = user_data.get("resume_path", "")
+            if resume_path and Path(resume_path).exists():
+                log.info(f"  Uploading resume: {resume_path}")
+                # Try multiple file input selectors
+                file_selectors = [
+                    '.jobs-easy-apply-modal input[type="file"]',
+                    'input[type="file"]',
+                ]
+                uploaded = False
+                for fsel in file_selectors:
+                    if client.upload_file(fsel, resume_path):
+                        uploaded = True
+                        break
+                if uploaded:
+                    log.info(f"  ✓ Resume uploaded successfully")
+                    filled_fields.append('resume-uploaded')
+                else:
+                    log.warning(f"  ✗ Resume upload failed — continuing without resume")
+            else:
+                log.warning(f"  Resume input detected but no valid file at {resume_path}")
         
         # Click Next/Review/Submit with fallbacks
         clicked_btn = client.evaluate("""

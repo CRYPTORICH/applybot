@@ -94,7 +94,9 @@ def _persist_user(user_row):
         json.dump(data, f, default=str)
 
 def _restore_users():
-    """Restore users from JSON backups after disk wipe."""
+    """Restore users from JSON backups after disk wipe.
+    S9 Yesod: if JSON backups are also gone (Render ephemeral disk), 
+    fall back to Stripe API to reconstruct from payment history."""
     count = 0
     for f in PERSIST_DIR.glob("user_*.json"):
         try:
@@ -114,11 +116,37 @@ def _restore_users():
                 db.close()
                 count += 1
         except: pass
+    
+    # S9: If nothing restored, try Stripe as ultimate source of truth
+    if count == 0 and STRIPE_SECRET:
+        try:
+            sessions = stripe.checkout.Session.list(limit=100, status="complete")
+            for session in sessions.auto_paging_iter():
+                meta = session.get("metadata", {})
+                user_id = meta.get("user_id")
+                tokens = int(meta.get("tokens", 0))
+                email = session.get("customer_details", {}).get("email", "")
+                name = session.get("customer_details", {}).get("name", "")
+                if user_id and tokens:
+                    db = get_db()
+                    db.execute("""INSERT OR REPLACE INTO users 
+                        (id, email, name, tokens) VALUES (?, ?, ?, ?)""",
+                        (user_id, email, name, tokens))
+                    # Also persist to JSON for future restores
+                    user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+                    if user:
+                        _persist_user(user)
+                    db.commit()
+                    db.close()
+                    count += 1
+        except Exception as e:
+            logging.warning(f"Stripe fallback restore failed: {e}")
+    
     return count
 
 _restored = _restore_users()
 if _restored:
-    logging.info(f"Restored {_restored} users from persistent JSON backup")
+    logging.info(f"Restored {_restored} users from persistent backup (JSON + Stripe fallback)")
 
 # === FLASK APP ===
 app = Flask(__name__)
