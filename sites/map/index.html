@@ -112,7 +112,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 <!-- Bottom bar -->
 <div class="bottom-bar">
   <button class="btn-scan" onclick="scanArea()">🔍 Scan Area</button>
-  <button class="btn-crm" onclick="window.open('crm/','_blank')">📞 CRM</button>
+  <button class="btn-crm" onclick="window.open('sites/crm/','_blank')">📞 CRM</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -178,7 +178,7 @@ Object.keys(ICONS).forEach(k=>{
 // ── INIT ──
 async function init(){
   // Load existing leads
-  try{leads=await(await fetch('leads.json')).json()}catch(e){try{leads=await(await fetch('../leads.json')).json()}catch(e2){leads=[]}}
+  try{leads=await(await fetch('sites/leads.json')).json()}catch(e){try{leads=await(await fetch('../sites/leads.json')).json()}catch(e2){leads=[]}}
   plotLeads();
   updateStats();
 }

@@ -2,423 +2,398 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ApplyBot — We Submit Job Applications For You</title>
-<script src="https://js.stripe.com/v3/"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ApplyBot — Find Opportunity</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
+:root{--bg:#080808;--accent:#00e676;--hot:#ffab00;--dead:#ff1744;--sold:#2979ff;--discover:#7c4dff;--text:#fff;--sub:#999;--surface:#1a1a1a}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#fff;color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
+html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
 
-header{border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto}
-header .logo{font-weight:800;font-size:1.2rem;color:#1a1a2e;text-decoration:none}
-header nav a{color:#6b7280;text-decoration:none;margin-left:24px;font-size:.9rem;font-weight:500}
-header nav a:hover{color:#1a1a2e}
+#map{width:100%;height:100%;z-index:1}
+.leaflet-control-zoom{display:none}
 
-.hero{text-align:center;padding:60px 20px 40px;max-width:650px;margin:0 auto}
-.hero h1{font-size:2.2rem;font-weight:800;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2}
-.hero p{font-size:1.05rem;color:#6b7280;margin-bottom:0}
+/* Top bar overlay */
+.top-overlay{position:fixed;top:0;left:0;right:0;z-index:1000;padding:6px 8px;pointer-events:none}
+.top-overlay>*{pointer-events:auto}
+.top-row{display:flex;gap:6px;align-items:center;margin-bottom:4px}
+.top-row h1{font-size:14px;color:var(--text);text-shadow:0 1px 3px rgba(0,0,0,.8);flex:1}
+.top-row button{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:20px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.top-row button.scanning{background:var(--hot);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-/* SEARCH BAR - the centerpiece */
-.search-section{padding:0 20px 40px;max-width:850px;margin:0 auto}
-.search-box{background:#fafafa;border:1px solid #e5e7eb;border-radius:12px;padding:24px}
-.search-row{display:flex;gap:10px;flex-wrap:wrap}
-.search-row input,.search-row select{flex:1;min-width:180px;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;font-family:inherit;background:#fff}
-.search-row button{padding:12px 28px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;white-space:nowrap}
-.search-row button:hover{background:#333}
-.search-row button:disabled{opacity:.6;cursor:default}
+/* Stats badge */
+.stats-badge{display:inline-flex;gap:6px;background:rgba(0,0,0,.85);border-radius:16px;padding:6px 10px;font-size:10px;color:var(--sub);backdrop-filter:blur(10px)}
+.stats-badge span{font-weight:700}
+.stats-badge .red{color:var(--dead)}
+.stats-badge .yellow{color:var(--hot)}
+.stats-badge .green{color:var(--accent)}
+.stats-badge .blue{color:var(--discover)}
 
-/* Results area */
-.results{margin-top:24px;display:none}
-.results.active{display:block}
-.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.result-count{font-size:1.4rem;font-weight:700;color:#059669}
-.result-count span{color:#6b7280;font-weight:400;font-size:.9rem}
-.result-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
-.badge-high{background:#ecfdf5;color:#059669}
-.badge-steady{background:#fffbeb;color:#d97706}
-.job-list{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
-.job-item{display:grid;grid-template-columns:2fr 1fr 1fr;padding:14px 18px;border-bottom:1px solid #f3f4f6;align-items:center;font-size:.85rem}
-.job-item:last-child{border-bottom:none}
-.job-item .title{font-weight:600}
-.job-item .company{color:#6b7280}
-.job-item .source{color:#9ca3af;font-size:.8rem}
-.job-item .salary{color:#059669;font-weight:600;font-size:.8rem}
-.govt-badge{display:inline-block;background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600;margin-left:6px}
-.no-results{text-align:center;padding:40px;color:#9ca3af}
+/* Category chips */
+.cat-chips{display:flex;gap:4px;flex-wrap:wrap}
+.cat-chips button{background:rgba(0,0,0,.8);color:var(--sub);border:1px solid rgba(255,255,255,.15);padding:4px 10px;border-radius:14px;font-size:10px;cursor:pointer;backdrop-filter:blur(10px)}
+.cat-chips button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
 
-/* Quick picks */
-.quick-picks{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.quick-pick{display:inline-block;padding:6px 14px;border:1px solid #e5e7eb;border-radius:20px;font-size:.8rem;color:#6b7280;cursor:pointer;background:#fff;transition:all .2s}
-.quick-pick:hover{border-color:#1a1a2e;color:#1a1a2e}
+/* Bottom bar */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:1000;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));display:flex;gap:8px}
+.bottom-bar button{flex:1;padding:12px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.btn-scan{background:var(--discover);color:#fff}
+.btn-reset{background:rgba(0,0,0,.8);color:var(--text);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px)}
+.btn-crm{background:var(--accent);color:#000}
 
-section{padding:50px 20px;max-width:900px;margin:0 auto}
-h2{font-size:1.5rem;text-align:center;margin-bottom:10px;color:#111}
-.section-sub{text-align:center;color:#6b7280;margin-bottom:36px;font-size:.9rem}
+/* Popup styles */
+.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:10px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.leaflet-popup-content{margin:10px 12px;font-size:12px;line-height:1.5}
+.leaflet-popup-tip{background:var(--surface)}
+.popup-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.popup-meta{font-size:10px;color:var(--sub);margin-bottom:4px}
+.popup-actions{display:flex;gap:4px;margin-top:6px}
+.popup-actions a,.popup-actions button{flex:1;text-align:center;padding:6px 8px;border-radius:8px;font-size:10px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+.popup-call{background:var(--accent);color:#000}
+.popup-copy{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+.popup-add{background:var(--discover);color:#fff}
 
-/* Pricing */
-.pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.plan{border:1px solid #e5e7eb;border-radius:10px;padding:26px 18px;text-align:center;transition:box-shadow .2s;position:relative}
-.plan:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.plan.popular{border-color:#1a1a2e;border-width:2px;padding:24px 16px}
-.plan.popular::before{content:'Most Popular';display:block;font-size:.6rem;font-weight:700;color:#1a1a2e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.plan .name{font-size:.85rem;font-weight:700;margin-bottom:4px}
-.plan .price{font-size:1.8rem;font-weight:800;margin:6px 0}
-.plan .apps{color:#059669;font-weight:600;margin-bottom:14px;font-size:.8rem}
-.plan button{width:100%;padding:10px;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;border:1px solid #1a1a2e;background:#fff;color:#1a1a2e}
-.plan.popular button{background:#1a1a2e;color:#fff}
-.plan button:hover:not(:disabled){background:#1a1a2e;color:#fff}
-.plan button:disabled{opacity:.5}
-.plan .per{color:#9ca3af;font-size:.7rem;margin-top:5px}
-.pricing-note{text-align:center;color:#9ca3af;font-size:.75rem}
+/* Marker legend */
+.legend{position:fixed;right:8px;top:50%;transform:translateY(-50%);z-index:1000;display:flex;flex-direction:column;gap:3px}
+.legend-item{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.75);padding:4px 8px;border-radius:10px;font-size:8px;color:var(--sub);backdrop-filter:blur(10px)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
-/* How it works */
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.how .step{text-align:center}
-.how .step .num{width:36px;height:36px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-weight:700;font-size:1rem}
-.how .step h3{font-size:.95rem;margin-bottom:6px}
-.how .step p{color:#6b7280;font-size:.8rem;line-height:1.5}
+/* Toast */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:6px 16px;border-radius:16px;font-weight:700;font-size:11px;z-index:2000;opacity:0;transition:opacity .15s;pointer-events:none}
+.toast.show{opacity:1}
 
-.compare{overflow-x:auto;margin-bottom:36px}
-.compare table{width:100%;border-collapse:collapse;font-size:.8rem}
-.compare td,.compare th{padding:10px 12px;text-align:center;border-bottom:1px solid #f3f4f6}
-.compare th{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#fafafa}
-.compare td:first-child{text-align:left;font-weight:500;color:#111}
-.compare .us{color:#059669;font-weight:700}
-.compare .yes{color:#059669}
-.compare .no{color:#d1d5db}
-
-.faq{max-width:600px;margin:0 auto}
-.faq dt{font-weight:600;margin-top:18px;font-size:.85rem}
-.faq dd{color:#6b7280;font-size:.8rem;margin-top:4px;margin-left:0}
-
-.disclaimer{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-top:28px;font-size:.75rem;color:#6b7280;line-height:1.6}
-.disclaimer strong{color:#333}
-
-.trust{display:flex;justify-content:center;gap:36px;padding:16px;color:#9ca3af;font-size:.75rem;border-top:1px solid #f3f4f6;margin-top:48px;flex-wrap:wrap}
-
-.footer{text-align:center;padding:28px 20px;color:#9ca3af;font-size:.7rem}
-.footer a{color:#1a1a2e;text-decoration:underline}
-.footer .links{display:flex;justify-content:center;gap:16px;margin-bottom:8px}
-
-/* Resume builder modal */
-.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto}
-.modal-overlay.active{display:flex}
-.modal{background:#fff;border-radius:12px;padding:32px;max-width:600px;width:100%;margin:40px 0}
-.modal h2{margin-bottom:20px;text-align:left}
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-weight:600;font-size:.85rem;margin-bottom:5px}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.9rem;font-family:inherit}
-.form-group textarea{min-height:80px;resize:vertical}
-.modal .btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-.modal .btn{ padding:10px 24px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;border:none}
-.modal .btn-primary{background:#1a1a2e;color:#fff}
-.modal .btn-secondary{background:#f3f4f6;color:#1a1a2e;border:1px solid #e5e7eb}
-.skills-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.skill-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#f3f4f6;border-radius:20px;font-size:.8rem;cursor:pointer}
-.skill-pill.selected{background:#1a1a2e;color:#fff}
-.skill-pill .remove{font-size:.7rem;cursor:pointer;opacity:.5}
-
-@media(max-width:768px){
-.hero h1{font-size:1.6rem}
-.pricing{grid-template-columns:1fr 1fr}
-.how{grid-template-columns:1fr}
-.search-row input,.search-row select{min-width:100%}
-.trust{gap:16px}
-}
+/* Mobile zoom buttons */
+.zoom-btns{position:fixed;right:8px;bottom:120px;z-index:1000;display:flex;flex-direction:column;gap:4px}
+.zoom-btns button{width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.8);color:var(--text);font-size:20px;cursor:pointer;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
 
-<header>
-<a href="/" class="logo">ApplyBot</a>
-<nav>
-<a href="#search">Search Jobs</a>
-<a href="#pricing">Pricing</a>
-<a href="#faq">FAQ</a>
-</nav>
-</header>
+<div id="map"></div>
 
-<div class="hero">
-<h1>See available jobs first.<br>Then decide if you want us to apply.</h1>
-<p>Search real listings from LinkedIn, Indeed, and company sites. No payment required to browse.</p>
-</div>
-
-<!-- ====== JOB SEARCH ====== -->
-<div class="search-section" id="search">
-<div class="search-box">
-<div class="search-row">
-<input type="text" id="keywords" placeholder="Job title (e.g. IT Support, Nurse, Warehouse)" onkeydown="if(event.key==='Enter')doSearch()">
-<select id="category">
-<option value="">All categories</option>
-<option value="it-support">IT Support & Help Desk</option>
-<option value="software-dev">Software Development</option>
-<option value="healthcare">Healthcare & Nursing</option>
-<option value="retail">Retail & Customer Service</option>
-<option value="warehouse">Warehouse & Logistics</option>
-<option value="admin">Administrative & Office</option>
-<option value="finance">Finance & Banking</option>
-<option value="construction">Construction & Trades</option>
-<option value="education">Education & Teaching</option>
-<option value="remote">Remote / Work From Home</option>
-<option value="sales">Sales & Business Development</option>
-<option value="manufacturing">Manufacturing & Production</option>
-</select>
-<input type="text" id="location" placeholder="City or 'Remote'" value="Remote" list="city-list" autocomplete="off">
-<datalist id="city-list">
-<option value="Remote">
-<option value="New York, NY">
-<option value="Los Angeles, CA">
-<option value="Chicago, IL">
-<option value="Houston, TX">
-<option value="Phoenix, AZ">
-<option value="Philadelphia, PA">
-<option value="San Antonio, TX">
-<option value="San Diego, CA">
-<option value="Dallas, TX">
-<option value="Austin, TX">
-<option value="Miami, FL">
-<option value="Atlanta, GA">
-<option value="Boston, MA">
-<option value="Seattle, WA">
-<option value="Denver, CO">
-<option value="Orlando, FL">
-<option value="Tampa, FL">
-<option value="Charlotte, NC">
-<option value="Nashville, TN">
-<option value="Portland, OR">
-<option value="Las Vegas, NV">
-<option value="Minneapolis, MN">
-<option value="Detroit, MI">
-<option value="Columbus, OH">
-</datalist>
-<button onclick="doSearch()" id="searchBtn">🔍 Search</button>
-</div>
-<div class="quick-picks">
-<span style="color:#9ca3af;font-size:.75rem;display:flex;align-items:center">Popular:</span>
-<button class="quick-pick" onclick="quickSearch('IT Support','Remote','it-support')">IT Support</button>
-<button class="quick-pick" onclick="quickSearch('Nurse','','healthcare')">Nursing</button>
-<button class="quick-pick" onclick="quickSearch('Warehouse','','warehouse')">Warehouse</button>
-<button class="quick-pick" onclick="quickSearch('','','remote')">Remote Jobs</button>
-<button class="quick-pick" onclick="quickSearch('','','software-dev')">Developer</button>
-<button class="quick-pick" onclick="quickSearch('Driver','','')">Driver</button>
-</div>
+<!-- Top overlay -->
+<div class="top-overlay">
+  <div class="top-row">
+    <h1>🗺️ ApplyBot</h1>
+    <button id="scanBtn" onclick="scanArea()">🔍 Scan Area</button>
+  </div>
+  <div class="stats-badge" id="statsBadge">
+    <span class="red" id="statRed">0</span> no site
+    <span class="yellow" id="statYellow">0</span> fake
+    <span class="green" id="statGreen">0</span> real
+    <span class="blue" id="statBlue">0</span> new
+  </div>
+  <div class="cat-chips" style="margin-top:4px">
+    <button class="on" onclick="setCat('all',this)">All</button>
+    <button onclick="setCat('HVAC',this)">HVAC</button>
+    <button onclick="setCat('Electrician',this)">Elec</button>
+    <button onclick="setCat('Plumber',this)">Plumb</button>
+    <button onclick="setCat('Roofer',this)">Roof</button>
+    <button onclick="setCat('discovered',this)">🆕 New</button>
+  </div>
 </div>
 
-<div class="results" id="results">
-<div class="result-header">
-<div class="result-count" id="resultCount"></div>
-<div class="result-badge" id="resultBadge" style="display:none"></div>
-</div>
-<div class="job-list" id="jobList"></div>
-<div style="text-align:center;margin-top:20px">
-<p style="color:#6b7280;font-size:.85rem;margin-bottom:10px">Want us to apply to these for you?</p>
-<a href="#pricing" class="btn" style="display:inline-block;padding:12px 32px;background:#1a1a2e;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:.9rem">Get Started →</a>
-</div>
-</div>
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--dead)"></div>No site</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--hot)"></div>Fake site</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Real site</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--discover)"></div>Discovered</div>
 </div>
 
-<!-- ====== PRICING ====== -->
-<section id="pricing">
-<h2>Simple Pricing</h2>
-<p class="section-sub">Pay once. No subscription. We apply. You get confirmations.</p>
-<div class="pricing">
-<div class="plan">
-<div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div>
-<button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div>
-</div>
-<div class="plan popular">
-<div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div>
-<button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div>
-</div>
-<div class="plan">
-<div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div>
-<button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div>
-</div>
-<div class="plan">
-<div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div>
-<button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div>
-</div>
-</div>
-<p class="pricing-note">All payments processed securely through Stripe. No refunds — you're paying for the application submission service.</p>
-</section>
-
-<section>
-<h2>How It Works</h2>
-<div class="how">
-<div class="step"><div class="num">1</div><h3>Search & Browse</h3><p>Find jobs in your field. See real listings and counts before committing.</p></div>
-<div class="step"><div class="num">2</div><h3>We Apply</h3><p>We submit applications to matching jobs using your resume and preferences.</p></div>
-<div class="step"><div class="num">3</div><h3>Email Confirmations</h3><p>Every application comes with an email — job title, company, listing link.</p></div>
-</div>
-</section>
-
-<section>
-<h2>What You Get</h2>
-<div class="compare">
-<table>
-<tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
-<tr><td>Browse jobs before paying</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-<tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-<tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-<tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-<tr><td>Price</td><td class="us">$5 – $79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr>
-</table>
-</div>
-</section>
-
-<section id="faq">
-<h2>FAQ</h2>
-<div class="faq">
-<dl>
-<dt>Where do the job listings come from?</dt>
-<dd>All listings are from publicly available sources — LinkedIn, Indeed, ZipRecruiter, USAJobs, and company career pages. Counts are based on real market data from BLS and job board APIs.</dd>
-<dt>How do I know you actually applied?</dt>
-<dd>You receive an email confirmation for every application, including job title, company, and link.</dd>
-<dt>Do you guarantee I'll get a job?</dt>
-<dd>No. We guarantee we submit the number of applications you purchased. Hiring decisions are made by employers.</dd>
-<dt>Can I get a refund?</dt>
-<dd>All sales are final. You're paying us to submit applications. If a technical issue prevents delivery, contact us.</dd>
-<dt>Do I need a resume?</dt>
-<dd>Nope. We have a built-in resume builder — just fill out your experience and we'll format it professionally.</dd>
-</dl>
-</div>
-<div class="disclaimer">
-<strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs. We do not guarantee interviews, job offers, or employment. Not affiliated with LinkedIn, Indeed, or any employer. Your data is used only to complete your purchased applications.
-</div>
-</section>
-
-<div class="trust">
-<span>🔒 Stripe Secure Payments</span>
-<span>📧 Email Confirmations</span>
-<span>📊 Public Job Data</span>
-<span>🚫 No Subscription</span>
-<span>📝 Resume Builder Included</span>
+<!-- Zoom buttons -->
+<div class="zoom-btns">
+  <button onclick="map.zoomIn()">+</button>
+  <button onclick="map.zoomOut()">−</button>
+  <button onclick="map.locate({setView:true,maxZoom:15})" style="font-size:12px">📍</button>
 </div>
 
-<div class="footer">
-<div class="links">
-<a href="#search">Search Jobs</a>
-<a href="#pricing">Pricing</a>
-<a href="#faq">FAQ</a>
-<a href="mailto:support@applybot.ai">Contact</a>
-</div>
-<p>ApplyBot · <a href="mailto:support@applybot.ai">support@applybot.ai</a></p>
-<p style="margin-top:4px">Not affiliated with LinkedIn, Indeed, or any employer.</p>
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <button class="btn-scan" onclick="scanArea()">🔍 Scan Area</button>
+  <button class="btn-crm" onclick="window.open('sites/crm/','_blank')">📞 CRM</button>
 </div>
 
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const API_BASE = 'https://applybot-yavz.onrender.com';
-const STRIPE_KEY = 'pk_live_51TYESzD1aBoWX0M19exk9T9mW445oT7y3dD5Kw1dtzTvFDwyrn2n975MMNyX1bILyH5csrLyIPhoEOQdjVRiPfXC008wKCTtB5';
-const stripe = Stripe(STRIPE_KEY);
+// ── STATE ──
+let leads=[], markers=[], discoveredMarkers=[], activeCat='all', scanning=false;
 
-// === JOB SEARCH ===
-async function doSearch() {
-    const keywords = document.getElementById('keywords').value;
-    const category = document.getElementById('category').value;
-    const location = document.getElementById('location').value;
-    const btn = document.getElementById('searchBtn');
-    const results = document.getElementById('results');
-    
-    if (!keywords && !category && !location) {
-        document.getElementById('keywords').focus();
-        return;
-    }
-    
-    btn.textContent = 'Searching...';
-    btn.disabled = true;
-    
-    try {
-        const params = new URLSearchParams();
-        if (keywords) params.set('keywords', keywords);
-        if (category) params.set('category', category);
-        if (location) params.set('location', location);
-        
-        const resp = await fetch(API_BASE + '/api/job-search?' + params.toString());
-        const data = await resp.json();
-        
-        if (data.error) {
-            results.innerHTML = '<div class="no-results">No results found. Try different keywords.</div>';
-        } else {
-            // Count
-            document.getElementById('resultCount').innerHTML = 
-                data.total_estimated.toLocaleString() + ' <span>jobs available</span>';
-            
-            // Badge
-            const badge = document.getElementById('resultBadge');
-            if (data.growth_trend === 'Very High' || data.growth_trend === 'High') {
-                badge.className = 'result-badge badge-high';
-                badge.textContent = '🔥 ' + data.growth_trend + ' Growth';
-                badge.style.display = 'inline-block';
-            } else if (data.growth_trend === 'Steady') {
-                badge.className = 'result-badge badge-steady';
-                badge.textContent = '📊 ' + data.growth_trend;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
-            }
-            
-            // Government jobs first
-            let html = '';
-            if (data.government_jobs && data.government_jobs.length > 0) {
-                for (const job of data.government_jobs) {
-                    html += `<div class="job-item">
-                        <span class="title">${job.title} <span class="govt-badge">🇺🇸 Gov</span></span>
-                        <span class="company">${job.company}</span>
-                        <span class="source">USAJobs.gov</span>
-                    </div>`;
-                }
-            }
-            
-            // Private sector preview
-            for (const job of data.preview_jobs || []) {
-                html += `<div class="job-item">
-                    <span class="title">${job.title}</span>
-                    <span class="company">${job.company}${job.estimated_salary ? '<br><span class="salary">'+job.estimated_salary+'</span>' : ''}</span>
-                    <span class="source">${job.source} · ${job.posted}</span>
-                </div>`;
-            }
-            
-            document.getElementById('jobList').innerHTML = html;
-        }
-        
-        results.classList.add('active');
-        results.scrollIntoView({behavior:'smooth',block:'center'});
-    } catch(e) {
-        results.innerHTML = '<div class="no-results">Search unavailable right now. Try again in a moment.</div>';
-        results.classList.add('active');
-    }
-    
-    btn.textContent = '🔍 Search';
-    btn.disabled = false;
+// Zip centroids with jitter ranges
+const ZIP_COORDS={
+  '19805':[39.745,-75.548],
+  '19720':[39.675,-75.605],
+  '21921':[39.610,-75.835],
+  '19804':[39.718,-75.528],
+  '19801':[39.737,-75.547],
+  '19802':[39.752,-75.532],
+  '19803':[39.776,-75.524],
+  '19806':[39.762,-75.565],
+  '19807':[39.772,-75.590],
+  '19808':[39.738,-75.650],
+  '19809':[39.766,-75.510],
+  '19810':[39.820,-75.528],
+  '19701':[39.664,-75.710],
+  '19702':[39.653,-75.750],
+  '19703':[39.712,-75.530],
+  '19709':[39.488,-75.716],
+  '19711':[39.702,-75.721],
+  '19713':[39.675,-75.735],
+  '21901':[39.583,-75.891],
+  '21911':[39.704,-75.924],
+  '21912':[39.533,-75.791],
+  '21913':[39.525,-75.870],
+  '21914':[39.556,-75.886],
+  '21915':[39.546,-75.830],
+  '21917':[39.658,-75.811],
+  '21918':[39.634,-75.788],
+  '21919':[39.427,-75.832],
+  '21920':[39.593,-75.870],
+  '21930':[39.462,-75.867]
+};
+const DEFAULT_COORDS=[39.746,-75.547]; // Wilmington
+
+// ── MAP ──
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.5,-75.8],9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OSM'}).addTo(map);
+
+// ── MARKER ICONS ──
+function mkIcon(color){return L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:'+color+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,8]})}
+
+const ICONS={
+  nosite:mkIcon('var(--dead)'),
+  fake:mkIcon('var(--hot)'),
+  real:mkIcon('var(--accent)'),
+  discovered:mkIcon('var(--discover)')
+};
+// Fix colors for inline style
+Object.keys(ICONS).forEach(k=>{
+  const c={nosite:'#ff1744',fake:'#ffab00',real:'#00e676',discovered:'#7c4dff'}[k];
+  ICONS[k]=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:'+c+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,8]});
+});
+
+// ── INIT ──
+async function init(){
+  // Load existing leads
+  try{leads=await(await fetch('sites/leads.json')).json()}catch(e){try{leads=await(await fetch('../sites/leads.json')).json()}catch(e2){leads=[]}}
+  plotLeads();
+  updateStats();
 }
 
-function quickSearch(keywords, location, category) {
-    document.getElementById('keywords').value = keywords;
-    document.getElementById('location').value = location || 'Remote';
-    document.getElementById('category').value = category || '';
-    doSearch();
+function getCoords(lead){
+  const zc=ZIP_COORDS[lead.zip]||DEFAULT_COORDS;
+  // Add jitter so markers don't stack
+  const jlat=(Math.random()-0.5)*0.02;
+  const jlng=(Math.random()-0.5)*0.02;
+  return [zc[0]+jlat,zc[1]+jlng];
 }
 
-// === STRIPE CHECKOUT ===
-async function checkout(plan) {
-    const btn = event.target;
-    const original = btn.textContent;
-    btn.textContent = 'Loading...';
-    btn.disabled = true;
-    try {
-        const resp = await fetch(API_BASE + '/api/create-checkout', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({plan})
-        });
-        if (!resp.ok) throw new Error('Server error');
-        const {sessionId} = await resp.json();
-        stripe.redirectToCheckout({sessionId});
-    } catch(e) {
-        btn.textContent = 'Try Again';
-        btn.disabled = false;
-        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
-    }
+function leadMarker(lead){
+  const type=lead.no_site?'nosite':'fake';
+  const coords=getCoords(lead);
+  const cat=lead.category||lead.cat||'Unknown';
+  const phone=(lead.phone||'').replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+  const slug=lead.slug||(lead.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,50);
+  const siteUrl='https://cryptorich.github.io/applybot/sites/'+slug+'/';
+  const opener=lead.opener||'Hey, I built a website for your '+cat.toLowerCase()+' business. Want me to text you the link?';
+
+  const popup='<div class="popup-name">'+escHtml(lead.name)+'</div>'+
+    '<div class="popup-meta">'+escHtml(cat)+' · '+escHtml(phone)+' · '+escHtml(lead.zip||'')+'</div>'+
+    '<div class="popup-meta" style="color:'+(type==='nosite'?'var(--dead)':'var(--hot)')+'">'+(type==='nosite'?'⚠ NO WEBSITE':'⚠ FAKE SITE')+'</div>'+
+    '<div class="popup-actions">'+
+      '<a class="popup-call" href="tel:+1'+(lead.phone||'')+'">📞 Call</a>'+
+      '<button class="popup-copy" onclick="copyText(\''+escJs(siteUrl)+'\')">📋 Copy</button>'+
+    '</div>';
+
+  const m=L.marker(coords,{icon:ICONS[type]}).bindPopup(popup,{maxWidth:260});
+  m._leadData=lead;
+  m._leadType=type;
+  return m;
 }
+
+function plotLeads(){
+  clearMarkers();
+  let filtered=activeCat==='all'||activeCat==='discovered'?leads:leads.filter(l=>(l.category||l.cat||'')===activeCat);
+  if(activeCat==='discovered')filtered=[];
+  filtered.forEach(l=>{
+    const m=leadMarker(l);
+    m.addTo(map);
+    markers.push(m);
+  });
+}
+
+function clearMarkers(){
+  markers.forEach(m=>m.remove());
+  markers=[];
+}
+
+// ── SCAN AREA ──
+async function scanArea(){
+  if(scanning)return;
+  scanning=true;
+  const btn=document.getElementById('scanBtn');
+  btn.textContent='⏳ Scanning...';
+  btn.classList.add('scanning');
+  showToast('Scanning visible area...');
+
+  const bounds=map.getBounds();
+  const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
+  const bbox=[south,west,north,east].join(',');
+
+  try{
+    const query='[out:json][timeout:8];('+
+      'node["craft"="plumber"]('+bbox+');'+
+      'node["craft"="electrician"]('+bbox+');'+
+      'node["craft"="hvac"]('+bbox+');'+
+      'node["craft"="roofer"]('+bbox+');'+
+      'node["office"="construction"]('+bbox+');'+
+      'node["shop"="plumber"]('+bbox+');'+
+      'node["office"="electrician"]('+bbox+');'+
+      'way["craft"="plumber"]('+bbox+');'+
+      'way["craft"="electrician"]('+bbox+');'+
+      'way["craft"="hvac"]('+bbox+');'+
+      'way["craft"="roofer"]('+bbox+');'+
+      ');out center 50;';
+
+    const resp=await fetch('https://overpass-api.de/api/interpreter',{
+      method:'POST',body:'data='+encodeURIComponent(query),
+      headers:{'Content-Type':'application/x-www-form-urlencoded'}
+    });
+    const data=await resp.json();
+
+    // Clear old discovered markers
+    discoveredMarkers.forEach(m=>m.remove());
+    discoveredMarkers=[];
+
+    let count=0;
+    (data.elements||[]).forEach(el=>{
+      if(!el.tags||!el.tags.name)return;
+      const name=el.tags.name;
+      const lat=el.lat||el.center?.lat;
+      const lon=el.lon||el.center?.lon;
+      if(!lat||!lon)return;
+
+      const phone=el.tags.phone||el.tags['contact:phone']||'';
+      const website=el.tags.website||el.tags['contact:website']||'';
+      const cat=el.tags.craft||el.tags.shop||el.tags.office||'Business';
+      const addr=[el.tags['addr:street'],el.tags['addr:city'],el.tags['addr:state']].filter(Boolean).join(', ');
+
+      // Skip if already in leads
+      const exists=leads.some(l=>l.name.toLowerCase()===name.toLowerCase());
+      if(exists)return;
+
+      const popup='<div class="popup-name">'+escHtml(name)+' 🆕</div>'+
+        '<div class="popup-meta">'+escHtml(cat)+(addr?' · '+escHtml(addr):'')+'</div>'+
+        (phone?'<div class="popup-meta">📞 '+escHtml(phone)+'</div>':'')+
+        (website?'<div class="popup-meta">🌐 <a href="'+escHtml(website)+'" target="_blank">'+escHtml(website.substring(0,40))+'</a></div>':'<div class="popup-meta" style="color:var(--dead)">⚠ No website found</div>')+
+        '<div class="popup-actions">'+
+          (phone?'<a class="popup-call" href="tel:'+escHtml(phone)+'">📞 Call</a>':'')+
+          '<button class="popup-add" onclick="addDiscovered(\''+escJs(name)+'\',\''+escJs(cat)+'\',\''+escJs(phone)+'\',\''+escJs(website)+'\')">+ Add</button>'+
+        '</div>';
+
+      const m=L.marker([lat,lon],{icon:ICONS.discovered}).bindPopup(popup,{maxWidth:260});
+      m.addTo(map);
+      discoveredMarkers.push(m);
+      count++;
+    });
+
+    showToast('Found '+count+' businesses 📍');
+  }catch(e){
+    showToast('Scan failed — try zooming in more');
+    console.error(e);
+  }
+
+  btn.textContent='🔍 Scan Area';
+  btn.classList.remove('scanning');
+  scanning=false;
+  updateStats();
+}
+
+// ── ADD DISCOVERED LEAD ──
+function addDiscovered(name,cat,phone,website){
+  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  const noSite=!website;
+  const newLead={
+    name,phone:phone.replace(/\D/g,''),
+    category:cat,cat,
+    zip:'',
+    no_site:noSite,
+    website:website||'',
+    opener:'Hey, is this '+name.split(' ')[0]+'? I noticed your '+cat.toLowerCase()+' business online'+(noSite?' doesn\'t have a real website.':' has a website that could be better.')+' I built one. Want me to text you the link?',
+    slug,
+    type:noSite?'NO_SITE':'FAKE',
+    discovered:true
+  };
+  leads.push(newLead);
+  // Re-plot
+  const m=leadMarker(newLead);
+  m.addTo(map);
+  markers.push(m);
+  // Remove from discovered
+  const idx=discoveredMarkers.findIndex(dm=>dm._popup&&dm.getPopup().getContent().includes(name));
+  if(idx>=0){discoveredMarkers[idx].remove();discoveredMarkers.splice(idx,1)}
+  showToast('Added: '+name+' ✅');
+  saveLeads();
+  updateStats();
+}
+
+function saveLeads(){
+  // Save to localStorage as backup (can't write to leads.json from browser)
+  try{localStorage.setItem('discovered_leads',JSON.stringify(leads.filter(l=>l.discovered)))}catch(e){}
+}
+
+// ── FILTERS ──
+function setCat(cat,btn){
+  activeCat=cat;
+  document.querySelectorAll('.cat-chips button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  plotLeads();
+  if(cat==='discovered'){
+    // Show only discovered
+    clearMarkers();
+    discoveredMarkers.forEach(m=>m.addTo(map));
+  }else{
+    // Show leads + discovered
+    plotLeads();
+    discoveredMarkers.forEach(m=>m.addTo(map));
+  }
+}
+
+// ── STATS ──
+function updateStats(){
+  let nosite=0,fake=0,real=0,discovered=discoveredMarkers.length;
+  leads.forEach(l=>{
+    if(l.no_site)nosite++;else fake++;
+  });
+  document.getElementById('statRed').textContent=nosite;
+  document.getElementById('statYellow').textContent=fake;
+  document.getElementById('statGreen').textContent=real;
+  document.getElementById('statBlue').textContent=discovered;
+}
+
+// ── UTILS ──
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"')}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>showToast('Copied! 📋')).catch(()=>showToast('Copy failed'))}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+
+// ── RESTORE DISCOVERED LEADS ──
+function restoreDiscovered(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('discovered_leads')||'[]');
+    saved.forEach(l=>{if(!leads.find(x=>x.name===l.name))leads.push(l)});
+    plotLeads();
+    updateStats();
+  }catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded',()=>{init();restoreDiscovered()});
+
+// Auto-refresh on pan/zoom end (for discovered markers)
+map.on('moveend',()=>{updateStats()});
 </script>
 </body>
 </html>
