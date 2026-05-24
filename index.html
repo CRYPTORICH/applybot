@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ApplyBot — We Submit Job Applications For You</title>
-<meta name="description" content="Upload your resume. We search public job boards and submit applications on your behalf. You get an email for every one.">
+<meta name="description" content="Upload your resume. We search public job boards and submit applications on your behalf.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -17,13 +17,12 @@ header nav a:hover{color:#1a1a2e}
 .hero .badge{display:inline-block;background:#ecfdf5;color:#059669;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:16px}
 .hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px;margin-bottom:16px;line-height:1.2}
 .hero p{font-size:1.1rem;color:#6b7280;max-width:500px;margin:0 auto 32px}
-.hero .cta{display:inline-block;padding:14px 32px;font-size:1rem;font-weight:600;border-radius:8px;cursor:pointer;background:#1a1a2e;color:#fff;text-decoration:none;transition:opacity .2s}
-.hero .cta:hover{opacity:.9}
+.hero .cta{display:inline-block;padding:14px 32px;font-size:1rem;font-weight:600;border-radius:8px;cursor:pointer;background:#1a1a2e;color:#fff;text-decoration:none}
 section{padding:60px 20px;max-width:900px;margin:0 auto}
 h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 .section-sub{text-align:center;color:#6b7280;margin-bottom:40px;font-size:.95rem}
 
-/* Map section */
+/* Map */
 .map-section{background:#fafafa;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:48px 20px}
 .map-section .map-inner{max-width:900px;margin:0 auto}
 .map-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -37,13 +36,10 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 .chips-row{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
 .chip{background:#fff;border:1px solid #e5e7eb;color:#6b7280;padding:4px 12px;border-radius:14px;font-size:.75rem;cursor:pointer;transition:all .15s}
 .chip.on{background:#059669;color:#fff;border-color:#059669;font-weight:600}
-
-/* Job count below map */
 .job-count{text-align:center;padding:12px 0 0;font-size:.85rem;color:#6b7280}
 .job-count strong{color:#059669}
 
 /* Resume Builder */
-.resume-section{background:#fff}
 .resume-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px;margin:0 auto}
 .resume-form .full{grid-column:span 2}
 .resume-form label{display:block;font-weight:600;font-size:.8rem;margin-bottom:4px;color:#374151}
@@ -52,14 +48,43 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 .resume-form textarea{resize:vertical;min-height:80px}
 .resume-actions{text-align:center;margin-top:24px}
 .resume-actions button{background:#059669;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer}
-.resume-actions button:hover{opacity:.9}
-.resume-preview{margin-top:24px;background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:32px;font-size:.85rem;line-height:1.8;max-width:700px;margin-left:auto;margin-right:auto;display:none}
-.resume-preview h3{font-size:1.2rem;text-align:center;margin-bottom:4px}
-.resume-preview .r-title{text-align:center;color:#059669;font-weight:600;margin-bottom:16px;font-size:.9rem}
-.resume-preview .r-section{margin-top:16px}
-.resume-preview .r-section h4{font-size:.85rem;border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;color:#374151}
-.resume-preview .r-copy{text-align:center;margin-top:16px}
-.resume-preview .r-copy button{background:#1a1a2e;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:.8rem;cursor:pointer}
+
+/* ═══ MONETIZATION: Locked preview ═══ */
+.locked-preview{margin-top:24px;max-width:700px;margin-left:auto;margin-right:auto;display:none}
+.locked-resume{position:relative;background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:32px;font-size:.85rem;line-height:1.8;filter:blur(6px);user-select:none}
+.locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;text-align:center}
+.locked-overlay .lock-icon{font-size:48px;margin-bottom:8px}
+.locked-overlay h3{font-size:1.2rem;margin-bottom:4px}
+.locked-overlay p{color:#6b7280;font-size:.85rem;margin-bottom:20px;max-width:400px}
+.unlock-options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.unlock-btn{border:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;transition:opacity .15s}
+.unlock-btn:hover{opacity:.9}
+.unlock-ad{background:#f59e0b;color:#fff}
+.unlock-pay{background:#1a1a2e;color:#fff}
+.unlock-skip{background:#fff;color:#6b7280;border:1px solid #e5e7eb;font-size:.75rem;padding:8px 16px}
+
+/* Ad player overlay */
+.ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center}
+.ad-overlay.on{display:flex}
+.ad-card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;max-width:420px;width:90%}
+.ad-card .ad-badge{display:inline-block;background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600;margin-bottom:12px}
+.ad-card h3{font-size:1.1rem;margin-bottom:8px}
+.ad-card p{color:#6b7280;font-size:.8rem;margin-bottom:20px}
+.ad-card .timer{font-size:2.5rem;font-weight:800;color:#059669;margin-bottom:16px}
+.ad-card .sponsor{display:inline-block;background:#1a1a2e;color:#fff;padding:12px 28px;border-radius:10px;font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:8px}
+.ad-card .sponsor-sub{font-size:.7rem;color:#9ca3af}
+.ad-skip{background:none;color:#9ca3af;border:none;font-size:.7rem;cursor:pointer;margin-top:12px}
+.ad-skip.enabled{color:#059669;font-weight:600;cursor:pointer}
+
+/* Unlocked resume */
+.unlocked-preview{margin-top:24px;background:#fafafa;border:1px solid #059669;border-radius:10px;padding:32px;font-size:.85rem;line-height:1.8;max-width:700px;margin-left:auto;margin-right:auto;display:none}
+.unlocked-preview h3{font-size:1.2rem;text-align:center;margin-bottom:4px}
+.unlocked-preview .r-title{text-align:center;color:#059669;font-weight:600;margin-bottom:16px;font-size:.9rem}
+.unlocked-preview .r-section{margin-top:16px}
+.unlocked-preview .r-section h4{font-size:.85rem;border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;color:#374151}
+.r-copy{text-align:center;margin-top:16px}
+.r-copy button{background:#1a1a2e;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:.8rem;cursor:pointer}
+.unlock-badge{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600;margin-bottom:8px}
 
 /* Original sections */
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
@@ -95,14 +120,8 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 .disclaimer strong{color:#333}
 .trust{display:flex;justify-content:center;gap:40px;padding:20px;color:#9ca3af;font-size:.8rem;border-top:1px solid #f3f4f6;margin-top:56px;flex-wrap:wrap}
 .trust span{display:flex;align-items:center;gap:6px}
-.referral{background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:24px;text-align:center;max-width:550px;margin:0 auto}
-.referral h3{font-size:1.1rem;margin-bottom:8px}
-.referral p{color:#6b7280;margin-bottom:16px;font-size:.9rem}
-.referral code{background:#1a1a2e;color:#fff;padding:8px 16px;border-radius:6px;font-size:.85rem;word-break:break-all}
-.referral .bonus{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600;margin-top:8px}
 .footer{text-align:center;padding:32px 20px;color:#9ca3af;font-size:.75rem}
-.footer a{color:#1a1a2e;text-decoration:underline}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:3000;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 @media(max-width:768px){
   .hero h1{font-size:1.8rem}
@@ -113,6 +132,7 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
   .map-controls{flex-direction:column}
   .resume-form{grid-template-columns:1fr}
   .resume-form .full{grid-column:span 1}
+  .unlock-options{flex-direction:column}
 }
 </style>
 </head>
@@ -131,233 +151,197 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
 <div class="hero">
   <div class="badge">🔍 We search. We apply. You get confirmations.</div>
   <h1>Your job applications,<br>handled for you</h1>
-  <p>Explore the map to find jobs in your area. Build a resume in 2 minutes. Then let us handle the applications.</p>
+  <p>Explore the map to find jobs. Build a free resume. Then let us handle the applications.</p>
   <a href="#map-section" class="cta">Explore Jobs ↓</a>
 </div>
 
-<!-- ═══ MAP SECTION ═══ -->
+<!-- ═══ MAP ═══ -->
 <div class="map-section" id="map-section">
   <div class="map-inner">
     <h2 style="margin-bottom:4px">Find Jobs Near You</h2>
-    <p class="section-sub" style="margin-bottom:18px">Select a category and search a city — listings appear directly on the map</p>
-
+    <p class="section-sub" style="margin-bottom:18px">Select a category and search a city — listings appear on the map</p>
     <div class="map-controls">
       <select id="catSelect" onchange="setCat(this.value,null)">
-        <option value="all">All Categories</option>
-        <option value="software-dev">💻 Software Development</option>
-        <option value="it-support">🖥️ IT Support</option>
-        <option value="healthcare">🏥 Healthcare</option>
-        <option value="retail">🛒 Retail</option>
-        <option value="warehouse">📦 Warehouse</option>
-        <option value="admin">📋 Admin & Office</option>
-        <option value="finance">💵 Finance & Banking</option>
-        <option value="construction">🔨 Construction & Trades</option>
-        <option value="education">📚 Education</option>
-        <option value="sales">📈 Sales</option>
-        <option value="manufacturing">🏭 Manufacturing</option>
+        <option value="all">All Categories</option><option value="software-dev">💻 Software Dev</option><option value="it-support">🖥️ IT Support</option><option value="healthcare">🏥 Healthcare</option><option value="retail">🛒 Retail</option><option value="warehouse">📦 Warehouse</option><option value="admin">📋 Admin</option><option value="finance">💵 Finance</option><option value="construction">🔨 Trades</option><option value="education">📚 Education</option><option value="sales">📈 Sales</option><option value="manufacturing">🏭 Manufacturing</option>
       </select>
       <input type="text" id="locInput" placeholder="City (e.g. Wilmington, DE)" onkeydown="if(event.key==='Enter')searchJobs()">
       <button onclick="searchJobs()" id="searchBtn">🔍 Search Jobs</button>
     </div>
-
-    <div class="map-wrap">
-      <div class="map-zoom"><button onclick="map.zoomIn()">+</button><button onclick="map.zoomOut()">−</button></div>
-      <div id="map"></div>
-    </div>
-
+    <div class="map-wrap"><div class="map-zoom"><button onclick="map.zoomIn()">+</button><button onclick="map.zoomOut()">−</button></div><div id="map"></div></div>
     <div class="job-count" id="jobCount"></div>
-
     <div class="chips-row">
-      <button class="chip on" onclick="setCat('all',this)">All Jobs</button>
-      <button class="chip" onclick="setCat('software-dev',this)">💻 Software</button>
-      <button class="chip" onclick="setCat('healthcare',this)">🏥 Healthcare</button>
-      <button class="chip" onclick="setCat('construction',this)">🔨 Trades</button>
-      <button class="chip" onclick="setCat('sales',this)">📈 Sales</button>
-      <button class="chip" onclick="setCat('remote',this)">🏠 Remote</button>
+      <button class="chip on" onclick="setCat('all',this)">All</button><button class="chip" onclick="setCat('software-dev',this)">💻 Dev</button><button class="chip" onclick="setCat('healthcare',this)">🏥 Health</button><button class="chip" onclick="setCat('construction',this)">🔨 Trades</button><button class="chip" onclick="setCat('sales',this)">📈 Sales</button><button class="chip" onclick="setCat('remote',this)">🏠 Remote</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ RESUME BUILDER ═══ -->
+<!-- ═══ RESUME BUILDER (monetized) ═══ -->
 <section id="resume">
-  <h2>AI Resume Builder</h2>
-  <p class="section-sub">Fill in your details and generate a professional resume in seconds — no signup required</p>
+  <h2>Free AI Resume Builder</h2>
+  <p class="section-sub">Build a professional resume in 2 minutes — <strong>free</strong> with a quick sponsor offer</p>
   <div class="resume-form">
     <div><label>Full Name</label><input type="text" id="rName" placeholder="John Smith"></div>
     <div><label>Email</label><input type="email" id="rEmail" placeholder="john@email.com"></div>
     <div><label>Phone</label><input type="tel" id="rPhone" placeholder="(555) 123-4567"></div>
     <div><label>Location</label><input type="text" id="rLocation" placeholder="Wilmington, DE"></div>
     <div class="full"><label>Professional Summary</label><textarea id="rSummary" placeholder="Dedicated professional with 5+ years of experience in..."></textarea></div>
-    <div class="full"><label>Work Experience</label><textarea id="rExperience" placeholder="Company Name | Job Title | 2020–Present&#10;• Led team of 5 on...&#10;• Increased revenue by...&#10;&#10;Previous Company | Role | 2018–2020&#10;• Managed..."></textarea></div>
+    <div class="full"><label>Work Experience</label><textarea id="rExperience" placeholder="Company | Job Title | 2020–Present&#10;• Led team of 5 on...&#10;• Increased revenue by 25%..."></textarea></div>
     <div class="full"><label>Skills (comma separated)</label><input type="text" id="rSkills" placeholder="Project Management, Data Analysis, Python, Leadership"></div>
     <div class="full"><label>Education</label><input type="text" id="rEducation" placeholder="Bachelor of Science, University of Delaware, 2018"></div>
   </div>
   <div class="resume-actions"><button onclick="buildResume()">✨ Generate Resume</button></div>
-  <div class="resume-preview" id="resumePreview"></div>
-</section>
 
-<!-- ═══ REST OF ORIGINAL SITE ═══ -->
-<section id="how">
-  <h2>How It Works</h2>
-  <p class="section-sub">Three steps from resume to applications</p>
-  <div class="how">
-    <div class="step"><div class="num">1</div><h3>Build Your Resume</h3><p>Use our AI builder above to create a professional resume in 2 minutes. No signup required.</p></div>
-    <div class="step"><div class="num">2</div><h3>We Search & Apply</h3><p>We find matching jobs on public boards and submit applications using your information.</p></div>
-    <div class="step"><div class="num">3</div><h3>Confirmations In Your Inbox</h3><p>Every application comes with an email — job title, company, and link.</p></div>
+  <!-- LOCKED preview -->
+  <div class="locked-preview" id="lockedPreview">
+    <div style="position:relative">
+      <div class="locked-resume" id="lockedResumeContent"></div>
+      <div class="locked-overlay">
+        <div class="lock-icon">🔒</div>
+        <h3>Your Resume is Ready</h3>
+        <p>Unlock it for free by viewing a quick sponsor offer, or go premium to skip ads and unlock job applications.</p>
+        <div class="unlock-options">
+          <button class="unlock-btn unlock-ad" onclick="showAd()">📺 Watch Sponsor Offer<br><small style="font-weight:400">~15 seconds</small></button>
+          <button class="unlock-btn unlock-pay" onclick="goToPricing()">💳 Unlock Everything — $5<br><small style="font-weight:400">Resume + Job Search + Auto-Apply</small></button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- UNLOCKED resume -->
+  <div class="unlocked-preview" id="unlockedPreview"></div>
 </section>
 
-<section id="pricing">
-  <h2>Pick a Plan to Continue</h2>
-  <p class="section-sub">Pay once. No subscription. You're in control.</p>
-  <div class="pricing">
-    <div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div></div>
-    <div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div></div>
-    <div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div></div>
-    <div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div></div>
+<!-- ═══ AD OVERLAY ═══ -->
+<div class="ad-overlay" id="adOverlay">
+  <div class="ad-card">
+    <div class="ad-badge">📺 Sponsor Offer</div>
+    <h3>Your resume is being finalized...</h3>
+    <p>While you wait, check out our sponsor — they help job seekers land interviews faster.</p>
+    <div class="timer" id="adTimer">15</div>
+    <a href="https://www.indeed.com/hire?co=US" target="_blank" class="sponsor" id="sponsorLink">🔗 Visit Indeed Hiring →</a>
+    <div class="sponsor-sub">Sponsored · Opens in new tab</div>
+    <button class="ad-skip" id="adSkip" disabled onclick="skipAd()">Skip in <span id="adSkipTime">15</span>s</button>
   </div>
-  <p class="pricing-note">All payments processed through Stripe. No refunds — paying for the application service, not a guaranteed outcome.</p>
-</section>
+</div>
 
-<section>
-  <h2>What You Get</h2>
-  <div class="compare"><table>
-    <tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
-    <tr><td>Job search map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-    <tr><td>AI resume builder</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-    <tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-    <tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-    <tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-    <tr><td>Price</td><td class="us">$5 – $79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr>
-  </table></div>
-</section>
+<!-- ═══ REST OF SITE ═══ -->
+<section id="how"><h2>How It Works</h2><p class="section-sub">Three steps from resume to applications</p><div class="how">
+<div class="step"><div class="num">1</div><h3>Build Your Resume</h3><p>Use our free builder above. Fill in your details, generate a professional resume in seconds.</p></div>
+<div class="step"><div class="num">2</div><h3>We Search & Apply</h3><p>We find matching jobs on public boards and submit applications using your information.</p></div>
+<div class="step"><div class="num">3</div><h3>Confirmations In Your Inbox</h3><p>Every application comes with an email — job title, company, and link.</p></div></div></section>
+
+<section id="pricing"><h2>Pick a Plan to Unlock</h2><p class="section-sub">Pay once. No subscription. All plans include resume builder + job applications.</p><div class="pricing">
+<div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div></div>
+<div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div></div>
+<div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div></div>
+<div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div></div></div>
+<p class="pricing-note">Stripe payments. No refunds — paying for the application service, not a guaranteed outcome.</p></section>
+
+<section><h2>What You Get</h2><div class="compare"><table>
+<tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
+<tr><td>AI Resume Builder</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Job search map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Price</td><td class="us">$5–$79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr></table></div></section>
 
 <section id="faq"><h2>FAQ</h2><div class="faq"><dl>
-<dt>Where do the job listings come from?</dt><dd>All listings are from publicly available sources — LinkedIn, Indeed, ZipRecruiter, USAJobs, and company career pages — found in real-time when your application runs.</dd>
-<dt>How do I know you actually applied?</dt><dd>You receive an email confirmation for every application, including job title, company, and listing link.</dd>
-<dt>Do you guarantee I'll get a job?</dt><dd>No. We guarantee we submit the number of applications you purchased to real, currently-open job listings. Applying to 150 jobs gives you dramatically better odds than 5.</dd>
-</dl></div>
+<dt>Is the resume builder really free?</dt><dd>Yes. View a 15-second sponsor offer and your resume is unlocked. Or pay $5 to skip all ads forever.</dd>
+<dt>Where do the job listings come from?</dt><dd>Publicly available sources — LinkedIn, Indeed, ZipRecruiter, USAJobs — found in real-time when your application runs.</dd>
+<dt>How do I know you actually applied?</dt><dd>Email confirmation for every application, including job title, company, and listing link.</dd></dl></div>
 <div class="disclaimer"><strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs using the information you provide. We are not affiliated with LinkedIn, Indeed, or any employer.</div></section>
 
-<div class="trust"><span>🔒 Stripe Secure</span><span>📧 Confirmations</span><span>📊 Real Job Data</span><span>🚫 No Subscription</span><span>🎁 Referrals</span></div>
-
-<section><div class="referral"><h3>🎁 Share & Earn Free Applications</h3><p>After your first purchase, get a referral link. When a friend buys, you <strong>BOTH</strong> get 2 free applications.</p><div class="bonus">+2 free apps for you + 2 free apps for them</div></div></section>
+<div class="trust"><span>🔒 Stripe Secure</span><span>📧 Confirmations</span><span>📊 Real Job Data</span><span>🚫 No Subscription</span><span>📺 Ad-Supported Free Tier</span></div>
 
 <div class="footer"><p>ApplyBot</p><p style="margin-top:4px">Not affiliated with LinkedIn, Indeed, or any employer.</p></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══ METRO DENSITY DATA ═══
+// ═══ DATA ═══
 const METROS=[{city:"New York",lat:40.71,lng:-74.01,jobs:420000},{city:"Los Angeles",lat:34.05,lng:-118.24,jobs:280000},{city:"Chicago",lat:41.88,lng:-87.63,jobs:180000},{city:"Dallas",lat:32.78,lng:-96.80,jobs:160000},{city:"Houston",lat:29.76,lng:-95.37,jobs:140000},{city:"Washington DC",lat:38.91,lng:-77.04,jobs:190000},{city:"Miami",lat:25.76,lng:-80.19,jobs:95000},{city:"Philadelphia",lat:39.95,lng:-75.17,jobs:110000},{city:"Atlanta",lat:33.75,lng:-84.39,jobs:130000},{city:"Phoenix",lat:33.45,lng:-112.07,jobs:100000},{city:"Boston",lat:42.36,lng:-71.06,jobs:110000},{city:"San Francisco",lat:37.77,lng:-122.42,jobs:90000},{city:"Seattle",lat:47.61,lng:-122.33,jobs:105000},{city:"Detroit",lat:42.33,lng:-83.05,jobs:60000},{city:"San Diego",lat:32.72,lng:-117.16,jobs:85000},{city:"Minneapolis",lat:44.98,lng:-93.27,jobs:75000},{city:"Tampa",lat:27.95,lng:-82.46,jobs:60000},{city:"Denver",lat:39.74,lng:-104.99,jobs:85000},{city:"Baltimore",lat:39.29,lng:-76.61,jobs:85000},{city:"St Louis",lat:38.63,lng:-90.20,jobs:52000},{city:"Orlando",lat:28.54,lng:-81.38,jobs:65000},{city:"Charlotte",lat:35.23,lng:-80.84,jobs:70000},{city:"San Antonio",lat:29.42,lng:-98.49,jobs:75000},{city:"Portland",lat:45.52,lng:-122.68,jobs:50000},{city:"Pittsburgh",lat:40.44,lng:-79.99,jobs:55000},{city:"Austin",lat:30.27,lng:-97.74,jobs:90000},{city:"Sacramento",lat:38.58,lng:-121.49,jobs:38000},{city:"Las Vegas",lat:36.17,lng:-115.14,jobs:55000},{city:"Cincinnati",lat:39.10,lng:-84.51,jobs:48000},{city:"Kansas City",lat:39.10,lng:-94.58,jobs:50000},{city:"Columbus",lat:39.96,lng:-82.99,jobs:50000},{city:"Cleveland",lat:41.50,lng:-81.69,jobs:45000},{city:"Indianapolis",lat:39.77,lng:-86.16,jobs:48000},{city:"Nashville",lat:36.16,lng:-86.78,jobs:55000},{city:"San Jose",lat:37.34,lng:-121.89,jobs:75000},{city:"Raleigh",lat:35.78,lng:-78.64,jobs:44000},{city:"Jacksonville",lat:30.33,lng:-81.66,jobs:40000},{city:"Milwaukee",lat:43.04,lng:-87.91,jobs:35000},{city:"Salt Lake City",lat:40.76,lng:-111.89,jobs:42000},{city:"Richmond",lat:37.54,lng:-77.44,jobs:35000},{city:"Louisville",lat:38.25,lng:-85.76,jobs:28000},{city:"Memphis",lat:35.15,lng:-90.05,jobs:30000},{city:"Oklahoma City",lat:35.47,lng:-97.52,jobs:32000},{city:"Buffalo",lat:42.89,lng:-78.88,jobs:22000},{city:"New Orleans",lat:29.95,lng:-90.07,jobs:25000},{city:"Birmingham",lat:33.52,lng:-86.80,jobs:24000},{city:"Omaha",lat:41.26,lng:-95.94,jobs:24000},{city:"Albuquerque",lat:35.08,lng:-106.65,jobs:18000},{city:"Tucson",lat:32.22,lng:-110.97,jobs:20000},{city:"Boise",lat:43.62,lng:-116.20,jobs:16000},{city:"Wilmington",lat:39.75,lng:-75.55,jobs:12000}];
 const CM={'software-dev':.16,'it-support':.10,'healthcare':.46,'retail':.21,'warehouse':.17,'admin':.13,'finance':.09,'construction':.15,'education':.10,'remote':.30,'sales':.17,'manufacturing':.11};
-const CAT_TITLES={'software-dev':['Software Engineer','Full Stack Developer','Frontend Developer','Backend Engineer','DevOps Engineer','QA Engineer','Mobile Developer','Data Engineer'],'it-support':['IT Support Specialist','Help Desk Technician','Systems Administrator','Network Engineer','Desktop Support','IT Manager','Cloud Support Engineer','Technical Support'],'healthcare':['Registered Nurse','Medical Assistant','Healthcare Administrator','Physical Therapist','Pharmacy Technician','Clinical Lab Scientist','Radiologic Technologist','Home Health Aide'],'retail':['Store Manager','Sales Associate','Cashier','Retail Supervisor','Merchandiser','Customer Service Rep','Inventory Specialist','Assistant Manager'],'warehouse':['Warehouse Associate','Forklift Operator','Logistics Coordinator','Supply Chain Analyst','Inventory Manager','Shipping Clerk','Material Handler','Warehouse Supervisor'],'admin':['Administrative Assistant','Office Manager','Executive Assistant','Data Entry Clerk','Receptionist','HR Coordinator','Payroll Specialist','Operations Manager'],'finance':['Financial Analyst','Accountant','Bank Teller','Loan Officer','Financial Advisor','Bookkeeper','Auditor','Tax Preparer'],'construction':['Electrician','Plumber','HVAC Technician','Carpenter','Construction Laborer','Project Manager','Welder','Heavy Equipment Operator'],'education':['Teacher','Teaching Assistant','School Counselor','Substitute Teacher','ESL Instructor','Special Education Teacher','Principal','Librarian'],'remote':['Customer Success Manager','Virtual Assistant','Content Writer','Social Media Manager','Online Tutor','Transcriptionist','Data Analyst','Remote Sales Rep'],'sales':['Sales Representative','Account Executive','Business Development','Sales Manager','Inside Sales Rep','Regional Sales Manager','BDR','Retail Sales'],'manufacturing':['Production Worker','Machine Operator','Quality Inspector','Assembly Technician','CNC Machinist','Maintenance Tech','Process Engineer','Plant Manager']};
-const CAT_COMPANIES={'software-dev':['TechCorp','DataStream Inc','CloudNine Systems','NextGen Software','Binary Works','AppForge','DevHub','StackLabs','CodeCraft','PixelPerfect'],'it-support':['TechSupport Pro','HelpDesk Central','NetGuard','SysAdmin Solutions','CloudCare','ITWorks','SupportDesk Inc','TechAssist','QuickFix IT','DigitalGuard'],'healthcare':['Mercy Hospital','City Medical Center','HealthFirst Clinic','CarePlus Medical','Wellness Health','Community Care','MediCenter','Healing Hands','PrimeCare','Lifeline Health'],'retail':['MegaMart','ShopSmart','ValueStore','QuickShop','RetailPro','MarketPlace','BuyMore','SuperStore','DailyDeals','ShopEase'],'warehouse':['ShipFast Logistics','WarePro','SupplyLink','DistroHub','Pack & Ship Co','FreightMasters','LogiCorp','StockHouse','MegaWarehouse','CargoPro'],'admin':['OfficePro','AdminCentral','ExecSupport Inc','DeskWorks','BizAssist','OfficeEdge','AdminHub','CorpSupport','TaskForce','WorkFlow Inc'],'finance':['First National Bank','CapitalTrust','MoneyWise','PrimeFinance','Heritage Financial','Apex Advisors','LedgerPro','WealthGuard','TaxEase','InvestRight'],'construction':['BuildRight Construction','ProCraft Builders','SteelWorks Inc','Foundation Co','Apex Contracting','MasterBuild','HardHat Corp','SiteWorks','ConstructPro','TradeCraft'],'education':['Lincoln School District','Academy Prep','LearnWell Education','Bright Futures School','Heritage Academy','Excel Learning Center','Peak Education','Pathway Schools','ScholarFirst','MindBridge Academy'],'remote':['RemoteTeam Inc','WorkFromAnywhere','CloudStaff','VirtualOps','Distributed Co','HomeBase Corp','FlexWork','RemoteForce','AnywhereWorks','DigitalNomad Co'],'sales':['SalesForce Pro','RevenueMax','GrowthHawk','Pipeline Inc','CloseDeal Corp','SalesEdge','WinRate','QuotaCrusher','DealFlow','ClientFirst'],'manufacturing':['Precision Manufacturing','IndustrialPro','FactoryWorks','AssemblyLine Inc','TechFab','MegaForge','ProductionCore','SteelCraft','MechWorks','QualityFab']};
-let ac='all',jobMarkers=[];
+const CT={'software-dev':['Software Engineer','Full Stack Developer','Frontend Developer','Backend Engineer','DevOps Engineer','QA Engineer','Mobile Developer','Data Engineer'],'it-support':['IT Support Specialist','Help Desk Technician','Systems Administrator','Network Engineer','Desktop Support','IT Manager','Cloud Support Engineer'],'healthcare':['Registered Nurse','Medical Assistant','Healthcare Administrator','Physical Therapist','Pharmacy Technician','Clinical Lab Scientist','Home Health Aide'],'retail':['Store Manager','Sales Associate','Cashier','Retail Supervisor','Merchandiser','Inventory Specialist','Assistant Manager'],'warehouse':['Warehouse Associate','Forklift Operator','Logistics Coordinator','Supply Chain Analyst','Inventory Manager','Shipping Clerk','Material Handler'],'admin':['Administrative Assistant','Office Manager','Executive Assistant','Data Entry Clerk','Receptionist','HR Coordinator','Operations Manager'],'finance':['Financial Analyst','Accountant','Bank Teller','Loan Officer','Financial Advisor','Bookkeeper','Auditor'],'construction':['Electrician','Plumber','HVAC Technician','Carpenter','Construction Laborer','Project Manager','Welder'],'education':['Teacher','Teaching Assistant','School Counselor','Substitute Teacher','ESL Instructor','Special Education Teacher','Librarian'],'remote':['Customer Success Manager','Virtual Assistant','Content Writer','Social Media Manager','Online Tutor','Data Analyst'],'sales':['Sales Representative','Account Executive','Business Development','Sales Manager','Inside Sales Rep','BDR','Retail Sales'],'manufacturing':['Production Worker','Machine Operator','Quality Inspector','Assembly Technician','CNC Machinist','Maintenance Tech','Process Engineer']};
+const CC={'software-dev':['TechCorp','DataStream Inc','CloudNine','NextGen','Binary Works','AppForge','DevHub','CodeCraft'],'it-support':['TechSupport Pro','HelpDesk Central','NetGuard','SysAdmin Co','CloudCare','ITWorks','QuickFix IT','DigitalGuard'],'healthcare':['Mercy Hospital','City Medical','HealthFirst','CarePlus','Wellness Health','Community Care','MediCenter','Lifeline'],'retail':['MegaMart','ShopSmart','ValueStore','QuickShop','RetailPro','MarketPlace','BuyMore','ShopEase'],'warehouse':['ShipFast Logistics','WarePro','SupplyLink','DistroHub','Pack & Ship Co','FreightMasters','LogiCorp','CargoPro'],'admin':['OfficePro','AdminCentral','ExecSupport','BizAssist','OfficeEdge','AdminHub','CorpSupport','WorkFlow Inc'],'finance':['First National','CapitalTrust','MoneyWise','PrimeFinance','Heritage','Apex Advisors','LedgerPro','WealthGuard'],'construction':['BuildRight','ProCraft','SteelWorks','Foundation Co','Apex Contracting','MasterBuild','HardHat Corp','ConstructPro'],'education':['Lincoln Schools','Academy Prep','LearnWell','Bright Futures','Heritage Academy','Excel Learning','Peak Education','Pathway Schools'],'remote':['RemoteTeam','WorkAnywhere','CloudStaff','VirtualOps','Distributed Co','HomeBase','FlexWork','AnywhereWorks'],'sales':['SalesForce Pro','RevenueMax','GrowthHawk','Pipeline Inc','CloseDeal','SalesEdge','WinRate','QuotaCrusher'],'manufacturing':['Precision Mfg','IndustrialPro','FactoryWorks','AssemblyLine','TechFab','MegaForge','ProductionCore','QualityFab']};
+let ac='all',jobMarkers=[],adTimer=null,resumeBuilt=null;
 
 // ═══ MAP ═══
-const map=L.map('map',{zoomControl:false,attributionControl:false,zoomSnap:.25}).setView([39.5,-98],4.5);
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.5,-98],4.5);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
-const densityLayer=L.layerGroup().addTo(map);
-const listingLayer=L.layerGroup().addTo(map);
+const densityLayer=L.layerGroup().addTo(map),listingLayer=L.layerGroup().addTo(map);
 
-function dotIcon(color,scale){return L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:'+color+';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:scale('+scale+')"></div>',iconSize:[14,14],iconAnchor:[7,7]})}
-function jobPin(){return L.divIcon({className:'',html:'<div style="width:22px;height:22px;background:#1a1a2e;border-radius:4px;transform:rotate(45deg);margin:4px 0 0 4px;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div><div style="width:10px;height:10px;background:#fff;border-radius:50%;position:absolute;top:6px;left:10px"></div>',iconSize:[30,30],iconAnchor:[15,30]})}
+function dotIcon(c,s){return L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:'+c+';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:scale('+s+')"></div>',iconSize:[14,14],iconAnchor:[7,7]})}
+function jobPin(){return L.divIcon({html:'<div style="width:22px;height:22px;background:#1a1a2e;border-radius:4px;transform:rotate(45deg);margin:4px 0 0 4px"></div><div style="width:10px;height:10px;background:#fff;border-radius:50%;position:absolute;top:6px;left:10px"></div>',iconSize:[30,30],iconAnchor:[15,30]})}
 
-function showDensity(){
-  densityLayer.clearLayers();
-  const m=ac&&CM[ac]?CM[ac]:1;
-  const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));
-  const mx=Math.max(...d.map(x=>x.adj),1);
-  d.forEach(x=>{if(x.adj<300&&ac!=='all')return;const p=x.adj/mx;const c=p>.6?'#059669':p>.3?'#10b981':p>.12?'#f59e0b':'#94a3b8';L.marker([x.lat,x.lng],{icon:dotIcon(c,.7+p*.5)}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' '+(ac!=='all'?'jobs':'openings')+'<br><small>BLS estimate</small>').addTo(densityLayer)});
-}
-
+function showDensity(){densityLayer.clearLayers();const m=ac&&CM[ac]?CM[ac]:1;const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));const mx=Math.max(...d.map(x=>x.adj),1);d.forEach(x=>{if(x.adj<300&&ac!=='all')return;const p=x.adj/mx,c=p>.6?'#059669':p>.3?'#10b981':p>.12?'#f59e0b':'#94a3b8';L.marker([x.lat,x.lng],{icon:dotIcon(c,.7+p*.5)}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' '+(ac!=='all'?'jobs':'openings')+'<br><small>BLS estimate</small>').addTo(densityLayer)})}
 function clearListings(){listingLayer.clearLayers();jobMarkers=[];document.getElementById('jobCount').innerHTML=''}
 
 async function searchJobs(){
-  clearListings();
-  const cat=ac==='all'?'sales':ac;
-  const loc=document.getElementById('locInput').value.trim()||'Wilmington';
-  document.getElementById('searchBtn').textContent='⏳ Searching...';
-
-  // Geocode location
-  let lat=39.75,lng=-75.55,cityName=loc;
-  try{
-    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(loc)+'&limit=1');
-    const d=await r.json();
-    if(d.length){lat=parseFloat(d[0].lat);lng=parseFloat(d[0].lon);cityName=d[0].display_name.split(',')[0]}
-  }catch(e){}
-
+  clearListings();const cat=ac==='all'?'sales':ac;const loc=document.getElementById('locInput').value.trim()||'Wilmington';
+  document.getElementById('searchBtn').textContent='⏳ Searching...';let lat=39.75,lng=-75.55,cityName=loc;
+  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(loc)+'&limit=1');const d=await r.json();if(d.length){lat=parseFloat(d[0].lat);lng=parseFloat(d[0].lon);cityName=d[0].display_name.split(',')[0]}}catch(e){}
   map.setView([lat,lng],11,{duration:1});
+  const titles=CT[cat]||CT.sales,companies=CC[cat]||CC.sales,count=10;
+  const mult=ac&&CM[ac]?CM[ac]:.17;const base=Math.round(12000*mult);
+  document.getElementById('jobCount').innerHTML='<strong>~'+base.toLocaleString()+'</strong> openings in <strong>'+cityName+'</strong> — '+count+' sample listings';
+  for(let i=0;i<count;i++){const t=titles[i%titles.length],c=companies[Math.floor(Math.random()*companies.length)],jl=lat+(Math.random()-.5)*.08,jn=lng+(Math.random()-.5)*.08;
+    L.marker([jl,jn],{icon:jobPin()}).bindPopup('<div style="min-width:180px"><b>'+t+'</b><br><small style="color:#6b7280">'+c+' · '+cityName+'</small><br><small style="color:#059669">Full-time · Posted recently</small><br><a href="#pricing" style="display:inline-block;margin-top:6px;background:#059669;color:#fff;padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.8rem">Apply Now → Pick a Plan</a></div>',{maxWidth:250}).addTo(listingLayer)}
+  document.getElementById('searchBtn').textContent='🔍 Search Jobs'}
+function setCat(c,btn){ac=c;document.getElementById('catSelect').value=c||'all';document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');showDensity();clearListings()}
 
-  // Generate job listings for this category + city
-  const titles=CAT_TITLES[cat]||CAT_TITLES.sales;
-  const companies=CAT_COMPANIES[cat]||CAT_COMPANIES.sales;
-  const count=Math.min(12,8+Math.floor(Math.random()*8));
-  const mult=ac&&CM[ac]?CM[ac]:.17;
-  const base=Math.round(12000*mult);
-  document.getElementById('jobCount').innerHTML='<strong>~'+base.toLocaleString()+'</strong> openings estimated in <strong>'+cityName+'</strong> — showing '+count+' sample listings';
-
-  for(let i=0;i<count;i++){
-    const title=titles[i%titles.length];
-    const comp=companies[Math.floor(Math.random()*companies.length)];
-    const jlat=lat+(Math.random()-.5)*.08;
-    const jlng=lng+(Math.random()-.5)*.08;
-    const marker=L.marker([jlat,jlng],{icon:jobPin()}).bindPopup(
-      '<div style="min-width:180px"><b>'+title+'</b><br><small style="color:#6b7280">'+comp+' · '+cityName+'</small>'+
-      '<br><small style="color:#059669">Full-time · Posted recently</small>'+
-      '<br><a href="#pricing" onclick="t(\'👇 Pick a plan below to start applying\')" style="display:inline-block;margin-top:6px;background:#059669;color:#fff;padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.8rem">Apply Now →</a></div>',
-      {maxWidth:250}
-    ).addTo(listingLayer);
-    jobMarkers.push(marker);
-  }
-
-  document.getElementById('searchBtn').textContent='🔍 Search Jobs';
-}
-
-function setCat(c,btn){
-  ac=c;document.getElementById('catSelect').value=c||'all';
-  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  showDensity();clearListings();
-}
-
-// ═══ RESUME BUILDER ═══
+// ═══ RESUME BUILDER + MONETIZATION ═══
 function buildResume(){
-  const n=document.getElementById('rName').value||'Your Name';
-  const e=document.getElementById('rEmail').value||'email@example.com';
-  const p=document.getElementById('rPhone').value||'(555) 123-4567';
-  const loc=document.getElementById('rLocation').value||'Your City, ST';
+  const n=document.getElementById('rName').value||'Your Name',e=document.getElementById('rEmail').value||'email@example.com';
+  const p=document.getElementById('rPhone').value||'(555) 123-4567',loc=document.getElementById('rLocation').value||'Your City';
   const sum=document.getElementById('rSummary').value||'Dedicated professional seeking new opportunities.';
-  const exp=document.getElementById('rExperience').value||'Company Name | Your Role | 2020–Present\n• Key achievement or responsibility';
-  const skills=document.getElementById('rSkills').value||'Skill 1, Skill 2, Skill 3';
+  const exp=document.getElementById('rExperience').value||'Company | Role | 2020–Present\n• Key achievement';
+  const sk=document.getElementById('rSkills').value||'Skill 1, Skill 2, Skill 3';
   const edu=document.getElementById('rEducation').value||'Degree, University, Year';
-  const skillsArr=skills.split(',').map(s=>s.trim()).filter(Boolean);
+  const skillsArr=sk.split(',').map(s=>s.trim()).filter(Boolean);
+  resumeBuilt={n,e,p,loc,sum,exp,skillsArr,edu};
 
-  const html='<h3>'+escHtml(n)+'</h3>'+
-    '<div class="r-title">'+escHtml(e)+' · '+escHtml(p)+' · '+escHtml(loc)+'</div>'+
-    '<div class="r-section"><h4>Professional Summary</h4><p>'+escHtml(sum)+'</p></div>'+
-    '<div class="r-section"><h4>Skills</h4><p>'+skillsArr.map(escHtml).join(' · ')+'</p></div>'+
-    '<div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+escHtml(exp)+'</p></div>'+
-    '<div class="r-section"><h4>Education</h4><p>'+escHtml(edu)+'</p></div>'+
-    '<div class="r-copy"><button onclick="copyResume()">📋 Copy Resume Text</button></div>';
-
-  document.getElementById('resumePreview').innerHTML=html;
-  document.getElementById('resumePreview').style.display='block';
-  document.getElementById('resumePreview').scrollIntoView({behavior:'smooth'});
-  t('✅ Resume generated!');
+  // Show locked preview
+  const lc=document.getElementById('lockedResumeContent');
+  lc.innerHTML='<h3>'+esc(n)+'</h3><div class="r-title">'+esc(e)+' · '+esc(p)+' · '+esc(loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(edu)+'</p></div>';
+  document.getElementById('lockedPreview').style.display='block';
+  document.getElementById('unlockedPreview').style.display='none';
+  document.getElementById('lockedPreview').scrollIntoView({behavior:'smooth'});
 }
 
-function copyResume(){
-  const el=document.getElementById('resumePreview');
-  const text=el.innerText;
-  navigator.clipboard.writeText(text).then(()=>t('📋 Copied!')).catch(()=>t('Copy failed'));
+function showAd(){
+  document.getElementById('adOverlay').classList.add('on');
+  let sec=15;document.getElementById('adTimer').textContent=sec;document.getElementById('adSkipTime').textContent=sec;
+  document.getElementById('adSkip').disabled=true;document.getElementById('adSkip').classList.remove('enabled');
+  adTimer=setInterval(()=>{sec--;document.getElementById('adTimer').textContent=sec;document.getElementById('adSkipTime').textContent=sec;
+    if(sec<=0){clearInterval(adTimer);document.getElementById('adSkip').disabled=false;document.getElementById('adSkip').classList.add('enabled');document.getElementById('adSkip').textContent='Skip ad →'}
+  },1000);
 }
+
+function skipAd(){
+  clearInterval(adTimer);document.getElementById('adOverlay').classList.remove('on');
+  unlockResume('ad');
+}
+
+function unlockResume(method){
+  const r=resumeBuilt;if(!r)return;
+  const html='<div class="unlock-badge">'+(method==='ad'?'✅ Unlocked via sponsor offer':'💳 Premium — no ads')+'</div><h3>'+esc(r.n)+'</h3><div class="r-title">'+esc(r.e)+' · '+esc(r.p)+' · '+esc(r.loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(r.sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+r.skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(r.exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(r.edu)+'</p></div><div class="r-copy"><button onclick="copyResume()">📋 Copy Resume</button></div>';
+  document.getElementById('unlockedPreview').innerHTML=html;
+  document.getElementById('lockedPreview').style.display='none';
+  document.getElementById('unlockedPreview').style.display='block';
+  document.getElementById('unlockedPreview').scrollIntoView({behavior:'smooth'});
+  t(method==='ad'?'✅ Unlocked! Resume ready':'💰 Premium unlocked!');
+}
+
+function goToPricing(){document.getElementById('pricing').scrollIntoView({behavior:'smooth'});unlockResume('paid')}
+function copyResume(){const el=document.getElementById('unlockedPreview');const txt=el.innerText;navigator.clipboard.writeText(txt).then(()=>t('📋 Copied!')).catch(()=>t('Copy failed'))}
 
 // ═══ UTILS ═══
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function checkout(p){t('🛒 Stripe checkout — connect your keys to enable')}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function checkout(p){t('🛒 Stripe checkout — connect keys to enable')}
 function t(m){const el=document.getElementById('toast')||function(){const d=document.createElement('div');d.className='toast';d.id='toast';document.body.appendChild(d);return d}();el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
-document.addEventListener('DOMContentLoaded',()=>{showDensity()});
+document.addEventListener('DOMContentLoaded',showDensity);
+// Close ad on backdrop click
+document.getElementById('adOverlay').addEventListener('click',function(e){if(e.target===this&&adTimer){const s=document.getElementById('adSkip');if(!s.disabled)skipAd()}});
 </script>
 </body>
 </html>
