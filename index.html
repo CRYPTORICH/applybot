@@ -2,342 +2,250 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ApplyBot — We Submit Job Applications For You</title>
-<meta name="description" content="Upload your resume. We search public job boards and submit applications on your behalf.">
+<meta name="description" content="Upload your resume. We search public job boards and submit applications on your behalf. You get an email for every one.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111827;line-height:1.6}
+body{background:#fff;color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
+header{border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto}
+header .logo{font-weight:800;font-size:1.2rem;color:#1a1a2e;text-decoration:none}
+header nav a{color:#6b7280;text-decoration:none;margin-left:24px;font-size:.9rem;font-weight:500}
+header nav a:hover{color:#1a1a2e}
+.hero{text-align:center;padding:80px 20px 60px;max-width:700px;margin:0 auto}
+.hero .badge{display:inline-block;background:#ecfdf5;color:#059669;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:16px}
+.hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px;margin-bottom:16px;line-height:1.2}
+.hero p{font-size:1.1rem;color:#6b7280;max-width:500px;margin:0 auto 32px}
+.hero .cta{display:inline-block;padding:14px 32px;font-size:1rem;font-weight:600;border-radius:8px;cursor:pointer;background:#1a1a2e;color:#fff;text-decoration:none;transition:opacity .2s}
+.hero .cta:hover{opacity:.9}
+section{padding:60px 20px;max-width:900px;margin:0 auto}
+h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
+.section-sub{text-align:center;color:#6b7280;margin-bottom:40px;font-size:.95rem}
 
-/* ═══ MAP AS FULL HERO ═══ */
-.map-hero{position:relative;width:100%;height:70vh;min-height:420px;max-height:650px}
+/* ── MAP SECTION (new — inserted between hero and how-it-works) ── */
+.map-section{background:#fafafa;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:48px 20px}
+.map-section .map-inner{max-width:900px;margin:0 auto}
+.map-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.map-controls select,.map-controls input{flex:1;min-width:120px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;font-family:inherit;color:#1a1a2e;background:#fff;outline:none}
+.map-controls select:focus,.map-controls input:focus{border-color:#059669}
+.map-controls button{background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.map-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;height:380px}
 #map{width:100%;height:100%}
+.map-zoom{position:absolute;right:8px;top:8px;z-index:500;display:flex;flex-direction:column;gap:3px}
+.map-zoom button{width:30px;height:30px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;color:#1a1a2e;font-size:15px;cursor:pointer}
+.chips-row{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.chip{background:#fff;border:1px solid #e5e7eb;color:#6b7280;padding:4px 12px;border-radius:14px;font-size:.75rem;cursor:pointer;transition:all .15s}
+.chip.on{background:#059669;color:#fff;border-color:#059669;font-weight:600}
 
-/* Floating nav bar */
-.float-nav{position:absolute;top:0;left:0;right:0;z-index:100;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
-.float-nav>*{pointer-events:auto}
-.float-nav .logo{font-size:16px;font-weight:800;color:#111;text-shadow:0 1px 2px rgba(255,255,255,.8)}
-.float-nav .logo span{color:#059669}
-.float-nav a.nav-cta{background:#059669;color:#fff;padding:6px 14px;border-radius:8px;font-weight:600;font-size:12px;text-decoration:none}
-
-/* Floating search bar */
-.float-search{position:absolute;top:52px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:6px;background:rgba(255,255,255,.94);border:1px solid #e5e7eb;border-radius:12px;padding:5px;box-shadow:0 2px 12px rgba(0,0,0,.08);max-width:520px;width:calc(100% - 28px)}
-.float-search select,.float-search input{flex:1;min-width:0;border:none;background:transparent;color:#111;padding:9px 10px;font-size:12px;font-family:inherit;outline:none}
-.float-search select option{color:#111}
-.float-search button{background:#059669;color:#fff;border:none;padding:9px 16px;border-radius:9px;font-weight:600;font-size:11px;cursor:pointer;white-space:nowrap}
-
-/* Floating chips */
-.float-chips{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;padding:0 10px;pointer-events:none;max-width:100%}
-.float-chips>*{pointer-events:auto}
-.float-chip{background:rgba(255,255,255,.9);border:1px solid #e5e7eb;color:#6b7280;padding:4px 11px;border-radius:14px;font-size:10px;cursor:pointer;white-space:nowrap;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.float-chip.on{background:#059669;color:#fff;border-color:#059669;font-weight:600}
-
-/* Floating zoom */
-.float-zoom{position:absolute;right:10px;bottom:60px;z-index:100;display:flex;flex-direction:column;gap:3px}
-.float-zoom button{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;background:rgba(255,255,255,.9);color:#111;font-size:16px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-
-/* ═══ CONTENT BELOW MAP ═══ */
-.content{max-width:960px;margin:0 auto;padding:0 20px 60px}
-
-/* Nav (desktop) */
-nav.desktop-nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #e5e7eb;margin-bottom:36px}
-nav.desktop-nav .logo{font-weight:800;font-size:16px;color:#111}
-nav.desktop-nav .logo span{color:#059669}
-nav.desktop-nav .links{display:flex;gap:20px;align-items:center}
-nav.desktop-nav .links a{color:#6b7280;text-decoration:none;font-size:13px;font-weight:500}
-nav.desktop-nav .links a.nav-cta{background:#059669;color:#fff;padding:6px 14px;border-radius:8px;font-weight:600}
-
-/* Stats row (below map) */
-.stats-row{display:flex;gap:10px;padding:14px 0 20px;flex-wrap:wrap}
-.stat-pill{flex:1;min-width:90px;text-align:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
-.stat-pill .val{font-size:17px;font-weight:700;color:#059669}
-.stat-pill .lbl{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
-
-section{padding:40px 0}
-section h2{font-size:24px;text-align:center;margin-bottom:6px}
-section h2 em{color:#059669;font-style:normal}
-.sec-sub{text-align:center;color:#6b7280;margin-bottom:32px;font-size:13px}
-
-/* Steps */
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:36px}
-.step{text-align:center;padding:24px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px}
-.step .icon{font-size:28px;margin-bottom:8px}
-.step h3{font-size:14px;margin-bottom:4px}
-.step p{color:#6b7280;font-size:11px;line-height:1.5}
-
-/* Pricing */
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:10px}
-.plan{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px 14px;text-align:center;transition:box-shadow .2s}
-.plan:hover{box-shadow:0 4px 16px rgba(5,150,105,.08)}
-.plan.pop{border-color:#059669;border-width:2px;padding:20px 12px}
-.plan.pop::before{content:'Most Popular';display:block;font-size:8px;font-weight:700;color:#059669;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
-.plan .pname{font-size:12px;font-weight:700;margin-bottom:2px}
-.plan .price{font-size:28px;font-weight:800;margin:2px 0}
-.plan .apps{color:#059669;font-weight:600;margin-bottom:12px;font-size:11px}
-.plan button{width:100%;padding:9px;border-radius:8px;font-weight:600;font-size:11px;cursor:pointer;border:1px solid #059669;background:#fff;color:#059669;transition:all .15s}
-.plan.pop button{background:#059669;color:#fff}
-.plan button:hover{background:#059669;color:#fff}
-.plan .per{color:#6b7280;font-size:9px;margin-top:4px}
-.pricing-note{text-align:center;color:#6b7280;font-size:10px}
-
-/* Compare */
-.compare-wrap{overflow-x:auto;margin-bottom:28px}
-.compare-wrap table{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
-.compare-wrap td,.compare-wrap th{padding:8px 10px;text-align:center;border-bottom:1px solid #e5e7eb}
-.compare-wrap th{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#f9fafb}
-.compare-wrap td:first-child{text-align:left;font-weight:500}
-.compare-wrap .us{color:#059669;font-weight:700}
-.compare-wrap .yes{color:#059669}
-.compare-wrap .no{color:#d1d5db}
-
-/* Features */
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.fcard{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
-.fcard .icon{font-size:20px;margin-bottom:6px}
-.fcard h3{font-size:12px;margin-bottom:3px}
-.fcard p{color:#6b7280;font-size:10px;line-height:1.5}
-
-/* CTA */
-.cta-block{text-align:center;padding:28px 0}
-.cta-block a{display:inline-block;background:#059669;color:#fff;padding:14px 30px;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none}
-.cta-block p{color:#6b7280;font-size:11px;margin-top:6px}
-
-/* FAQ */
-.faq-block{max-width:560px;margin:0 auto}
-.faq-block .q{font-weight:600;margin-top:18px;font-size:13px}
-.faq-block .a{color:#6b7280;font-size:11px;margin-top:3px;line-height:1.5}
-
-footer{text-align:center;padding:20px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:10px}
-footer a{color:#6b7280;text-decoration:none;margin:0 8px}
-
-/* Toast */
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:7px 18px;border-radius:18px;font-weight:600;font-size:11px;z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none}
+/* ── ORIGINAL SECTIONS ── */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
+.how .step{text-align:center;padding:0 8px}
+.how .step .num{width:40px;height:40px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:700;font-size:1.1rem}
+.how .step h3{font-size:1rem;margin-bottom:8px}
+.how .step p{color:#6b7280;font-size:.85rem;line-height:1.5}
+.pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.plan{border:1px solid #e5e7eb;border-radius:10px;padding:28px 20px;text-align:center;transition:box-shadow .2s}
+.plan:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.plan.popular{border-color:#1a1a2e;border-width:2px;padding:26px 18px}
+.plan.popular::before{content:'Most Popular';display:block;font-size:.65rem;font-weight:700;color:#1a1a2e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.plan .name{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.plan .price{font-size:2rem;font-weight:800;margin:8px 0}
+.plan .apps{color:#059669;font-weight:600;margin-bottom:16px;font-size:.85rem}
+.plan button{width:100%;padding:10px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;border:1px solid #1a1a2e;background:#fff;color:#1a1a2e}
+.plan.popular button{background:#1a1a2e;color:#fff}
+.plan button:hover{background:#1a1a2e;color:#fff}
+.plan .per{color:#9ca3af;font-size:.7rem;margin-top:6px}
+.pricing-note{text-align:center;color:#9ca3af;font-size:.8rem}
+.compare{overflow-x:auto;margin-bottom:40px}
+.compare table{width:100%;border-collapse:collapse;font-size:.85rem}
+.compare td,.compare th{padding:12px 14px;text-align:center;border-bottom:1px solid #f3f4f6}
+.compare th{font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#fafafa}
+.compare td:first-child{text-align:left;font-weight:500;color:#111}
+.compare .us{color:#059669;font-weight:700}
+.compare .yes{color:#059669}
+.compare .no{color:#d1d5db}
+.faq{max-width:650px;margin:0 auto}
+.faq dt{font-weight:600;margin-top:20px;font-size:.9rem}
+.faq dd{color:#6b7280;font-size:.85rem;margin-top:4px;margin-left:0}
+.disclaimer{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-top:32px;font-size:.8rem;color:#6b7280;line-height:1.6}
+.disclaimer strong{color:#333}
+.trust{display:flex;justify-content:center;gap:40px;padding:20px;color:#9ca3af;font-size:.8rem;border-top:1px solid #f3f4f6;margin-top:56px;flex-wrap:wrap}
+.trust span{display:flex;align-items:center;gap:6px}
+.referral{background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:24px;text-align:center;max-width:550px;margin:0 auto}
+.referral h3{font-size:1.1rem;margin-bottom:8px}
+.referral p{color:#6b7280;margin-bottom:16px;font-size:.9rem}
+.referral code{background:#1a1a2e;color:#fff;padding:8px 16px;border-radius:6px;font-size:.85rem;word-break:break-all}
+.referral .bonus{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600;margin-top:8px}
+.footer{text-align:center;padding:32px 20px;color:#9ca3af;font-size:.75rem}
+.footer a{color:#1a1a2e;text-decoration:underline}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
-
-/* Popup */
-.leaflet-popup-content-wrapper{background:#fff;color:#111;border-radius:8px;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.08);border:1px solid #e5e7eb}
-.leaflet-popup-content{margin:6px 8px;font-size:11px;line-height:1.5}
-.leaflet-popup-tip{background:#fff}
-
-@media(min-width:769px){
-  .float-nav{display:none}
-  .float-search{top:70px}
-}
 @media(max-width:768px){
-  nav.desktop-nav{display:none}
-  .map-hero{height:55vh;min-height:360px}
-  .float-search{top:46px;width:calc(100% - 20px)}
-  .pricing-grid{grid-template-columns:1fr 1fr}
-  .steps{grid-template-columns:1fr}
+  .hero h1{font-size:1.8rem}
+  .pricing{grid-template-columns:1fr 1fr}
+  .how{grid-template-columns:1fr}
+  .trust{gap:16px}
+  .map-wrap{height:280px}
+  .map-controls{flex-direction:column}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ MAP HERO (full viewport) ═══ -->
-<div class="map-hero">
-  <div id="map"></div>
-
-  <!-- Floating nav -->
-  <div class="float-nav">
-    <div class="logo">Apply<span>Bot</span></div>
-    <a href="https://cryptorich.github.io/CRM/" class="nav-cta">📞 CRM</a>
-  </div>
-
-  <!-- Floating search -->
-  <div class="float-search">
-    <select id="catSelect" onchange="setCat(this.value,null)">
-      <option value="all">All Categories</option>
-      <option value="software-dev">💻 Software</option>
-      <option value="it-support">🖥️ IT Support</option>
-      <option value="healthcare">🏥 Healthcare</option>
-      <option value="retail">🛒 Retail</option>
-      <option value="warehouse">📦 Warehouse</option>
-      <option value="admin">📋 Admin</option>
-      <option value="finance">💵 Finance</option>
-      <option value="construction">🔨 Trades</option>
-      <option value="education">📚 Education</option>
-      <option value="sales">📈 Sales</option>
-      <option value="manufacturing">🏭 Manufacturing</option>
-    </select>
-    <input type="text" id="locInput" placeholder="City or zip..." onkeydown="if(event.key==='Enter')flyToCity()">
-    <button onclick="flyToCity()">Go</button>
-  </div>
-
-  <!-- Floating chips -->
-  <div class="float-chips">
-    <button class="float-chip on" onclick="setCat('all',this)">All</button>
-    <button class="float-chip" onclick="setCat('software-dev',this)">💻 Dev</button>
-    <button class="float-chip" onclick="setCat('healthcare',this)">🏥 Health</button>
-    <button class="float-chip" onclick="setCat('construction',this)">🔨 Trades</button>
-    <button class="float-chip" onclick="setCat('sales',this)">📈 Sales</button>
-    <button class="float-chip" onclick="setCat('remote',this)">🏠 Remote</button>
-  </div>
-
-  <!-- Floating zoom -->
-  <div class="float-zoom">
-    <button onclick="map.zoomIn()">+</button>
-    <button onclick="map.zoomOut()">−</button>
-    <button onclick="map.locate({setView:true,maxZoom:12})">📍</button>
-  </div>
-</div>
-
-<!-- ═══ CONTENT ═══ -->
-<div class="content">
-
-<!-- Desktop nav -->
-<nav class="desktop-nav">
-  <div class="logo">Apply<span>Bot</span></div>
-  <div class="links">
+<header>
+  <a href="/" class="logo">ApplyBot</a>
+  <nav>
     <a href="#how">How It Works</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
-    <a href="https://cryptorich.github.io/CRM/" class="nav-cta">📞 CRM</a>
-  </div>
-</nav>
+    <a href="https://cryptorich.github.io/CRM/" style="background:#1a1a2e;color:#fff;padding:6px 14px;border-radius:6px;font-weight:500">📞 CRM</a>
+  </nav>
+</header>
 
-<div class="stats-row">
-  <div class="stat-pill"><div class="val" id="stTotal">3.2M</div><div class="lbl">Openings US</div></div>
-  <div class="stat-pill"><div class="val">50</div><div class="lbl">Metro Areas</div></div>
-  <div class="stat-pill"><div class="val" id="stGrowth">4.2%</div><div class="lbl">Growth/mo</div></div>
-  <div class="stat-pill"><div class="val">$5</div><div class="lbl">From</div></div>
+<div class="hero">
+  <div class="badge">🔍 We search. We apply. You get confirmations.</div>
+  <h1>Your job applications,<br>handled for you</h1>
+  <p>Upload your resume. We search public job boards and submit applications on your behalf. You get an email for every one.</p>
+  <a href="#pricing" class="cta">Get Started</a>
+</div>
+
+<!-- ═══ MAP SECTION (the user's addition) ═══ -->
+<div class="map-section">
+  <div class="map-inner">
+    <h2 style="margin-bottom:4px">Explore Job Density</h2>
+    <p class="section-sub" style="margin-bottom:18px">See where jobs cluster across the US before you choose your target area</p>
+
+    <div class="map-controls">
+      <select id="catSelect" onchange="setCat(this.value,null)">
+        <option value="all">All Categories</option>
+        <option value="software-dev">💻 Software Development</option>
+        <option value="it-support">🖥️ IT Support</option>
+        <option value="healthcare">🏥 Healthcare</option>
+        <option value="retail">🛒 Retail</option>
+        <option value="warehouse">📦 Warehouse</option>
+        <option value="admin">📋 Admin & Office</option>
+        <option value="finance">💵 Finance & Banking</option>
+        <option value="construction">🔨 Construction & Trades</option>
+        <option value="education">📚 Education</option>
+        <option value="sales">📈 Sales</option>
+        <option value="manufacturing">🏭 Manufacturing</option>
+      </select>
+      <input type="text" id="locInput" placeholder="City or zip (e.g. Wilmington, DE)" onkeydown="if(event.key==='Enter')flyToCity()">
+      <button onclick="flyToCity()">🔍 Search</button>
+    </div>
+
+    <div class="map-wrap">
+      <div class="map-zoom">
+        <button onclick="map.zoomIn()">+</button>
+        <button onclick="map.zoomOut()">−</button>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <div class="chips-row">
+      <button class="chip on" onclick="setCat('all',this)">All Jobs</button>
+      <button class="chip" onclick="setCat('software-dev',this)">💻 Software</button>
+      <button class="chip" onclick="setCat('healthcare',this)">🏥 Healthcare</button>
+      <button class="chip" onclick="setCat('construction',this)">🔨 Trades</button>
+      <button class="chip" onclick="setCat('sales',this)">📈 Sales</button>
+      <button class="chip" onclick="setCat('remote',this)">🏠 Remote</button>
+    </div>
+  </div>
 </div>
 
 <section id="how">
-  <h2>How <em>ApplyBot</em> Works</h2>
-  <p class="sec-sub">Explore the map to find job clusters, then let us handle the applications</p>
-  <div class="steps">
-    <div class="step"><div class="icon">🗺️</div><h3>Explore Job Density</h3><p>Zoom into any metro area. Circles show estimated openings — bigger = more jobs.</p></div>
-    <div class="step"><div class="icon">📎</div><h3>Upload Your Resume</h3><p>Drop your resume, pick your target job titles and location. No per-application forms.</p></div>
-    <div class="step"><div class="icon">🚀</div><h3>We Apply For You</h3><p>Our engine submits applications to LinkedIn Easy Apply and USAJobs. Every application sends you a confirmation email.</p></div>
+  <h2>How It Works</h2>
+  <p class="section-sub">Three steps from resume to applications</p>
+  <div class="how">
+    <div class="step"><div class="num">1</div><h3>Upload Your Resume</h3><p>Share your resume and tell us what kind of jobs you're looking for.</p></div>
+    <div class="step"><div class="num">2</div><h3>We Search & Apply</h3><p>We find matching jobs on public boards and submit applications using your information.</p></div>
+    <div class="step"><div class="num">3</div><h3>Confirmations In Your Inbox</h3><p>Every application comes with an email — job title, company, and link.</p></div>
   </div>
 </section>
 
 <section id="pricing">
-  <h2>Simple <em>Pricing</em></h2>
-  <p class="sec-sub">Pay once. No subscription. 2 free trial applications — no credit card.</p>
-  <div class="pricing-grid">
-    <div class="plan"><div class="pname">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="cta()">Get Started</button><div class="per">50¢ / app</div></div>
-    <div class="plan pop"><div class="pname">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="cta()">Get Started</button><div class="per">38¢ / app</div></div>
-    <div class="plan"><div class="pname">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="cta()">Get Started</button><div class="per">26¢ / app</div></div>
-    <div class="plan"><div class="pname">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="cta()">Get Started</button><div class="per">16¢ / app</div></div>
+  <h2>Simple Pricing</h2>
+  <p class="section-sub">Pay once. No subscription. You're in control.</p>
+  <div class="pricing">
+    <div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div></div>
+    <div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div></div>
+    <div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div></div>
+    <div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div></div>
   </div>
-  <p class="pricing-note">Secure Stripe payments. Paying for the application service, not a guaranteed outcome.</p>
+  <p class="pricing-note">All payments processed through Stripe. No refunds — paying for the application service, not a guaranteed outcome.</p>
 </section>
 
 <section>
-  <h2>How We <em>Compare</em></h2>
-  <div class="compare-wrap">
+  <h2>What You Get</h2>
+  <div class="compare">
     <table>
-      <tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>Sonara</th><th>MassApply</th></tr>
+      <tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
       <tr><td>Job density map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
       <tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
       <tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
       <tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-      <tr><td>LinkedIn + USAJobs</td><td class="yes">✓</td><td class="yes">—</td><td class="no">—</td><td class="yes">✓</td></tr>
-      <tr><td>Price</td><td class="us">$5–$79</td><td>$79/mo</td><td>$49/mo</td><td>$29/mo</td></tr>
+      <tr><td>LinkedIn + Indeed</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td></tr>
+      <tr><td>Price</td><td class="us">$5 – $79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr>
     </table>
-  </div>
-
-  <div class="fgrid">
-    <div class="fcard"><div class="icon">🗺️</div><h3>Live Job Map</h3><p>BLS-powered job density across 50 US metros. See where jobs cluster.</p></div>
-    <div class="fcard"><div class="icon">🤖</div><h3>Auto-Apply Engine</h3><p>Chrome CDP engine fills Easy Apply forms. No captchas, no manual work.</p></div>
-    <div class="fcard"><div class="icon">📧</div><h3>Confirmations</h3><p>Every application emails you with job title, company, and link.</p></div>
-    <div class="fcard"><div class="icon">🔒</div><h3>No Subscriptions</h3><p>Pay per batch. Tokens never expire. No recurring fees.</p></div>
-    <div class="fcard"><div class="icon">📊</div><h3>BLS-Verified</h3><p>Job counts from Bureau of Labor Statistics. Real data.</p></div>
-    <div class="fcard"><div class="icon">👥</div><h3>Referrals</h3><p>Refer a friend → both get +2 free applications.</p></div>
   </div>
 </section>
 
 <section id="faq">
-  <h2>Quick <em>Answers</em></h2>
-  <div class="faq-block">
-    <div class="q">Where do you apply?</div>
-    <div class="a">LinkedIn (Easy Apply), USAJobs.gov, and public job boards. We target platforms with programmatic application support.</div>
-    <div class="q">How long does it take?</div>
-    <div class="a">Applications begin within 24 hours. A 50-app batch typically completes in 2–3 days.</div>
-    <div class="q">Can I target specific companies?</div>
-    <div class="a">We match by job title, category, and location. Contact us post-purchase for company-specific targeting.</div>
-    <div class="q">What if I don't get interviews?</div>
-    <div class="a">We submit applications — we can't guarantee interviews. But we use real BLS job data to maximize match volume in your target area.</div>
+  <h2>FAQ</h2>
+  <div class="faq">
+    <dl>
+      <dt>Where do the job listings come from?</dt>
+      <dd>All listings are from publicly available sources — LinkedIn, Indeed, ZipRecruiter, and company career pages — found in real-time when your application runs.</dd>
+      <dt>How do I know you actually applied?</dt>
+      <dd>You receive an email confirmation for every application, including job title, company, and listing link. You can also verify by checking your LinkedIn "Applied Jobs" page — every application we submit appears there.</dd>
+      <dt>Do you guarantee I'll get a job?</dt>
+      <dd>No. We guarantee we submit the number of applications you purchased to real, currently-open job listings. Employers make hiring decisions — but applying to 150 jobs gives you dramatically better odds than 5.</dd>
+      <dt>Can I get a refund?</dt>
+      <dd>All sales are final. You're paying us to submit real applications to real job listings, which we do. You can verify every submission.</dd>
+      <dt>Is this allowed by LinkedIn?</dt>
+      <dd>ApplyBot uses browser automation to fill out LinkedIn Easy Apply forms — the same forms you'd fill manually, just faster. We recommend spacing out applications to stay within normal usage patterns.</dd>
+    </dl>
+  </div>
+  <div class="disclaimer">
+    <strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs using the information you provide. We do not guarantee interviews, job offers, or employment. We are not affiliated with LinkedIn, Indeed, or any employer. Your personal information is used only to complete the applications you've purchased.
   </div>
 </section>
 
-<div class="cta-block">
-  <a href="#pricing">Get Started — Plans from $5</a>
-  <p>2 free trial applications included. No credit card required.</p>
+<div class="trust">
+  <span>🔒 Stripe Secure Payments</span>
+  <span>📧 Email Confirmations</span>
+  <span>📊 Real Job Data</span>
+  <span>🚫 No Subscription</span>
+  <span>🎁 Referral Rewards</span>
 </div>
 
+<section>
+  <div class="referral">
+    <h3>🎁 Share & Earn Free Applications</h3>
+    <p>After your first purchase, you'll get a unique referral link. When a friend buys tokens using your link, you <strong>BOTH</strong> get 2 free applications. No limit — share with everyone.</p>
+    <div class="bonus">+2 free apps for you + 2 free apps for them</div>
+  </div>
+</section>
+
+<div class="footer">
+  <p>ApplyBot · <a href="https://cryptorich.github.io/CRM/">CRM</a></p>
+  <p style="margin-top:4px">Not affiliated with LinkedIn, Indeed, or any employer.</p>
 </div>
-
-<footer>
-  ApplyBot &copy; 2026
-  <a href="https://cryptorich.github.io/CRM/">CRM</a>
-  <a href="#">Privacy</a>
-  <a href="#">Terms</a>
-</footer>
-
-<div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const METROS=[
-  {city:"New York",lat:40.71,lng:-74.01,jobs:420000},{city:"Los Angeles",lat:34.05,lng:-118.24,jobs:280000},
-  {city:"Chicago",lat:41.88,lng:-87.63,jobs:180000},{city:"Dallas",lat:32.78,lng:-96.80,jobs:160000},
-  {city:"Houston",lat:29.76,lng:-95.37,jobs:140000},{city:"Washington DC",lat:38.91,lng:-77.04,jobs:190000},
-  {city:"Miami",lat:25.76,lng:-80.19,jobs:95000},{city:"Philadelphia",lat:39.95,lng:-75.17,jobs:110000},
-  {city:"Atlanta",lat:33.75,lng:-84.39,jobs:130000},{city:"Phoenix",lat:33.45,lng:-112.07,jobs:100000},
-  {city:"Boston",lat:42.36,lng:-71.06,jobs:110000},{city:"San Francisco",lat:37.77,lng:-122.42,jobs:90000},
-  {city:"Seattle",lat:47.61,lng:-122.33,jobs:105000},{city:"Detroit",lat:42.33,lng:-83.05,jobs:60000},
-  {city:"San Diego",lat:32.72,lng:-117.16,jobs:85000},{city:"Minneapolis",lat:44.98,lng:-93.27,jobs:75000},
-  {city:"Tampa",lat:27.95,lng:-82.46,jobs:60000},{city:"Denver",lat:39.74,lng:-104.99,jobs:85000},
-  {city:"Baltimore",lat:39.29,lng:-76.61,jobs:85000},{city:"St Louis",lat:38.63,lng:-90.20,jobs:52000},
-  {city:"Orlando",lat:28.54,lng:-81.38,jobs:65000},{city:"Charlotte",lat:35.23,lng:-80.84,jobs:70000},
-  {city:"San Antonio",lat:29.42,lng:-98.49,jobs:75000},{city:"Portland",lat:45.52,lng:-122.68,jobs:50000},
-  {city:"Pittsburgh",lat:40.44,lng:-79.99,jobs:55000},{city:"Austin",lat:30.27,lng:-97.74,jobs:90000},
-  {city:"Sacramento",lat:38.58,lng:-121.49,jobs:38000},{city:"Las Vegas",lat:36.17,lng:-115.14,jobs:55000},
-  {city:"Cincinnati",lat:39.10,lng:-84.51,jobs:48000},{city:"Kansas City",lat:39.10,lng:-94.58,jobs:50000},
-  {city:"Columbus",lat:39.96,lng:-82.99,jobs:50000},{city:"Cleveland",lat:41.50,lng:-81.69,jobs:45000},
-  {city:"Indianapolis",lat:39.77,lng:-86.16,jobs:48000},{city:"Nashville",lat:36.16,lng:-86.78,jobs:55000},
-  {city:"San Jose",lat:37.34,lng:-121.89,jobs:75000},{city:"Raleigh",lat:35.78,lng:-78.64,jobs:44000},
-  {city:"Jacksonville",lat:30.33,lng:-81.66,jobs:40000},{city:"Milwaukee",lat:43.04,lng:-87.91,jobs:35000},
-  {city:"Salt Lake City",lat:40.76,lng:-111.89,jobs:42000},{city:"Richmond",lat:37.54,lng:-77.44,jobs:35000},
-  {city:"Louisville",lat:38.25,lng:-85.76,jobs:28000},{city:"Memphis",lat:35.15,lng:-90.05,jobs:30000},
-  {city:"Oklahoma City",lat:35.47,lng:-97.52,jobs:32000},{city:"Buffalo",lat:42.89,lng:-78.88,jobs:22000},
-  {city:"New Orleans",lat:29.95,lng:-90.07,jobs:25000},{city:"Birmingham",lat:33.52,lng:-86.80,jobs:24000},
-  {city:"Omaha",lat:41.26,lng:-95.94,jobs:24000},{city:"Albuquerque",lat:35.08,lng:-106.65,jobs:18000},
-  {city:"Tucson",lat:32.22,lng:-110.97,jobs:20000},{city:"Boise",lat:43.62,lng:-116.20,jobs:16000},
-  {city:"Wilmington",lat:39.75,lng:-75.55,jobs:12000}
-];
+const METROS=[{city:"New York",lat:40.71,lng:-74.01,jobs:420000},{city:"Los Angeles",lat:34.05,lng:-118.24,jobs:280000},{city:"Chicago",lat:41.88,lng:-87.63,jobs:180000},{city:"Dallas",lat:32.78,lng:-96.80,jobs:160000},{city:"Houston",lat:29.76,lng:-95.37,jobs:140000},{city:"Washington DC",lat:38.91,lng:-77.04,jobs:190000},{city:"Miami",lat:25.76,lng:-80.19,jobs:95000},{city:"Philadelphia",lat:39.95,lng:-75.17,jobs:110000},{city:"Atlanta",lat:33.75,lng:-84.39,jobs:130000},{city:"Phoenix",lat:33.45,lng:-112.07,jobs:100000},{city:"Boston",lat:42.36,lng:-71.06,jobs:110000},{city:"San Francisco",lat:37.77,lng:-122.42,jobs:90000},{city:"Seattle",lat:47.61,lng:-122.33,jobs:105000},{city:"Detroit",lat:42.33,lng:-83.05,jobs:60000},{city:"San Diego",lat:32.72,lng:-117.16,jobs:85000},{city:"Minneapolis",lat:44.98,lng:-93.27,jobs:75000},{city:"Tampa",lat:27.95,lng:-82.46,jobs:60000},{city:"Denver",lat:39.74,lng:-104.99,jobs:85000},{city:"Baltimore",lat:39.29,lng:-76.61,jobs:85000},{city:"St Louis",lat:38.63,lng:-90.20,jobs:52000},{city:"Orlando",lat:28.54,lng:-81.38,jobs:65000},{city:"Charlotte",lat:35.23,lng:-80.84,jobs:70000},{city:"San Antonio",lat:29.42,lng:-98.49,jobs:75000},{city:"Portland",lat:45.52,lng:-122.68,jobs:50000},{city:"Pittsburgh",lat:40.44,lng:-79.99,jobs:55000},{city:"Austin",lat:30.27,lng:-97.74,jobs:90000},{city:"Sacramento",lat:38.58,lng:-121.49,jobs:38000},{city:"Las Vegas",lat:36.17,lng:-115.14,jobs:55000},{city:"Cincinnati",lat:39.10,lng:-84.51,jobs:48000},{city:"Kansas City",lat:39.10,lng:-94.58,jobs:50000},{city:"Columbus",lat:39.96,lng:-82.99,jobs:50000},{city:"Cleveland",lat:41.50,lng:-81.69,jobs:45000},{city:"Indianapolis",lat:39.77,lng:-86.16,jobs:48000},{city:"Nashville",lat:36.16,lng:-86.78,jobs:55000},{city:"San Jose",lat:37.34,lng:-121.89,jobs:75000},{city:"Raleigh",lat:35.78,lng:-78.64,jobs:44000},{city:"Jacksonville",lat:30.33,lng:-81.66,jobs:40000},{city:"Milwaukee",lat:43.04,lng:-87.91,jobs:35000},{city:"Salt Lake City",lat:40.76,lng:-111.89,jobs:42000},{city:"Richmond",lat:37.54,lng:-77.44,jobs:35000},{city:"Louisville",lat:38.25,lng:-85.76,jobs:28000},{city:"Memphis",lat:35.15,lng:-90.05,jobs:30000},{city:"Oklahoma City",lat:35.47,lng:-97.52,jobs:32000},{city:"Buffalo",lat:42.89,lng:-78.88,jobs:22000},{city:"New Orleans",lat:29.95,lng:-90.07,jobs:25000},{city:"Birmingham",lat:33.52,lng:-86.80,jobs:24000},{city:"Omaha",lat:41.26,lng:-95.94,jobs:24000},{city:"Albuquerque",lat:35.08,lng:-106.65,jobs:18000},{city:"Tucson",lat:32.22,lng:-110.97,jobs:20000},{city:"Boise",lat:43.62,lng:-116.20,jobs:16000},{city:"Wilmington",lat:39.75,lng:-75.55,jobs:12000}];
 const CM={'software-dev':.16,'it-support':.10,'healthcare':.46,'retail':.21,'warehouse':.17,'admin':.13,'finance':.09,'construction':.15,'education':.10,'remote':.30,'sales':.17,'manufacturing':.11};
 let ac='all';
-
 const map=L.map('map',{zoomControl:false,attributionControl:false,zoomSnap:.25}).setView([39.5,-98],4.5);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
 const mL=L.layerGroup().addTo(map);
-
-function up(){
-  mL.clearLayers();const m=ac&&CM[ac]?CM[ac]:1;
-  const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));
-  const mx=Math.max(...d.map(x=>x.adj),1);
-  const t=d.reduce((s,x)=>s+x.adj,0);
-  document.getElementById('stTotal').textContent=(t/1e6).toFixed(1)+'M';
-  document.getElementById('stGrowth').textContent=(m*4.2).toFixed(1)+'%';
-  d.forEach(x=>{
-    if(x.adj<300&&ac!=='all')return;
-    const r=Math.max(4,Math.sqrt(x.adj)*1.8);
-    const c=x.adj/mx>.6?'#059669':x.adj/mx>.3?'#10b981':x.adj/mx>.12?'#f59e0b':'#d1d5db';
-    L.circleMarker([x.lat,x.lng],{radius:r,fillColor:c,color:'#fff',weight:1.5,fillOpacity:.8}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' '+(ac!=='all'?'jobs':'openings')+'<br><small>BLS estimate</small>').addTo(mL);
-  });
-}
-function setCat(c,btn){ac=c;document.getElementById('catSelect').value=c||'all';document.querySelectorAll('.float-chip').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');up()}
-async function flyToCity(){
-  const q=document.getElementById('locInput').value.trim();if(!q)return;
-  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1');const d=await r.json();if(d.length){map.flyTo([parseFloat(d[0].lat),parseFloat(d[0].lon)],11,{duration:1});s('📍 '+d[0].display_name.split(',')[0])}else s('Not found')}catch(e){s('Search failed')}
-}
-function cta(){s('🛒 Stripe checkout coming soon')}
-function s(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+function up(){mL.clearLayers();const m=ac&&CM[ac]?CM[ac]:1;const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));const mx=Math.max(...d.map(x=>x.adj),1);d.forEach(x=>{if(x.adj<300&&ac!=='all')return;const r=Math.max(4,Math.sqrt(x.adj)*1.8);const c=x.adj/mx>.6?'#059669':x.adj/mx>.3?'#10b981':x.adj/mx>.12?'#f59e0b':'#d1d5db';L.circleMarker([x.lat,x.lng],{radius:r,fillColor:c,color:'#fff',weight:1.5,fillOpacity:.8}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' '+(ac!=='all'?'jobs':'openings')+'<br><small>BLS estimate</small>').addTo(mL)})}
+function setCat(c,btn){ac=c;document.getElementById('catSelect').value=c||'all';document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');up()}
+async function flyToCity(){const q=document.getElementById('locInput').value.trim();if(!q)return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1');const d=await r.json();if(d.length){map.flyTo([parseFloat(d[0].lat),parseFloat(d[0].lon)],11,{duration:1.2});t('📍 '+d[0].display_name.split(',')[0])}else t('Not found')}catch(e){t('Search failed')}}
+function checkout(p){t('🛒 Stripe checkout — connect your Stripe keys to enable')}
+function t(m){const el=document.getElementById('toast')||function(){const d=document.createElement('div');d.className='toast';d.id='toast';document.body.appendChild(d);return d}();el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
 document.addEventListener('DOMContentLoaded',up);
 </script>
 </body>
