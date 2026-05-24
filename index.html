@@ -3,397 +3,337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ApplyBot — Find Opportunity</title>
+<title>ApplyBot — Auto-Apply to Jobs</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-:root{--bg:#080808;--accent:#00e676;--hot:#ffab00;--dead:#ff1744;--sold:#2979ff;--discover:#7c4dff;--text:#fff;--sub:#999;--surface:#1a1a1a}
+:root{--bg:#060606;--card:#0f0f0f;--surface:#161616;--border:#1a1a1a;--accent:#00e676;--text:#fff;--sub:#888;--dead:#ff1744;--hot:#ffab00;--discover:#7c4dff}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
 
-#map{width:100%;height:100%;z-index:1}
-.leaflet-control-zoom{display:none}
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(6,6,6,.95);backdrop-filter:blur(10px);z-index:100}
+nav .logo{font-size:16px;font-weight:800;color:var(--accent)}
+nav .logo span{color:var(--text)}
+nav a{color:var(--sub);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border);border-radius:6px;transition:all .2s}
+nav a:hover{color:var(--text);border-color:var(--sub)}
 
-/* Top bar overlay */
-.top-overlay{position:fixed;top:0;left:0;right:0;z-index:1000;padding:6px 8px;pointer-events:none}
-.top-overlay>*{pointer-events:auto}
-.top-row{display:flex;gap:6px;align-items:center;margin-bottom:4px}
-.top-row h1{font-size:14px;color:var(--text);text-shadow:0 1px 3px rgba(0,0,0,.8);flex:1}
-.top-row button{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:20px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.top-row button.scanning{background:var(--hot);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* ── HERO / MAP SECTION ── */
+.hero{padding:20px 16px 0;max-width:800px;margin:0 auto}
+.hero h1{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero .sub{color:var(--sub);font-size:14px;margin-bottom:16px}
 
-/* Stats badge */
-.stats-badge{display:inline-flex;gap:6px;background:rgba(0,0,0,.85);border-radius:16px;padding:6px 10px;font-size:10px;color:var(--sub);backdrop-filter:blur(10px)}
-.stats-badge span{font-weight:700}
-.stats-badge .red{color:var(--dead)}
-.stats-badge .yellow{color:var(--hot)}
-.stats-badge .green{color:var(--accent)}
-.stats-badge .blue{color:var(--discover)}
+/* Search bar */
+.search-box{display:flex;gap:8px;margin-bottom:12px}
+.search-box input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:14px;outline:none}
+.search-box input:focus{border-color:var(--accent)}
+.search-box button{background:var(--accent);color:#000;border:none;padding:12px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+
+/* Map container */
+.map-wrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);height:340px;margin-bottom:8px}
+#map{width:100%;height:100%}
+.map-overlay{position:absolute;top:8px;right:8px;z-index:500;display:flex;flex-direction:column;gap:3px}
+.map-overlay button{width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.7);color:var(--text);font-size:16px;cursor:pointer;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}
+.map-stats{position:absolute;bottom:8px;left:8px;z-index:500;display:flex;gap:6px;font-size:9px}
+.map-stats span{padding:3px 8px;border-radius:10px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px)}
+.map-stats .m-red{color:var(--dead)}
+.map-stats .m-amber{color:var(--hot)}
+.map-stats .m-purple{color:var(--discover)}
 
 /* Category chips */
-.cat-chips{display:flex;gap:4px;flex-wrap:wrap}
-.cat-chips button{background:rgba(0,0,0,.8);color:var(--sub);border:1px solid rgba(255,255,255,.15);padding:4px 10px;border-radius:14px;font-size:10px;cursor:pointer;backdrop-filter:blur(10px)}
-.cat-chips button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.chips button{background:var(--surface);color:var(--sub);border:1px solid var(--border);padding:4px 10px;border-radius:12px;font-size:10px;cursor:pointer}
+.chips button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
 
-/* Bottom bar */
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:1000;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));display:flex;gap:8px}
-.bottom-bar button{flex:1;padding:12px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.btn-scan{background:var(--discover);color:#fff}
-.btn-reset{background:rgba(0,0,0,.8);color:var(--text);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px)}
-.btn-crm{background:var(--accent);color:#000}
+/* ── FEATURES SECTION ── */
+.features{max-width:800px;margin:0 auto;padding:24px 16px 40px}
+.features h2{font-size:18px;margin-bottom:16px}
+.features h2 em{color:var(--accent);font-style:normal}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card .icon{font-size:24px;margin-bottom:8px}
+.card h3{font-size:14px;margin-bottom:4px}
+.card p{font-size:12px;color:var(--sub);line-height:1.5}
 
-/* Popup styles */
-.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:10px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.5)}
-.leaflet-popup-content{margin:10px 12px;font-size:12px;line-height:1.5}
-.leaflet-popup-tip{background:var(--surface)}
-.popup-name{font-size:13px;font-weight:700;margin-bottom:2px}
-.popup-meta{font-size:10px;color:var(--sub);margin-bottom:4px}
-.popup-actions{display:flex;gap:4px;margin-top:6px}
-.popup-actions a,.popup-actions button{flex:1;text-align:center;padding:6px 8px;border-radius:8px;font-size:10px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
-.popup-call{background:var(--accent);color:#000}
-.popup-copy{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
-.popup-add{background:var(--discover);color:#fff}
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step-num{background:var(--accent);color:#000;min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+.step h4{font-size:13px;margin-bottom:2px}
+.step p{font-size:11px;color:var(--sub);line-height:1.4}
 
-/* Marker legend */
-.legend{position:fixed;right:8px;top:50%;transform:translateY(-50%);z-index:1000;display:flex;flex-direction:column;gap:3px}
-.legend-item{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.75);padding:4px 8px;border-radius:10px;font-size:8px;color:var(--sub);backdrop-filter:blur(10px)}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* CTA */
+.cta{text-align:center;padding:20px 0}
+.cta a{display:inline-block;background:var(--accent);color:#000;padding:14px 32px;border-radius:12px;font-weight:800;font-size:15px;text-decoration:none}
+.cta p{color:var(--sub);font-size:11px;margin-top:8px}
+
+/* Footer */
+footer{text-align:center;padding:16px;border-top:1px solid var(--border);color:var(--sub);font-size:10px}
+footer a{color:var(--accent);text-decoration:none}
 
 /* Toast */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:6px 16px;border-radius:16px;font-weight:700;font-size:11px;z-index:2000;opacity:0;transition:opacity .15s;pointer-events:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:6px 16px;border-radius:16px;font-weight:700;font-size:11px;z-index:2000;opacity:0;transition:opacity .15s;pointer-events:none}
 .toast.show{opacity:1}
 
-/* Mobile zoom buttons */
-.zoom-btns{position:fixed;right:8px;bottom:120px;z-index:1000;display:flex;flex-direction:column;gap:4px}
-.zoom-btns button{width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.8);color:var(--text);font-size:20px;cursor:pointer;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center}
+/* Leaflet popup dark */
+.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:10px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.leaflet-popup-content{margin:8px 10px;font-size:11px;line-height:1.4}
+.leaflet-popup-tip{background:var(--surface)}
+.popup-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.popup-meta{font-size:9px;color:var(--sub);margin-bottom:3px}
+.popup-act{display:flex;gap:4px;margin-top:4px}
+.popup-act a,.popup-act button{flex:1;text-align:center;padding:5px;border-radius:6px;font-size:9px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+.pa-call{background:var(--accent);color:#000}
+.pa-add{background:var(--discover);color:#fff}
+
+@media(max-width:500px){
+  .hero h1{font-size:20px}
+  .map-wrap{height:280px}
+  .grid3{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<div id="map"></div>
+<!-- NAV -->
+<nav>
+  <div class="logo">Apply<span>Bot</span></div>
+  <a href="https://cryptorich.github.io/CRM/">📞 CRM</a>
+</nav>
 
-<!-- Top overlay -->
-<div class="top-overlay">
-  <div class="top-row">
-    <h1>🗺️ ApplyBot</h1>
-    <button id="scanBtn" onclick="scanArea()">🔍 Scan Area</button>
+<!-- HERO -->
+<div class="hero">
+  <h1>Find <em>opportunities</em> anywhere.<br>Zoom in. Scan. Apply.</h1>
+  <p class="sub">Pan the map to any US city, hit scan, and discover businesses and jobs in that area.</p>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="City, zip, or 'HVAC near me'..." onkeydown="if(event.key==='Enter')searchPlace()">
+    <button onclick="searchPlace()">🔍 Search</button>
   </div>
-  <div class="stats-badge" id="statsBadge">
-    <span class="red" id="statRed">0</span> no site
-    <span class="yellow" id="statYellow">0</span> fake
-    <span class="green" id="statGreen">0</span> real
-    <span class="blue" id="statBlue">0</span> new
+
+  <!-- MAP -->
+  <div class="map-wrap">
+    <div class="map-overlay">
+      <button onclick="map.zoomIn()">+</button>
+      <button onclick="map.zoomOut()">−</button>
+      <button onclick="map.locate({setView:true,maxZoom:14})" title="My location">📍</button>
+    </div>
+    <div class="map-stats" id="mapStats">
+      <span class="m-red" id="stRed">0 no site</span>
+      <span class="m-amber" id="stAmber">0 fake</span>
+      <span class="m-purple" id="stPurple">0 new</span>
+    </div>
+    <div id="map"></div>
   </div>
-  <div class="cat-chips" style="margin-top:4px">
+
+  <div class="chips">
     <button class="on" onclick="setCat('all',this)">All</button>
     <button onclick="setCat('HVAC',this)">HVAC</button>
     <button onclick="setCat('Electrician',this)">Elec</button>
     <button onclick="setCat('Plumber',this)">Plumb</button>
     <button onclick="setCat('Roofer',this)">Roof</button>
-    <button onclick="setCat('discovered',this)">🆕 New</button>
+    <button onclick="scanArea()" style="background:var(--discover);color:#fff;border-color:var(--discover)">🔍 Scan Area</button>
   </div>
 </div>
 
-<!-- Legend -->
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:var(--dead)"></div>No site</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--hot)"></div>Fake site</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Real site</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--discover)"></div>Discovered</div>
+<!-- FEATURES -->
+<div class="features">
+  <h2>How <em>ApplyBot</em> Works</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h4>Zoom into any US city</h4>
+        <p>Pan the map above to wherever you want to find work. Wilmington, Philly, Baltimore — anywhere.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h4>Hit "Scan Area"</h4>
+        <p>ApplyBot pulls every business and listing in view — plumbers, electricians, contractors, and more. Each one is an opportunity.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h4>Apply or contact directly</h4>
+        <p>Tap any marker to call, visit their site, or save them to your lead list. One tap and you're in motion.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Built for <em>speed</em></h2>
+  <div class="grid3">
+    <div class="card">
+      <div class="icon">🗺️</div>
+      <h3>Map-First Discovery</h3>
+      <p>No scrolling endless lists. See opportunities where they actually are — on the map.</p>
+    </div>
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h3>One-Tap Contact</h3>
+      <p>Tap a pin, tap call. You're talking to a lead in under 3 seconds.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📱</div>
+      <h3>Mobile Native</h3>
+      <p>Built for your phone. Works from the car, the job site, or the couch.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔄</div>
+      <h3>Always Fresh</h3>
+      <p>Scan pulls live data from OpenStreetMap. New businesses appear as they're mapped.</p>
+    </div>
+    <div class="card">
+      <div class="icon">💰</div>
+      <h3>Free to Use</h3>
+      <p>No API keys. No subscriptions. Open data. Zero cost.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔗</div>
+      <h3>CRM Ready</h3>
+      <p>Found a lead? Send it straight to the CRM for call tracking and follow-ups.</p>
+    </div>
+  </div>
+
+  <div class="cta">
+    <a href="#" onclick="scanArea();return false">🔍 Scan Your Area Now</a>
+    <p>No signup. No credit card. Just zoom and scan.</p>
+  </div>
 </div>
 
-<!-- Zoom buttons -->
-<div class="zoom-btns">
-  <button onclick="map.zoomIn()">+</button>
-  <button onclick="map.zoomOut()">−</button>
-  <button onclick="map.locate({setView:true,maxZoom:15})" style="font-size:12px">📍</button>
-</div>
-
-<!-- Bottom bar -->
-<div class="bottom-bar">
-  <button class="btn-scan" onclick="scanArea()">🔍 Scan Area</button>
-  <button class="btn-crm" onclick="window.open('https://cryptorich.github.io/CRM/','_blank')">📞 CRM</button>
-</div>
+<footer>
+  ApplyBot &copy; 2026 · <a href="https://cryptorich.github.io/CRM/">CRM</a> · Built with OpenStreetMap & Leaflet
+</footer>
 
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ── STATE ──
-let leads=[], markers=[], discoveredMarkers=[], activeCat='all', scanning=false;
-
-// Zip centroids with jitter ranges
-const ZIP_COORDS={
-  '19805':[39.745,-75.548],
-  '19720':[39.675,-75.605],
-  '21921':[39.610,-75.835],
-  '19804':[39.718,-75.528],
-  '19801':[39.737,-75.547],
-  '19802':[39.752,-75.532],
-  '19803':[39.776,-75.524],
-  '19806':[39.762,-75.565],
-  '19807':[39.772,-75.590],
-  '19808':[39.738,-75.650],
-  '19809':[39.766,-75.510],
-  '19810':[39.820,-75.528],
-  '19701':[39.664,-75.710],
-  '19702':[39.653,-75.750],
-  '19703':[39.712,-75.530],
-  '19709':[39.488,-75.716],
-  '19711':[39.702,-75.721],
-  '19713':[39.675,-75.735],
-  '21901':[39.583,-75.891],
-  '21911':[39.704,-75.924],
-  '21912':[39.533,-75.791],
-  '21913':[39.525,-75.870],
-  '21914':[39.556,-75.886],
-  '21915':[39.546,-75.830],
-  '21917':[39.658,-75.811],
-  '21918':[39.634,-75.788],
-  '21919':[39.427,-75.832],
-  '21920':[39.593,-75.870],
-  '21930':[39.462,-75.867]
-};
-const DEFAULT_COORDS=[39.746,-75.547]; // Wilmington
-
 // ── MAP ──
-const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.5,-75.8],9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OSM'}).addTo(map);
-
-// ── MARKER ICONS ──
-function mkIcon(color){return L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:'+color+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,8]})}
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.746,-75.547],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
 
 const ICONS={
-  nosite:mkIcon('var(--dead)'),
-  fake:mkIcon('var(--hot)'),
-  real:mkIcon('var(--accent)'),
-  discovered:mkIcon('var(--discover)')
+  nosite:L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#ff1744;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7]}),
+  fake:L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#ffab00;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7]}),
+  discovered:L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:#7c4dff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7]})
 };
-// Fix colors for inline style
-Object.keys(ICONS).forEach(k=>{
-  const c={nosite:'#ff1744',fake:'#ffab00',real:'#00e676',discovered:'#7c4dff'}[k];
-  ICONS[k]=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:'+c+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>',iconSize:[16,16],iconAnchor:[8,8]});
-});
+
+const ZIP_COORDS={
+  '19805':[39.745,-75.548],'19720':[39.675,-75.605],'21921':[39.610,-75.835],
+  '19804':[39.718,-75.528],'19801':[39.737,-75.547],'19802':[39.752,-75.532],
+  '19803':[39.776,-75.524],'19806':[39.762,-75.565],'19808':[39.738,-75.650],
+  '19809':[39.766,-75.510],'19810':[39.820,-75.528],'19701':[39.664,-75.710],
+  '19702':[39.653,-75.750],'19703':[39.712,-75.530],'19709':[39.488,-75.716],
+  '19711':[39.702,-75.721],'19713':[39.675,-75.735],'21901':[39.583,-75.891],
+  '21911':[39.704,-75.924],'21912':[39.533,-75.791],'21914':[39.556,-75.886],
+  '21915':[39.546,-75.830],'21917':[39.658,-75.811],'21918':[39.634,-75.788],
+  '21919':[39.427,-75.832],'21920':[39.593,-75.870]
+};
+
+let leads=[], markers=[], discovered=[], activeCat='all', scanning=false;
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"')}
 
 // ── INIT ──
 async function init(){
-  // Load existing leads
-  try{leads=await(await fetch('sites/leads.json')).json()}catch(e){try{leads=await(await fetch('../sites/leads.json')).json()}catch(e2){leads=[]}}
-  plotLeads();
-  updateStats();
+  try{leads=await(await fetch('sites/leads.json')).json()}catch(e){leads=[]}
+  plotLeads();updateStats();
 }
 
-function getCoords(lead){
-  const zc=ZIP_COORDS[lead.zip]||DEFAULT_COORDS;
-  // Add jitter so markers don't stack
-  const jlat=(Math.random()-0.5)*0.02;
-  const jlng=(Math.random()-0.5)*0.02;
-  return [zc[0]+jlat,zc[1]+jlng];
-}
-
-function leadMarker(lead){
-  const type=lead.no_site?'nosite':'fake';
-  const coords=getCoords(lead);
-  const cat=lead.category||lead.cat||'Unknown';
-  const phone=(lead.phone||'').replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
-  const slug=lead.slug||(lead.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,50);
-  const siteUrl='https://cryptorich.github.io/applybot/sites/'+slug+'/';
-  const opener=lead.opener||'Hey, I built a website for your '+cat.toLowerCase()+' business. Want me to text you the link?';
-
-  const popup='<div class="popup-name">'+escHtml(lead.name)+'</div>'+
-    '<div class="popup-meta">'+escHtml(cat)+' · '+escHtml(phone)+' · '+escHtml(lead.zip||'')+'</div>'+
-    '<div class="popup-meta" style="color:'+(type==='nosite'?'var(--dead)':'var(--hot)')+'">'+(type==='nosite'?'⚠ NO WEBSITE':'⚠ FAKE SITE')+'</div>'+
-    '<div class="popup-actions">'+
-      '<a class="popup-call" href="tel:+1'+(lead.phone||'')+'">📞 Call</a>'+
-      '<button class="popup-copy" onclick="copyText(\''+escJs(siteUrl)+'\')">📋 Copy</button>'+
+function mkPopup(l,type,discoveredData){
+  const phone=(l.phone||'').replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3');
+  const cat=l.category||l.cat||(discoveredData?discoveredData.cat:'');
+  const website=discoveredData?discoveredData.website:'';
+  const tag=type==='nosite'?'⚠ NO WEBSITE':type==='fake'?'⚠ FAKE SITE':discoveredData?'🆕 DISCOVERED':'';
+  const tagColor=type==='nosite'?'#ff1744':type==='fake'?'#ffab00':'#7c4dff';
+  return'<div class="popup-name">'+esc(l.name||discoveredData?.name||'')+'</div>'+
+    '<div class="popup-meta">'+esc(cat)+(phone?' · '+esc(phone):'')+' · '+esc(l.zip||'')+'</div>'+
+    '<div class="popup-meta" style="color:'+tagColor+'">'+tag+'</div>'+
+    (website?'<div class="popup-meta">🌐 '+esc(website.substring(0,50))+'</div>':'')+
+    '<div class="popup-act">'+
+      (phone?'<a class="pa-call" href="tel:+1'+(l.phone||discoveredData?.phone||'')+'">📞 Call</a>':'')+
+      (discoveredData?'<button class="pa-add" onclick="addLead(\''+escJs(discoveredData.name)+'\',\''+escJs(discoveredData.cat)+'\',\''+escJs(discoveredData.phone||'')+'\',\''+escJs(discoveredData.website||'')+'\')">+ Add</button>':'')+
     '</div>';
-
-  const m=L.marker(coords,{icon:ICONS[type]}).bindPopup(popup,{maxWidth:260});
-  m._leadData=lead;
-  m._leadType=type;
-  return m;
 }
 
 function plotLeads(){
-  clearMarkers();
-  let filtered=activeCat==='all'||activeCat==='discovered'?leads:leads.filter(l=>(l.category||l.cat||'')===activeCat);
-  if(activeCat==='discovered')filtered=[];
+  markers.forEach(m=>m.remove());markers=[];
+  let filtered=activeCat==='all'?leads:leads.filter(l=>(l.category||l.cat||'')===activeCat);
   filtered.forEach(l=>{
-    const m=leadMarker(l);
-    m.addTo(map);
-    markers.push(m);
+    const zc=ZIP_COORDS[l.zip]||[39.746,-75.547];
+    const lat=zc[0]+(Math.random()-.5)*.015,lng=zc[1]+(Math.random()-.5)*.015;
+    const type=l.no_site?'nosite':'fake';
+    const m=L.marker([lat,lng],{icon:ICONS[type]}).bindPopup(mkPopup(l,type),{maxWidth:240});
+    m.addTo(map);markers.push(m);
   });
 }
 
-function clearMarkers(){
-  markers.forEach(m=>m.remove());
-  markers=[];
-}
-
-// ── SCAN AREA ──
+// ── SCAN ──
 async function scanArea(){
-  if(scanning)return;
-  scanning=true;
-  const btn=document.getElementById('scanBtn');
-  btn.textContent='⏳ Scanning...';
-  btn.classList.add('scanning');
-  showToast('Scanning visible area...');
-
-  const bounds=map.getBounds();
-  const south=bounds.getSouth(),west=bounds.getWest(),north=bounds.getNorth(),east=bounds.getEast();
-  const bbox=[south,west,north,east].join(',');
-
+  if(scanning)return;scanning=true;showToast('Scanning...');
+  discovered.forEach(m=>m.remove());discovered=[];
+  const b=map.getBounds();
+  const bbox=[b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].join(',');
   try{
-    const query='[out:json][timeout:8];('+
-      'node["craft"="plumber"]('+bbox+');'+
-      'node["craft"="electrician"]('+bbox+');'+
-      'node["craft"="hvac"]('+bbox+');'+
-      'node["craft"="roofer"]('+bbox+');'+
-      'node["office"="construction"]('+bbox+');'+
-      'node["shop"="plumber"]('+bbox+');'+
-      'node["office"="electrician"]('+bbox+');'+
-      'way["craft"="plumber"]('+bbox+');'+
-      'way["craft"="electrician"]('+bbox+');'+
-      'way["craft"="hvac"]('+bbox+');'+
-      'way["craft"="roofer"]('+bbox+');'+
-      ');out center 50;';
-
-    const resp=await fetch('https://overpass-api.de/api/interpreter',{
-      method:'POST',body:'data='+encodeURIComponent(query),
-      headers:{'Content-Type':'application/x-www-form-urlencoded'}
-    });
-    const data=await resp.json();
-
-    // Clear old discovered markers
-    discoveredMarkers.forEach(m=>m.remove());
-    discoveredMarkers=[];
-
-    let count=0;
-    (data.elements||[]).forEach(el=>{
-      if(!el.tags||!el.tags.name)return;
-      const name=el.tags.name;
-      const lat=el.lat||el.center?.lat;
-      const lon=el.lon||el.center?.lon;
+    const q='[out:json][timeout:6];(node["craft"="plumber"]('+bbox+');node["craft"="electrician"]('+bbox+');node["craft"="hvac"]('+bbox+');node["craft"="roofer"]('+bbox+');node["office"="construction"]('+bbox+');way["craft"="plumber"]('+bbox+');way["craft"="electrician"]('+bbox+');way["craft"="hvac"]('+bbox+');way["craft"="roofer"]('+bbox+'););out center 40;';
+    const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const d=await r.json();let c=0;
+    (d.elements||[]).forEach(el=>{
+      if(!el.tags?.name)return;
+      const lat=el.lat||el.center?.lat,lon=el.lon||el.center?.lon;
       if(!lat||!lon)return;
-
-      const phone=el.tags.phone||el.tags['contact:phone']||'';
-      const website=el.tags.website||el.tags['contact:website']||'';
+      const nm=el.tags.name,ph=el.tags.phone||el.tags['contact:phone']||'';
+      const web=el.tags.website||el.tags['contact:website']||'';
       const cat=el.tags.craft||el.tags.shop||el.tags.office||'Business';
-      const addr=[el.tags['addr:street'],el.tags['addr:city'],el.tags['addr:state']].filter(Boolean).join(', ');
-
-      // Skip if already in leads
-      const exists=leads.some(l=>l.name.toLowerCase()===name.toLowerCase());
-      if(exists)return;
-
-      const popup='<div class="popup-name">'+escHtml(name)+' 🆕</div>'+
-        '<div class="popup-meta">'+escHtml(cat)+(addr?' · '+escHtml(addr):'')+'</div>'+
-        (phone?'<div class="popup-meta">📞 '+escHtml(phone)+'</div>':'')+
-        (website?'<div class="popup-meta">🌐 <a href="'+escHtml(website)+'" target="_blank">'+escHtml(website.substring(0,40))+'</a></div>':'<div class="popup-meta" style="color:var(--dead)">⚠ No website found</div>')+
-        '<div class="popup-actions">'+
-          (phone?'<a class="popup-call" href="tel:'+escHtml(phone)+'">📞 Call</a>':'')+
-          '<button class="popup-add" onclick="addDiscovered(\''+escJs(name)+'\',\''+escJs(cat)+'\',\''+escJs(phone)+'\',\''+escJs(website)+'\')">+ Add</button>'+
-        '</div>';
-
-      const m=L.marker([lat,lon],{icon:ICONS.discovered}).bindPopup(popup,{maxWidth:260});
-      m.addTo(map);
-      discoveredMarkers.push(m);
-      count++;
+      if(leads.some(l=>l.name.toLowerCase()===nm.toLowerCase()))return;
+      const ld={name:nm,phone:ph.replace(/\D/g,''),category:cat,cat,website:web,no_site:!web};
+      const m=L.marker([lat,lon],{icon:ICONS.discovered}).bindPopup(mkPopup(ld,'discovered',{name:nm,phone:ph,cat,website:web}),{maxWidth:240});
+      m.addTo(map);discovered.push(m);c++;
     });
-
-    showToast('Found '+count+' businesses 📍');
-  }catch(e){
-    showToast('Scan failed — try zooming in more');
-    console.error(e);
-  }
-
-  btn.textContent='🔍 Scan Area';
-  btn.classList.remove('scanning');
-  scanning=false;
-  updateStats();
+    showToast('Found '+c+' businesses 📍');
+  }catch(e){showToast('Scan failed — zoom in more')}
+  scanning=false;updateStats();
 }
 
-// ── ADD DISCOVERED LEAD ──
-function addDiscovered(name,cat,phone,website){
-  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
-  const noSite=!website;
-  const newLead={
-    name,phone:phone.replace(/\D/g,''),
-    category:cat,cat,
-    zip:'',
-    no_site:noSite,
-    website:website||'',
-    opener:'Hey, is this '+name.split(' ')[0]+'? I noticed your '+cat.toLowerCase()+' business online'+(noSite?' doesn\'t have a real website.':' has a website that could be better.')+' I built one. Want me to text you the link?',
-    slug,
-    type:noSite?'NO_SITE':'FAKE',
-    discovered:true
-  };
-  leads.push(newLead);
-  // Re-plot
-  const m=leadMarker(newLead);
-  m.addTo(map);
-  markers.push(m);
-  // Remove from discovered
-  const idx=discoveredMarkers.findIndex(dm=>dm._popup&&dm.getPopup().getContent().includes(name));
-  if(idx>=0){discoveredMarkers[idx].remove();discoveredMarkers.splice(idx,1)}
-  showToast('Added: '+name+' ✅');
-  saveLeads();
-  updateStats();
+function addLead(name,cat,phone,website){
+  const ld={name,phone,cat,category:cat,website:website||'',no_site:!website,zip:'',slug:name.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,50)};
+  leads.push(ld);
+  const zc=[39.746,-75.547];const lat=zc[0]+(Math.random()-.5)*.015,lng=zc[1]+(Math.random()-.5)*.015;
+  const m=L.marker([lat,lng],{icon:ICONS[ld.no_site?'nosite':'fake']}).bindPopup(mkPopup(ld,ld.no_site?'nosite':'fake'),{maxWidth:240});
+  m.addTo(map);markers.push(m);
+  const idx=discovered.findIndex(dm=>dm.getPopup().getContent().includes(name));
+  if(idx>=0){discovered[idx].remove();discovered.splice(idx,1)}
+  showToast('Added: '+name+' ✅');updateStats();
+  try{localStorage.setItem('added_leads',JSON.stringify(leads.filter(l=>l._added)))}catch(e){}
 }
 
-function saveLeads(){
-  // Save to localStorage as backup (can't write to leads.json from browser)
-  try{localStorage.setItem('discovered_leads',JSON.stringify(leads.filter(l=>l.discovered)))}catch(e){}
-}
-
-// ── FILTERS ──
-function setCat(cat,btn){
-  activeCat=cat;
-  document.querySelectorAll('.cat-chips button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  plotLeads();
-  if(cat==='discovered'){
-    // Show only discovered
-    clearMarkers();
-    discoveredMarkers.forEach(m=>m.addTo(map));
-  }else{
-    // Show leads + discovered
-    plotLeads();
-    discoveredMarkers.forEach(m=>m.addTo(map));
-  }
-}
-
-// ── STATS ──
-function updateStats(){
-  let nosite=0,fake=0,real=0,discovered=discoveredMarkers.length;
-  leads.forEach(l=>{
-    if(l.no_site)nosite++;else fake++;
-  });
-  document.getElementById('statRed').textContent=nosite;
-  document.getElementById('statYellow').textContent=fake;
-  document.getElementById('statGreen').textContent=real;
-  document.getElementById('statBlue').textContent=discovered;
-}
-
-// ── UTILS ──
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"')}
-function copyText(t){navigator.clipboard.writeText(t).then(()=>showToast('Copied! 📋')).catch(()=>showToast('Copy failed'))}
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
-
-// ── RESTORE DISCOVERED LEADS ──
-function restoreDiscovered(){
+// ── SEARCH ──
+async function searchPlace(){
+  const q=document.getElementById('searchInput').value.trim();
+  if(!q)return;
   try{
-    const saved=JSON.parse(localStorage.getItem('discovered_leads')||'[]');
-    saved.forEach(l=>{if(!leads.find(x=>x.name===l.name))leads.push(l)});
-    plotLeads();
-    updateStats();
-  }catch(e){}
+    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1');
+    const d=await r.json();
+    if(d.length){map.setView([parseFloat(d[0].lat),parseFloat(d[0].lon)],14);showToast('📍 '+d[0].display_name.split(',')[0])}
+    else showToast('Place not found');
+  }catch(e){showToast('Search failed')}
 }
 
-document.addEventListener('DOMContentLoaded',()=>{init();restoreDiscovered()});
-
-// Auto-refresh on pan/zoom end (for discovered markers)
-map.on('moveend',()=>{updateStats()});
+function setCat(c,btn){activeCat=c;document.querySelectorAll('.chips button.on').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');plotLeads()}
+function updateStats(){
+  let ns=0,fk=0;leads.forEach(l=>{if(l.no_site)ns++;else fk++});
+  document.getElementById('stRed').textContent=ns+' no site';
+  document.getElementById('stAmber').textContent=fk+' fake';
+  document.getElementById('stPurple').textContent=discovered.length+' new';
+}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+document.addEventListener('DOMContentLoaded',init);
+map.on('moveend',updateStats);
 </script>
 </body>
 </html>
