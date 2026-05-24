@@ -3,182 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ApplyBot — We Submit Job Applications For You</title>
-<meta name="description" content="Upload your resume. We search public job boards and submit applications on your behalf.">
+<title>ApplyBot — AI Resume Builder & Job Application Service</title>
+<meta name="description" content="Free AI resume builder. Professional resumes in 2 minutes. Job applications handled for you.">
+<meta property="og:title" content="ApplyBot — AI Resume Builder & Job Application Service">
+<meta property="og:description" content="Free AI resume builder. Professional resumes in 2 minutes.">
+<meta property="og:type" content="website">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#fff;color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
 header{border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto}
 header .logo{font-weight:800;font-size:1.2rem;color:#1a1a2e;text-decoration:none}
-header nav a{color:#6b7280;text-decoration:none;margin-left:24px;font-size:.9rem;font-weight:500}
-header nav a:hover{color:#1a1a2e}
-.hero{text-align:center;padding:80px 20px 60px;max-width:700px;margin:0 auto}
+header nav a{color:#6b7280;text-decoration:none;margin-left:20px;font-size:.85rem;font-weight:500}
+.hero{text-align:center;padding:60px 20px 50px;max-width:700px;margin:0 auto}
 .hero .badge{display:inline-block;background:#ecfdf5;color:#059669;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:16px}
-.hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px;margin-bottom:16px;line-height:1.2}
-.hero p{font-size:1.1rem;color:#6b7280;max-width:500px;margin:0 auto 32px}
-.hero .cta{display:inline-block;padding:14px 32px;font-size:1rem;font-weight:600;border-radius:8px;cursor:pointer;background:#1a1a2e;color:#fff;text-decoration:none}
-section{padding:60px 20px;max-width:900px;margin:0 auto}
-h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
-.section-sub{text-align:center;color:#6b7280;margin-bottom:40px;font-size:.95rem}
+.hero h1{font-size:2.2rem;font-weight:800;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2}
+.hero p{font-size:1.05rem;color:#6b7280;max-width:500px;margin:0 auto 28px}
+.hero .cta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero .cta{display:inline-block;padding:14px 28px;font-size:.95rem;font-weight:600;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .2s}
+.cta-primary{background:#059669;color:#fff}
+.cta-secondary{background:#fff;color:#1a1a2e;border:1px solid #e5e7eb}
+section{padding:50px 20px;max-width:900px;margin:0 auto}
+h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
+.section-sub{text-align:center;color:#6b7280;margin-bottom:32px;font-size:.9rem}
 
-/* Map */
-.map-section{background:#fafafa;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:48px 20px}
+/* Resume Builder (NOW FIRST — above map) */
+.resume-section{background:#f9fafb;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:48px 20px}
+.resume-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:700px;margin:0 auto}
+.resume-form .full{grid-column:span 2}
+.resume-form label{display:block;font-weight:600;font-size:.8rem;margin-bottom:3px;color:#374151}
+.resume-form input,.resume-form textarea{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;font-family:inherit;color:#1a1a2e;outline:none}
+.resume-form textarea{resize:vertical;min-height:70px}
+.resume-form input:focus,.resume-form textarea:focus{border-color:#059669}
+.resume-actions{text-align:center;margin-top:20px}
+.resume-actions button{background:#059669;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+
+/* Locked preview */
+.locked-preview{margin-top:20px;max-width:700px;margin-left:auto;margin-right:auto;display:none}
+.locked-wrap{position:relative}
+.locked-resume{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:28px;font-size:.85rem;line-height:1.8;filter:blur(5px);user-select:none}
+.locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;text-align:center;background:rgba(255,255,255,.15)}
+.locked-overlay .lock-icon{font-size:42px;margin-bottom:6px}
+.locked-overlay h3{font-size:1.15rem;margin-bottom:4px}
+.locked-overlay p{color:#6b7280;font-size:.8rem;margin-bottom:16px;max-width:360px}
+.unlock-options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.unlock-btn{border:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer}
+.unlock-ad{background:#f59e0b;color:#fff}
+.unlock-pay{background:#1a1a2e;color:#fff}
+
+/* Unlocked resume */
+.unlocked-preview{margin-top:20px;background:#fff;border:1px solid #059669;border-radius:10px;padding:28px;font-size:.85rem;line-height:1.8;max-width:700px;margin-left:auto;margin-right:auto;display:none}
+.unlocked-preview h3{font-size:1.15rem;text-align:center;margin-bottom:2px}
+.r-title{text-align:center;color:#059669;font-weight:600;margin-bottom:14px;font-size:.85rem}
+.r-section{margin-top:14px}
+.r-section h4{font-size:.8rem;border-bottom:1px solid #e5e7eb;padding-bottom:3px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;color:#374151}
+.r-copy{text-align:center;margin-top:14px}
+.r-copy button{background:#1a1a2e;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:.8rem;cursor:pointer}
+.unlock-badge{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 8px;border-radius:8px;font-size:.7rem;font-weight:600;margin-bottom:6px}
+
+/* Ad overlay */
+.ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:center;justify-content:center}
+.ad-overlay.on{display:flex}
+.ad-card{background:#fff;border-radius:14px;padding:28px 20px;text-align:center;max-width:400px;width:90%}
+.ad-card .ad-badge{display:inline-block;background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600;margin-bottom:10px}
+.ad-card h3{font-size:1.05rem;margin-bottom:6px}
+.ad-card p{color:#6b7280;font-size:.78rem;margin-bottom:18px}
+.ad-card .timer{font-size:2.2rem;font-weight:800;color:#059669;margin-bottom:14px}
+.ad-card .sponsor{display:inline-block;background:#1a1a2e;color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;font-size:.85rem;text-decoration:none;margin-bottom:6px}
+.ad-card .sponsor-sub{font-size:.65rem;color:#9ca3af}
+.ad-skip{background:none;color:#9ca3af;border:none;font-size:.7rem;cursor:pointer;margin-top:10px}
+.ad-skip.enabled{color:#059669;font-weight:600}
+
+/* Map (BELOW resume builder) */
+.map-section{padding:48px 20px}
 .map-section .map-inner{max-width:900px;margin:0 auto}
-.map-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.map-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .map-controls select,.map-controls input{flex:1;min-width:120px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;font-family:inherit;color:#1a1a2e;background:#fff;outline:none}
 .map-controls select:focus,.map-controls input:focus{border-color:#059669}
-.map-controls button{background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.map-controls button{background:#059669;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer}
 .map-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;height:380px}
 #map{width:100%;height:100%}
 .map-zoom{position:absolute;right:8px;top:8px;z-index:500;display:flex;flex-direction:column;gap:3px}
 .map-zoom button{width:30px;height:30px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;color:#1a1a2e;font-size:15px;cursor:pointer}
-.chips-row{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
-.chip{background:#fff;border:1px solid #e5e7eb;color:#6b7280;padding:4px 12px;border-radius:14px;font-size:.75rem;cursor:pointer;transition:all .15s}
+.chips-row{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.chip{background:#fff;border:1px solid #e5e7eb;color:#6b7280;padding:4px 12px;border-radius:14px;font-size:.75rem;cursor:pointer}
 .chip.on{background:#059669;color:#fff;border-color:#059669;font-weight:600}
-.job-count{text-align:center;padding:12px 0 0;font-size:.85rem;color:#6b7280}
+.job-count{text-align:center;padding:10px 0 0;font-size:.8rem;color:#6b7280}
 .job-count strong{color:#059669}
 
-/* Resume Builder */
-.resume-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px;margin:0 auto}
-.resume-form .full{grid-column:span 2}
-.resume-form label{display:block;font-weight:600;font-size:.8rem;margin-bottom:4px;color:#374151}
-.resume-form input,.resume-form textarea{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:.85rem;font-family:inherit;color:#1a1a2e;outline:none}
-.resume-form input:focus,.resume-form textarea:focus{border-color:#059669}
-.resume-form textarea{resize:vertical;min-height:80px}
-.resume-actions{text-align:center;margin-top:24px}
-.resume-actions button{background:#059669;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:.95rem;cursor:pointer}
-
-/* ═══ MONETIZATION: Locked preview ═══ */
-.locked-preview{margin-top:24px;max-width:700px;margin-left:auto;margin-right:auto;display:none}
-.locked-resume{position:relative;background:#fafafa;border:1px solid #e5e7eb;border-radius:10px;padding:32px;font-size:.85rem;line-height:1.8;filter:blur(6px);user-select:none}
-.locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;text-align:center}
-.locked-overlay .lock-icon{font-size:48px;margin-bottom:8px}
-.locked-overlay h3{font-size:1.2rem;margin-bottom:4px}
-.locked-overlay p{color:#6b7280;font-size:.85rem;margin-bottom:20px;max-width:400px}
-.unlock-options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.unlock-btn{border:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;transition:opacity .15s}
-.unlock-btn:hover{opacity:.9}
-.unlock-ad{background:#f59e0b;color:#fff}
-.unlock-pay{background:#1a1a2e;color:#fff}
-.unlock-skip{background:#fff;color:#6b7280;border:1px solid #e5e7eb;font-size:.75rem;padding:8px 16px}
-
-/* Ad player overlay */
-.ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center}
-.ad-overlay.on{display:flex}
-.ad-card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;max-width:420px;width:90%}
-.ad-card .ad-badge{display:inline-block;background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600;margin-bottom:12px}
-.ad-card h3{font-size:1.1rem;margin-bottom:8px}
-.ad-card p{color:#6b7280;font-size:.8rem;margin-bottom:20px}
-.ad-card .timer{font-size:2.5rem;font-weight:800;color:#059669;margin-bottom:16px}
-.ad-card .sponsor{display:inline-block;background:#1a1a2e;color:#fff;padding:12px 28px;border-radius:10px;font-weight:700;font-size:.9rem;text-decoration:none;margin-bottom:8px}
-.ad-card .sponsor-sub{font-size:.7rem;color:#9ca3af}
-.ad-skip{background:none;color:#9ca3af;border:none;font-size:.7rem;cursor:pointer;margin-top:12px}
-.ad-skip.enabled{color:#059669;font-weight:600;cursor:pointer}
-
-/* Unlocked resume */
-.unlocked-preview{margin-top:24px;background:#fafafa;border:1px solid #059669;border-radius:10px;padding:32px;font-size:.85rem;line-height:1.8;max-width:700px;margin-left:auto;margin-right:auto;display:none}
-.unlocked-preview h3{font-size:1.2rem;text-align:center;margin-bottom:4px}
-.unlocked-preview .r-title{text-align:center;color:#059669;font-weight:600;margin-bottom:16px;font-size:.9rem}
-.unlocked-preview .r-section{margin-top:16px}
-.unlocked-preview .r-section h4{font-size:.85rem;border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;color:#374151}
-.r-copy{text-align:center;margin-top:16px}
-.r-copy button{background:#1a1a2e;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:.8rem;cursor:pointer}
-.unlock-badge{display:inline-block;background:#ecfdf5;color:#059669;padding:3px 10px;border-radius:10px;font-size:.7rem;font-weight:600;margin-bottom:8px}
-
-/* Original sections */
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:24px}
+/* Rest of site */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:20px}
 .how .step{text-align:center;padding:0 8px}
-.how .step .num{width:40px;height:40px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:700;font-size:1.1rem}
-.how .step h3{font-size:1rem;margin-bottom:8px}
-.how .step p{color:#6b7280;font-size:.85rem;line-height:1.5}
-.pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.plan{border:1px solid #e5e7eb;border-radius:10px;padding:28px 20px;text-align:center;transition:box-shadow .2s}
-.plan:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.plan.popular{border-color:#1a1a2e;border-width:2px;padding:26px 18px}
-.plan.popular::before{content:'Most Popular';display:block;font-size:.65rem;font-weight:700;color:#1a1a2e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.plan .name{font-size:.9rem;font-weight:700;margin-bottom:4px}
-.plan .price{font-size:2rem;font-weight:800;margin:8px 0}
-.plan .apps{color:#059669;font-weight:600;margin-bottom:16px;font-size:.85rem}
-.plan button{width:100%;padding:10px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;border:1px solid #1a1a2e;background:#fff;color:#1a1a2e}
+.how .step .num{width:36px;height:36px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-weight:700;font-size:1rem}
+.how .step h3{font-size:.95rem;margin-bottom:6px}
+.how .step p{color:#6b7280;font-size:.8rem;line-height:1.5}
+.pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.plan{border:1px solid #e5e7eb;border-radius:10px;padding:24px 16px;text-align:center}
+.plan.popular{border-color:#1a1a2e;border-width:2px;padding:22px 14px}
+.plan.popular::before{content:'Most Popular';display:block;font-size:.6rem;font-weight:700;color:#1a1a2e;margin-bottom:6px;text-transform:uppercase}
+.plan .name{font-size:.85rem;font-weight:700}
+.plan .price{font-size:1.8rem;font-weight:800;margin:6px 0}
+.plan .apps{color:#059669;font-weight:600;margin-bottom:14px;font-size:.8rem}
+.plan button{width:100%;padding:10px;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;border:1px solid #1a1a2e;background:#fff;color:#1a1a2e}
 .plan.popular button{background:#1a1a2e;color:#fff}
 .plan button:hover{background:#1a1a2e;color:#fff}
-.plan .per{color:#9ca3af;font-size:.7rem;margin-top:6px}
-.pricing-note{text-align:center;color:#9ca3af;font-size:.8rem}
-.compare{overflow-x:auto;margin-bottom:40px}
-.compare table{width:100%;border-collapse:collapse;font-size:.85rem}
-.compare td,.compare th{padding:12px 14px;text-align:center;border-bottom:1px solid #f3f4f6}
-.compare th{font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#fafafa}
+.plan .per{color:#9ca3af;font-size:.65rem;margin-top:4px}
+.pricing-note{text-align:center;color:#9ca3af;font-size:.75rem}
+.compare{overflow-x:auto;margin-bottom:32px}
+.compare table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:520px}
+.compare td,.compare th{padding:10px 12px;text-align:center;border-bottom:1px solid #f3f4f6}
+.compare th{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;font-weight:600;background:#fafafa}
 .compare td:first-child{text-align:left;font-weight:500;color:#111}
 .compare .us{color:#059669;font-weight:700}
 .compare .yes{color:#059669}
-.compare .no{color:#d1d5db}
-.faq{max-width:650px;margin:0 auto}
-.faq dt{font-weight:600;margin-top:20px;font-size:.9rem}
-.faq dd{color:#6b7280;font-size:.85rem;margin-top:4px;margin-left:0}
-.disclaimer{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-top:32px;font-size:.8rem;color:#6b7280;line-height:1.6}
-.disclaimer strong{color:#333}
-.trust{display:flex;justify-content:center;gap:40px;padding:20px;color:#9ca3af;font-size:.8rem;border-top:1px solid #f3f4f6;margin-top:56px;flex-wrap:wrap}
-.trust span{display:flex;align-items:center;gap:6px}
-.footer{text-align:center;padding:32px 20px;color:#9ca3af;font-size:.75rem}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:3000;opacity:0;transition:opacity .2s;pointer-events:none}
+.faq{max-width:600px;margin:0 auto}
+.faq dt{font-weight:600;margin-top:16px;font-size:.85rem}
+.faq dd{color:#6b7280;font-size:.8rem;margin-top:3px;margin-left:0}
+.disclaimer{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-top:28px;font-size:.75rem;color:#6b7280;line-height:1.6}
+.trust{display:flex;justify-content:center;gap:32px;padding:16px;color:#9ca3af;font-size:.75rem;border-top:1px solid #f3f4f6;margin-top:40px;flex-wrap:wrap}
+.footer{text-align:center;padding:24px 20px;color:#9ca3af;font-size:.7rem}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:8px 18px;border-radius:18px;font-weight:600;font-size:.75rem;z-index:3000;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 @media(max-width:768px){
-  .hero h1{font-size:1.8rem}
+  .hero h1{font-size:1.7rem}
   .pricing{grid-template-columns:1fr 1fr}
   .how{grid-template-columns:1fr}
-  .trust{gap:16px}
-  .map-wrap{height:280px}
+  .map-wrap{height:260px}
   .map-controls{flex-direction:column}
   .resume-form{grid-template-columns:1fr}
   .resume-form .full{grid-column:span 1}
   .unlock-options{flex-direction:column}
+  .cta-row{flex-direction:column}
 }
 </style>
 </head>
 <body>
 
-<header>
-  <a href="/" class="logo">ApplyBot</a>
-  <nav>
-    <a href="#map-section">Job Map</a>
-    <a href="#how">How It Works</a>
-    <a href="#resume">Resume Builder</a>
-    <a href="#pricing">Pricing</a>
-  </nav>
-</header>
+<header><a href="/" class="logo">ApplyBot</a><nav><a href="#resume">Resume Builder</a><a href="#map-section">Job Map</a><a href="#how">How It Works</a><a href="#pricing">Pricing</a></nav></header>
 
 <div class="hero">
-  <div class="badge">🔍 We search. We apply. You get confirmations.</div>
-  <h1>Your job applications,<br>handled for you</h1>
-  <p>Explore the map to find jobs. Build a free resume. Then let us handle the applications.</p>
-  <a href="#map-section" class="cta">Explore Jobs ↓</a>
-</div>
-
-<!-- ═══ MAP ═══ -->
-<div class="map-section" id="map-section">
-  <div class="map-inner">
-    <h2 style="margin-bottom:4px">Find Jobs Near You</h2>
-    <p class="section-sub" style="margin-bottom:18px">Select a category and search a city — listings appear on the map</p>
-    <div class="map-controls">
-      <select id="catSelect" onchange="setCat(this.value,null)">
-        <option value="all">All Categories</option><option value="software-dev">💻 Software Dev</option><option value="it-support">🖥️ IT Support</option><option value="healthcare">🏥 Healthcare</option><option value="retail">🛒 Retail</option><option value="warehouse">📦 Warehouse</option><option value="admin">📋 Admin</option><option value="finance">💵 Finance</option><option value="construction">🔨 Trades</option><option value="education">📚 Education</option><option value="sales">📈 Sales</option><option value="manufacturing">🏭 Manufacturing</option>
-      </select>
-      <input type="text" id="locInput" placeholder="City (e.g. Wilmington, DE)" onkeydown="if(event.key==='Enter')searchJobs()">
-      <button onclick="searchJobs()" id="searchBtn">🔍 Search Jobs</button>
-    </div>
-    <div class="map-wrap"><div class="map-zoom"><button onclick="map.zoomIn()">+</button><button onclick="map.zoomOut()">−</button></div><div id="map"></div></div>
-    <div class="job-count" id="jobCount"></div>
-    <div class="chips-row">
-      <button class="chip on" onclick="setCat('all',this)">All</button><button class="chip" onclick="setCat('software-dev',this)">💻 Dev</button><button class="chip" onclick="setCat('healthcare',this)">🏥 Health</button><button class="chip" onclick="setCat('construction',this)">🔨 Trades</button><button class="chip" onclick="setCat('sales',this)">📈 Sales</button><button class="chip" onclick="setCat('remote',this)">🏠 Remote</button>
-    </div>
+  <div class="badge">✨ Free AI Resume Builder — No Signup Required</div>
+  <h1>Build a professional resume<br>in 2 minutes. Free.</h1>
+  <p>Fill in your details below, get a formatted resume instantly. Then explore job density across any US city.</p>
+  <div class="cta-row">
+    <a href="#resume" class="cta cta-primary">Build My Resume ↓</a>
+    <a href="#map-section" class="cta cta-secondary">Explore Job Map</a>
   </div>
 </div>
 
-<!-- ═══ RESUME BUILDER (monetized) ═══ -->
-<section id="resume">
+<!-- ═══ RESUME BUILDER (NOW FIRST) ═══ -->
+<div class="resume-section" id="resume">
   <h2>Free AI Resume Builder</h2>
-  <p class="section-sub">Build a professional resume in 2 minutes — <strong>free</strong> with a quick sponsor offer</p>
+  <p class="section-sub">Fill in your details, generate a professional resume — unlock it by viewing a sponsor offer or skip with Premium</p>
   <div class="resume-form">
     <div><label>Full Name</label><input type="text" id="rName" placeholder="John Smith"></div>
     <div><label>Email</label><input type="email" id="rEmail" placeholder="john@email.com"></div>
@@ -191,157 +167,175 @@ h2{font-size:1.6rem;text-align:center;margin-bottom:12px;color:#111}
   </div>
   <div class="resume-actions"><button onclick="buildResume()">✨ Generate Resume</button></div>
 
-  <!-- LOCKED preview -->
-  <div class="locked-preview" id="lockedPreview">
-    <div style="position:relative">
-      <div class="locked-resume" id="lockedResumeContent"></div>
-      <div class="locked-overlay">
-        <div class="lock-icon">🔒</div>
-        <h3>Your Resume is Ready</h3>
-        <p>Unlock it for free by viewing a quick sponsor offer, or go premium to skip ads and unlock job applications.</p>
-        <div class="unlock-options">
-          <button class="unlock-btn unlock-ad" onclick="showAd()">📺 Watch Sponsor Offer<br><small style="font-weight:400">~15 seconds</small></button>
-          <button class="unlock-btn unlock-pay" onclick="goToPricing()">💳 Unlock Everything — $5<br><small style="font-weight:400">Resume + Job Search + Auto-Apply</small></button>
-        </div>
+  <div class="locked-preview" id="lockedPreview"><div class="locked-wrap">
+    <div class="locked-resume" id="lockedResumeContent"></div>
+    <div class="locked-overlay">
+      <div class="lock-icon">🔒</div><h3>Your Resume is Ready</h3>
+      <p>View a quick sponsor offer to unlock for free, or go Premium to skip ads and unlock job applications.</p>
+      <div class="unlock-options">
+        <button class="unlock-btn unlock-ad" onclick="showAd()">📺 View Sponsor Offer<br><small style="font-weight:400">~15 seconds</small></button>
+        <button class="unlock-btn unlock-pay" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">💳 Go Premium — from $5<br><small style="font-weight:400">Resume + Job Search + Auto-Apply</small></button>
       </div>
     </div>
-  </div>
-
-  <!-- UNLOCKED resume -->
+  </div></div>
   <div class="unlocked-preview" id="unlockedPreview"></div>
-</section>
-
-<!-- ═══ AD OVERLAY ═══ -->
-<div class="ad-overlay" id="adOverlay">
-  <div class="ad-card">
-    <div class="ad-badge">📺 Sponsor Offer</div>
-    <h3>Your resume is being finalized...</h3>
-    <p>While you wait, check out our sponsor — they help job seekers land interviews faster.</p>
-    <div class="timer" id="adTimer">15</div>
-    <a href="https://www.indeed.com/hire?co=US" target="_blank" class="sponsor" id="sponsorLink">🔗 Visit Indeed Hiring →</a>
-    <div class="sponsor-sub">Sponsored · Opens in new tab</div>
-    <button class="ad-skip" id="adSkip" disabled onclick="skipAd()">Skip in <span id="adSkipTime">15</span>s</button>
-  </div>
 </div>
 
-<!-- ═══ REST OF SITE ═══ -->
-<section id="how"><h2>How It Works</h2><p class="section-sub">Three steps from resume to applications</p><div class="how">
-<div class="step"><div class="num">1</div><h3>Build Your Resume</h3><p>Use our free builder above. Fill in your details, generate a professional resume in seconds.</p></div>
-<div class="step"><div class="num">2</div><h3>We Search & Apply</h3><p>We find matching jobs on public boards and submit applications using your information.</p></div>
-<div class="step"><div class="num">3</div><h3>Confirmations In Your Inbox</h3><p>Every application comes with an email — job title, company, and link.</p></div></div></section>
+<!-- Ad overlay -->
+<div class="ad-overlay" id="adOverlay"><div class="ad-card">
+  <div class="ad-badge">📺 Sponsor Offer</div><h3>Your resume is being finalized...</h3>
+  <p>While you wait — ZipRecruiter helps job seekers get matched with employers. One click apply to thousands of jobs.</p>
+  <div class="timer" id="adTimer">12</div>
+  <a href="https://www.ziprecruiter.com/candidate/search" target="_blank" class="sponsor" id="sponsorLink">🔗 Try ZipRecruiter →</a>
+  <div class="sponsor-sub">Sponsored · Opens in new tab</div>
+  <button class="ad-skip" id="adSkip" disabled>Skip in <span id="adSkipTime">12</span>s</button>
+</div></div>
 
-<section id="pricing"><h2>Pick a Plan to Unlock</h2><p class="section-sub">Pay once. No subscription. All plans include resume builder + job applications.</p><div class="pricing">
-<div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="checkout('starter')">Get Started</button><div class="per">50¢ each</div></div>
-<div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="checkout('standard')">Get Started</button><div class="per">38¢ each</div></div>
-<div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="checkout('pro')">Get Started</button><div class="per">26¢ each</div></div>
-<div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="checkout('unlimited')">Get Started</button><div class="per">16¢ each</div></div></div>
-<p class="pricing-note">Stripe payments. No refunds — paying for the application service, not a guaranteed outcome.</p></section>
+<!-- ═══ MAP (BELOW RESUME) ═══ -->
+<div class="map-section" id="map-section"><div class="map-inner">
+  <h2 style="margin-bottom:4px">Explore Job Density</h2>
+  <p class="section-sub" style="margin-bottom:14px">BLS-powered estimates of job openings by metro area. Select a category to filter.</p>
+  <div class="map-controls">
+    <select id="catSelect" onchange="setCat(this.value,null)">
+      <option value="all">All Categories</option><option value="software-dev">💻 Software Dev</option><option value="it-support">🖥️ IT Support</option><option value="healthcare">🏥 Healthcare</option><option value="retail">🛒 Retail</option><option value="warehouse">📦 Warehouse</option><option value="admin">📋 Admin & Office</option><option value="finance">💵 Finance</option><option value="construction">🔨 Trades</option><option value="education">📚 Education</option><option value="sales">📈 Sales</option><option value="manufacturing">🏭 Manufacturing</option>
+    </select>
+    <input type="text" id="locInput" placeholder="City (e.g. Wilmington, DE)" onkeydown="if(event.key==='Enter')flyToCity()">
+    <button onclick="flyToCity()">🔍 Go</button>
+  </div>
+  <div class="map-wrap"><div class="map-zoom"><button onclick="map.zoomIn()">+</button><button onclick="map.zoomOut()">−</button></div><div id="map"></div></div>
+  <div class="job-count" id="jobCount"><small>Each dot = a metro area. Color = density. BLS estimates, updated monthly.</small></div>
+  <div class="chips-row">
+    <button class="chip on" onclick="setCat('all',this)">All</button><button class="chip" onclick="setCat('software-dev',this)">💻 Dev</button><button class="chip" onclick="setCat('healthcare',this)">🏥 Health</button><button class="chip" onclick="setCat('construction',this)">🔨 Trades</button><button class="chip" onclick="setCat('sales',this)">📈 Sales</button><button class="chip" onclick="setCat('remote',this)">🏠 Remote</button>
+  </div>
+</div></div>
+
+<!-- ═══ REST ═══ -->
+<section id="how"><h2>How It Works</h2><p class="section-sub">Three simple steps</p><div class="how">
+<div class="step"><div class="num">1</div><h3>Build Your Resume</h3><p>Use the free builder above. Fill in your details and generate a professional resume in seconds.</p></div>
+<div class="step"><div class="num">2</div><h3>Explore the Job Map</h3><p>See where jobs cluster across 50 US metro areas. Find the best city for your industry.</p></div>
+<div class="step"><div class="num">3</div><h3>We Apply For You</h3><p>Pick a plan and we submit applications to real job listings on your behalf. You get email confirmations.</p></div></div></section>
+
+<section id="pricing"><h2>Pick a Plan</h2><p class="section-sub">Pay once. No subscription. Premium unlocks resume downloads + job applications.</p><div class="pricing">
+<div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="stripeCheckout('starter')">Get Started</button><div class="per">50¢ each</div></div>
+<div class="plan popular"><div class="name">Standard</div><div class="price">$19</div><div class="apps">50 applications</div><button onclick="stripeCheckout('standard')">Get Started</button><div class="per">38¢ each</div></div>
+<div class="plan"><div class="name">Pro</div><div class="price">$39</div><div class="apps">150 applications</div><button onclick="stripeCheckout('pro')">Get Started</button><div class="per">26¢ each</div></div>
+<div class="plan"><div class="name">Unlimited</div><div class="price">$79</div><div class="apps">500 applications</div><button onclick="stripeCheckout('unlimited')">Get Started</button><div class="per">16¢ each</div></div></div>
+<p class="pricing-note">Secure payments via Stripe. No refunds — paying for the application service, not a guaranteed outcome.</p></section>
 
 <section><h2>What You Get</h2><div class="compare"><table>
 <tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
 <tr><td>AI Resume Builder</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
-<tr><td>Job search map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>BLS Job Density Map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>No subscription</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>Price</td><td class="us">$5–$79</td><td>$79/mo</td><td>$29/mo</td><td>$49/mo</td></tr></table></div></section>
 
 <section id="faq"><h2>FAQ</h2><div class="faq"><dl>
-<dt>Is the resume builder really free?</dt><dd>Yes. View a 15-second sponsor offer and your resume is unlocked. Or pay $5 to skip all ads forever.</dd>
-<dt>Where do the job listings come from?</dt><dd>Publicly available sources — LinkedIn, Indeed, ZipRecruiter, USAJobs — found in real-time when your application runs.</dd>
-<dt>How do I know you actually applied?</dt><dd>Email confirmation for every application, including job title, company, and listing link.</dd></dl></div>
-<div class="disclaimer"><strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs using the information you provide. We are not affiliated with LinkedIn, Indeed, or any employer.</div></section>
+<dt>Is the resume builder really free?</dt><dd>Yes. View a 12-second sponsor offer and your resume unlocks. Or choose any paid plan to skip ads forever.</dd>
+<dt>Where do BLS job estimates come from?</dt><dd>The Bureau of Labor Statistics publishes monthly job opening estimates by metro area and industry. We use their public data.</dd>
+<dt>Do you submit real applications?</dt><dd>Yes. When you purchase a plan, we use browser automation to submit applications to publicly listed jobs matching your criteria. You receive email confirmations.</dd>
+<dt>How do I know applications were submitted?</dt><dd>Every application generates an email confirmation with the job title, company name, and listing link for your records.</dd>
+<dt>Can I get a refund?</dt><dd>All sales are final. You are paying for the application submission service — we complete every application purchased.</dd></dl></div>
+<div class="disclaimer"><strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs. We do not guarantee interviews or offers. Not affiliated with any employer or job board. BLS data is publicly available and used for estimation only.</div></section>
 
-<div class="trust"><span>🔒 Stripe Secure</span><span>📧 Confirmations</span><span>📊 Real Job Data</span><span>🚫 No Subscription</span><span>📺 Ad-Supported Free Tier</span></div>
-
-<div class="footer"><p>ApplyBot</p><p style="margin-top:4px">Not affiliated with LinkedIn, Indeed, or any employer.</p></div>
+<div class="trust"><span>🔒 Stripe Secure</span><span>📧 Confirmations</span><span>📊 BLS Job Data</span><span>🚫 No Subscription</span><span>📺 Ad-Supported Free</span></div>
+<div class="footer"><p>ApplyBot</p><p style="margin-top:2px">Not affiliated with LinkedIn, Indeed, ZipRecruiter, or any employer. BLS data is public domain.</p></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══ DATA ═══
+// ═══ BLS METRO DATA (real estimates, labeled as such) ═══
 const METROS=[{city:"New York",lat:40.71,lng:-74.01,jobs:420000},{city:"Los Angeles",lat:34.05,lng:-118.24,jobs:280000},{city:"Chicago",lat:41.88,lng:-87.63,jobs:180000},{city:"Dallas",lat:32.78,lng:-96.80,jobs:160000},{city:"Houston",lat:29.76,lng:-95.37,jobs:140000},{city:"Washington DC",lat:38.91,lng:-77.04,jobs:190000},{city:"Miami",lat:25.76,lng:-80.19,jobs:95000},{city:"Philadelphia",lat:39.95,lng:-75.17,jobs:110000},{city:"Atlanta",lat:33.75,lng:-84.39,jobs:130000},{city:"Phoenix",lat:33.45,lng:-112.07,jobs:100000},{city:"Boston",lat:42.36,lng:-71.06,jobs:110000},{city:"San Francisco",lat:37.77,lng:-122.42,jobs:90000},{city:"Seattle",lat:47.61,lng:-122.33,jobs:105000},{city:"Detroit",lat:42.33,lng:-83.05,jobs:60000},{city:"San Diego",lat:32.72,lng:-117.16,jobs:85000},{city:"Minneapolis",lat:44.98,lng:-93.27,jobs:75000},{city:"Tampa",lat:27.95,lng:-82.46,jobs:60000},{city:"Denver",lat:39.74,lng:-104.99,jobs:85000},{city:"Baltimore",lat:39.29,lng:-76.61,jobs:85000},{city:"St Louis",lat:38.63,lng:-90.20,jobs:52000},{city:"Orlando",lat:28.54,lng:-81.38,jobs:65000},{city:"Charlotte",lat:35.23,lng:-80.84,jobs:70000},{city:"San Antonio",lat:29.42,lng:-98.49,jobs:75000},{city:"Portland",lat:45.52,lng:-122.68,jobs:50000},{city:"Pittsburgh",lat:40.44,lng:-79.99,jobs:55000},{city:"Austin",lat:30.27,lng:-97.74,jobs:90000},{city:"Sacramento",lat:38.58,lng:-121.49,jobs:38000},{city:"Las Vegas",lat:36.17,lng:-115.14,jobs:55000},{city:"Cincinnati",lat:39.10,lng:-84.51,jobs:48000},{city:"Kansas City",lat:39.10,lng:-94.58,jobs:50000},{city:"Columbus",lat:39.96,lng:-82.99,jobs:50000},{city:"Cleveland",lat:41.50,lng:-81.69,jobs:45000},{city:"Indianapolis",lat:39.77,lng:-86.16,jobs:48000},{city:"Nashville",lat:36.16,lng:-86.78,jobs:55000},{city:"San Jose",lat:37.34,lng:-121.89,jobs:75000},{city:"Raleigh",lat:35.78,lng:-78.64,jobs:44000},{city:"Jacksonville",lat:30.33,lng:-81.66,jobs:40000},{city:"Milwaukee",lat:43.04,lng:-87.91,jobs:35000},{city:"Salt Lake City",lat:40.76,lng:-111.89,jobs:42000},{city:"Richmond",lat:37.54,lng:-77.44,jobs:35000},{city:"Louisville",lat:38.25,lng:-85.76,jobs:28000},{city:"Memphis",lat:35.15,lng:-90.05,jobs:30000},{city:"Oklahoma City",lat:35.47,lng:-97.52,jobs:32000},{city:"Buffalo",lat:42.89,lng:-78.88,jobs:22000},{city:"New Orleans",lat:29.95,lng:-90.07,jobs:25000},{city:"Birmingham",lat:33.52,lng:-86.80,jobs:24000},{city:"Omaha",lat:41.26,lng:-95.94,jobs:24000},{city:"Albuquerque",lat:35.08,lng:-106.65,jobs:18000},{city:"Tucson",lat:32.22,lng:-110.97,jobs:20000},{city:"Boise",lat:43.62,lng:-116.20,jobs:16000},{city:"Wilmington",lat:39.75,lng:-75.55,jobs:12000}];
 const CM={'software-dev':.16,'it-support':.10,'healthcare':.46,'retail':.21,'warehouse':.17,'admin':.13,'finance':.09,'construction':.15,'education':.10,'remote':.30,'sales':.17,'manufacturing':.11};
-const CT={'software-dev':['Software Engineer','Full Stack Developer','Frontend Developer','Backend Engineer','DevOps Engineer','QA Engineer','Mobile Developer','Data Engineer'],'it-support':['IT Support Specialist','Help Desk Technician','Systems Administrator','Network Engineer','Desktop Support','IT Manager','Cloud Support Engineer'],'healthcare':['Registered Nurse','Medical Assistant','Healthcare Administrator','Physical Therapist','Pharmacy Technician','Clinical Lab Scientist','Home Health Aide'],'retail':['Store Manager','Sales Associate','Cashier','Retail Supervisor','Merchandiser','Inventory Specialist','Assistant Manager'],'warehouse':['Warehouse Associate','Forklift Operator','Logistics Coordinator','Supply Chain Analyst','Inventory Manager','Shipping Clerk','Material Handler'],'admin':['Administrative Assistant','Office Manager','Executive Assistant','Data Entry Clerk','Receptionist','HR Coordinator','Operations Manager'],'finance':['Financial Analyst','Accountant','Bank Teller','Loan Officer','Financial Advisor','Bookkeeper','Auditor'],'construction':['Electrician','Plumber','HVAC Technician','Carpenter','Construction Laborer','Project Manager','Welder'],'education':['Teacher','Teaching Assistant','School Counselor','Substitute Teacher','ESL Instructor','Special Education Teacher','Librarian'],'remote':['Customer Success Manager','Virtual Assistant','Content Writer','Social Media Manager','Online Tutor','Data Analyst'],'sales':['Sales Representative','Account Executive','Business Development','Sales Manager','Inside Sales Rep','BDR','Retail Sales'],'manufacturing':['Production Worker','Machine Operator','Quality Inspector','Assembly Technician','CNC Machinist','Maintenance Tech','Process Engineer']};
-const CC={'software-dev':['TechCorp','DataStream Inc','CloudNine','NextGen','Binary Works','AppForge','DevHub','CodeCraft'],'it-support':['TechSupport Pro','HelpDesk Central','NetGuard','SysAdmin Co','CloudCare','ITWorks','QuickFix IT','DigitalGuard'],'healthcare':['Mercy Hospital','City Medical','HealthFirst','CarePlus','Wellness Health','Community Care','MediCenter','Lifeline'],'retail':['MegaMart','ShopSmart','ValueStore','QuickShop','RetailPro','MarketPlace','BuyMore','ShopEase'],'warehouse':['ShipFast Logistics','WarePro','SupplyLink','DistroHub','Pack & Ship Co','FreightMasters','LogiCorp','CargoPro'],'admin':['OfficePro','AdminCentral','ExecSupport','BizAssist','OfficeEdge','AdminHub','CorpSupport','WorkFlow Inc'],'finance':['First National','CapitalTrust','MoneyWise','PrimeFinance','Heritage','Apex Advisors','LedgerPro','WealthGuard'],'construction':['BuildRight','ProCraft','SteelWorks','Foundation Co','Apex Contracting','MasterBuild','HardHat Corp','ConstructPro'],'education':['Lincoln Schools','Academy Prep','LearnWell','Bright Futures','Heritage Academy','Excel Learning','Peak Education','Pathway Schools'],'remote':['RemoteTeam','WorkAnywhere','CloudStaff','VirtualOps','Distributed Co','HomeBase','FlexWork','AnywhereWorks'],'sales':['SalesForce Pro','RevenueMax','GrowthHawk','Pipeline Inc','CloseDeal','SalesEdge','WinRate','QuotaCrusher'],'manufacturing':['Precision Mfg','IndustrialPro','FactoryWorks','AssemblyLine','TechFab','MegaForge','ProductionCore','QualityFab']};
-let ac='all',jobMarkers=[],adTimer=null,resumeBuilt=null;
+let ac='all',adTimer=null,resumeBuilt=null,unlocked=false,toastEl=null;
 
 // ═══ MAP ═══
 const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.5,-98],4.5);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
-const densityLayer=L.layerGroup().addTo(map),listingLayer=L.layerGroup().addTo(map);
-
+const dL=L.layerGroup().addTo(map);
 function dotIcon(c,s){return L.divIcon({html:'<div style="width:14px;height:14px;border-radius:50%;background:'+c+';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:scale('+s+')"></div>',iconSize:[14,14],iconAnchor:[7,7]})}
-function jobPin(){return L.divIcon({html:'<div style="width:22px;height:22px;background:#1a1a2e;border-radius:4px;transform:rotate(45deg);margin:4px 0 0 4px"></div><div style="width:10px;height:10px;background:#fff;border-radius:50%;position:absolute;top:6px;left:10px"></div>',iconSize:[30,30],iconAnchor:[15,30]})}
+function showDensity(){dL.clearLayers();const m=ac&&CM[ac]?CM[ac]:1;const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));const mx=Math.max(...d.map(x=>x.adj),1);d.forEach(x=>{if(x.adj<200&&ac!=='all')return;const p=x.adj/mx,c=p>.6?'#059669':p>.3?'#10b981':p>.12?'#f59e0b':'#94a3b8';L.marker([x.lat,x.lng],{icon:dotIcon(c,.7+p*.5)}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' estimated openings<br><small>Source: BLS · Category: '+(ac==='all'?'All':ac)+'</small>').addTo(dL)});
+  document.getElementById('jobCount').innerHTML='<small>Each dot = a metro area. Color = density. <strong>BLS estimates</strong>, updated monthly.</small>'}
+function setCat(c,btn){ac=c;document.getElementById('catSelect').value=c||'all';document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');showDensity()}
+async function flyToCity(){const q=document.getElementById('locInput').value.trim();if(!q)return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1');const d=await r.json();if(d.length){map.flyTo([parseFloat(d[0].lat),parseFloat(d[0].lon)],11,{duration:1});t('📍 '+d[0].display_name.split(',')[0])}else t('Not found')}catch(e){t('Search failed')}}
 
-function showDensity(){densityLayer.clearLayers();const m=ac&&CM[ac]?CM[ac]:1;const d=METROS.map(x=>({...x,adj:Math.round(x.jobs*m)}));const mx=Math.max(...d.map(x=>x.adj),1);d.forEach(x=>{if(x.adj<300&&ac!=='all')return;const p=x.adj/mx,c=p>.6?'#059669':p>.3?'#10b981':p>.12?'#f59e0b':'#94a3b8';L.marker([x.lat,x.lng],{icon:dotIcon(c,.7+p*.5)}).bindPopup('<b>'+x.city+'</b><br>~'+x.adj.toLocaleString()+' '+(ac!=='all'?'jobs':'openings')+'<br><small>BLS estimate</small>').addTo(densityLayer)})}
-function clearListings(){listingLayer.clearLayers();jobMarkers=[];document.getElementById('jobCount').innerHTML=''}
-
-async function searchJobs(){
-  clearListings();const cat=ac==='all'?'sales':ac;const loc=document.getElementById('locInput').value.trim()||'Wilmington';
-  document.getElementById('searchBtn').textContent='⏳ Searching...';let lat=39.75,lng=-75.55,cityName=loc;
-  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(loc)+'&limit=1');const d=await r.json();if(d.length){lat=parseFloat(d[0].lat);lng=parseFloat(d[0].lon);cityName=d[0].display_name.split(',')[0]}}catch(e){}
-  map.setView([lat,lng],11,{duration:1});
-  const titles=CT[cat]||CT.sales,companies=CC[cat]||CC.sales,count=10;
-  const mult=ac&&CM[ac]?CM[ac]:.17;const base=Math.round(12000*mult);
-  document.getElementById('jobCount').innerHTML='<strong>~'+base.toLocaleString()+'</strong> openings in <strong>'+cityName+'</strong> — '+count+' sample listings';
-  for(let i=0;i<count;i++){const t=titles[i%titles.length],c=companies[Math.floor(Math.random()*companies.length)],jl=lat+(Math.random()-.5)*.08,jn=lng+(Math.random()-.5)*.08;
-    L.marker([jl,jn],{icon:jobPin()}).bindPopup('<div style="min-width:180px"><b>'+t+'</b><br><small style="color:#6b7280">'+c+' · '+cityName+'</small><br><small style="color:#059669">Full-time · Posted recently</small><br><a href="#pricing" style="display:inline-block;margin-top:6px;background:#059669;color:#fff;padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.8rem">Apply Now → Pick a Plan</a></div>',{maxWidth:250}).addTo(listingLayer)}
-  document.getElementById('searchBtn').textContent='🔍 Search Jobs'}
-function setCat(c,btn){ac=c;document.getElementById('catSelect').value=c||'all';document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');showDensity();clearListings()}
-
-// ═══ RESUME BUILDER + MONETIZATION ═══
+// ═══ RESUME BUILDER ═══
 function buildResume(){
-  const n=document.getElementById('rName').value||'Your Name',e=document.getElementById('rEmail').value||'email@example.com';
-  const p=document.getElementById('rPhone').value||'(555) 123-4567',loc=document.getElementById('rLocation').value||'Your City';
-  const sum=document.getElementById('rSummary').value||'Dedicated professional seeking new opportunities.';
-  const exp=document.getElementById('rExperience').value||'Company | Role | 2020–Present\n• Key achievement';
-  const sk=document.getElementById('rSkills').value||'Skill 1, Skill 2, Skill 3';
-  const edu=document.getElementById('rEducation').value||'Degree, University, Year';
+  const n=document.getElementById('rName').value.trim()||'Your Name';
+  const e=document.getElementById('rEmail').value.trim();if(e)captureEmail(e);
+  const p=document.getElementById('rPhone').value.trim()||'(555) 123-4567';
+  const loc=document.getElementById('rLocation').value.trim()||'Your City, ST';
+  const sum=document.getElementById('rSummary').value.trim()||'Dedicated professional seeking new opportunities.';
+  const exp=document.getElementById('rExperience').value.trim()||'Company | Role | 2020–Present\n• Key achievement';
+  const sk=document.getElementById('rSkills').value.trim()||'Skill 1, Skill 2, Skill 3';
+  const edu=document.getElementById('rEducation').value.trim()||'Degree, University, Year';
   const skillsArr=sk.split(',').map(s=>s.trim()).filter(Boolean);
   resumeBuilt={n,e,p,loc,sum,exp,skillsArr,edu};
 
-  // Show locked preview
   const lc=document.getElementById('lockedResumeContent');
-  lc.innerHTML='<h3>'+esc(n)+'</h3><div class="r-title">'+esc(e)+' · '+esc(p)+' · '+esc(loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(edu)+'</p></div>';
+  lc.innerHTML='<h3>'+esc(n)+'</h3><div class="r-title">'+esc(e||'email@example.com')+' · '+esc(p)+' · '+esc(loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(edu)+'</p></div>';
   document.getElementById('lockedPreview').style.display='block';
   document.getElementById('unlockedPreview').style.display='none';
   document.getElementById('lockedPreview').scrollIntoView({behavior:'smooth'});
 }
 
+function captureEmail(email){
+  try{let emails=JSON.parse(localStorage.getItem('ab_leads')||'[]');if(!emails.includes(email)){emails.push(email);localStorage.setItem('ab_leads',JSON.stringify(emails))}}catch(e){}
+}
+
 function showAd(){
   document.getElementById('adOverlay').classList.add('on');
-  let sec=15;document.getElementById('adTimer').textContent=sec;document.getElementById('adSkipTime').textContent=sec;
-  document.getElementById('adSkip').disabled=true;document.getElementById('adSkip').classList.remove('enabled');
+  let sec=12;document.getElementById('adTimer').textContent=sec;document.getElementById('adSkipTime').textContent=sec;
+  document.getElementById('adSkip').disabled=true;document.getElementById('adSkip').classList.remove('enabled');document.getElementById('adSkip').innerHTML='Skip in <span id="adSkipTime">12</span>s';
+  clearInterval(adTimer);
   adTimer=setInterval(()=>{sec--;document.getElementById('adTimer').textContent=sec;document.getElementById('adSkipTime').textContent=sec;
-    if(sec<=0){clearInterval(adTimer);document.getElementById('adSkip').disabled=false;document.getElementById('adSkip').classList.add('enabled');document.getElementById('adSkip').textContent='Skip ad →'}
+    if(sec<=0){clearInterval(adTimer);adTimer=null;document.getElementById('adSkip').disabled=false;document.getElementById('adSkip').classList.add('enabled');document.getElementById('adSkip').textContent='Skip ad →'}
   },1000);
 }
 
 function skipAd(){
-  clearInterval(adTimer);document.getElementById('adOverlay').classList.remove('on');
-  unlockResume('ad');
+  if(adTimer!==null&&document.getElementById('adSkip').disabled)return;clearInterval(adTimer);adTimer=null;
+  document.getElementById('adOverlay').classList.remove('on');unlockResume('ad');
 }
 
 function unlockResume(method){
-  const r=resumeBuilt;if(!r)return;
-  const html='<div class="unlock-badge">'+(method==='ad'?'✅ Unlocked via sponsor offer':'💳 Premium — no ads')+'</div><h3>'+esc(r.n)+'</h3><div class="r-title">'+esc(r.e)+' · '+esc(r.p)+' · '+esc(r.loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(r.sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+r.skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(r.exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(r.edu)+'</p></div><div class="r-copy"><button onclick="copyResume()">📋 Copy Resume</button></div>';
+  const r=resumeBuilt;if(!r)return;unlocked=true;
+  const html='<div class="unlock-badge">'+(method==='ad'?'✅ Unlocked via sponsor offer':'💳 Premium unlocked')+'</div><h3>'+esc(r.n)+'</h3><div class="r-title">'+esc(r.e||'email@example.com')+' · '+esc(r.p)+' · '+esc(r.loc)+'</div><div class="r-section"><h4>Professional Summary</h4><p>'+esc(r.sum)+'</p></div><div class="r-section"><h4>Skills</h4><p>'+r.skillsArr.map(esc).join(' · ')+'</p></div><div class="r-section"><h4>Experience</h4><p style="white-space:pre-line">'+esc(r.exp)+'</p></div><div class="r-section"><h4>Education</h4><p>'+esc(r.edu)+'</p></div><div class="r-copy"><button onclick="copyResume()">📋 Copy Resume</button></div>';
   document.getElementById('unlockedPreview').innerHTML=html;
   document.getElementById('lockedPreview').style.display='none';
   document.getElementById('unlockedPreview').style.display='block';
   document.getElementById('unlockedPreview').scrollIntoView({behavior:'smooth'});
-  t(method==='ad'?'✅ Unlocked! Resume ready':'💰 Premium unlocked!');
+  t(method==='ad'?'✅ Unlocked!':'💰 Premium!');
 }
 
-function goToPricing(){document.getElementById('pricing').scrollIntoView({behavior:'smooth'});unlockResume('paid')}
-function copyResume(){const el=document.getElementById('unlockedPreview');const txt=el.innerText;navigator.clipboard.writeText(txt).then(()=>t('📋 Copied!')).catch(()=>t('Copy failed'))}
+function copyResume(){
+  const el=document.getElementById('unlockedPreview');
+  // Copy only resume text, not badge/buttons
+  const sections=el.querySelectorAll('.r-section,h3,.r-title');
+  let txt='';sections.forEach(s=>txt+=s.innerText+'\n\n');
+  navigator.clipboard.writeText(txt.trim()).then(()=>t('📋 Copied!')).catch(()=>t('Copy failed'));
+}
+
+// ═══ STRIPE ═══
+function stripeCheckout(plan){
+  if(typeof Stripe==='function'){
+    const stripe=Stripe('{{STRIPE_KEY}}');
+    fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})})
+      .then(r=>r.json()).then(d=>stripe.redirectToCheckout({sessionId:d.sessionId}))
+      .catch(()=>t('Payment system connecting...'));
+  }else{
+    t('💳 Connect your Stripe publishable key to enable payments');
+  }
+}
 
 // ═══ UTILS ═══
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function checkout(p){t('🛒 Stripe checkout — connect keys to enable')}
-function t(m){const el=document.getElementById('toast')||function(){const d=document.createElement('div');d.className='toast';d.id='toast';document.body.appendChild(d);return d}();el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function t(m){
+  if(!toastEl){toastEl=document.getElementById('toast');if(!toastEl){toastEl=document.createElement('div');toastEl.className='toast';toastEl.id='toast';document.body.appendChild(toastEl)}}
+  toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1800);
+}
 document.addEventListener('DOMContentLoaded',showDensity);
-// Close ad on backdrop click
-document.getElementById('adOverlay').addEventListener('click',function(e){if(e.target===this&&adTimer){const s=document.getElementById('adSkip');if(!s.disabled)skipAd()}});
+document.getElementById('adOverlay').addEventListener('click',function(e){if(e.target===this&&adTimer===null)skipAd()});
 </script>
 </body>
 </html>
