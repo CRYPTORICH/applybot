@@ -319,8 +319,8 @@ function copyResume(){
 // ═══ STRIPE ═══
 function stripeCheckout(plan){
   if(typeof Stripe==='function'){
-    const stripe=Stripe('{{STRIPE_KEY}}');
-    fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})})
+    const stripe=Stripe('pk_live_51TYESzD1aBoWX0M19exk9T9mW445oT7y3dD5Kw1dtzTvFDwyrn2n975MMNyX1bILyH5csrLyIPhoEOQdjVRiPfXC008wKCTtB5');
+    fetch('https://applybot-yavz.onrender.com/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})})
       .then(r=>r.json()).then(d=>stripe.redirectToCheckout({sessionId:d.sessionId}))
       .catch(()=>t('Payment system connecting...'));
   }else{
