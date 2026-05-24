@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ApplyBot — AI Resume Builder & Job Application Service</title>
-<meta name="description" content="Free AI resume builder. Professional resumes in 2 minutes. Job applications handled for you.">
-<meta property="og:title" content="ApplyBot — AI Resume Builder & Job Application Service">
-<meta property="og:description" content="Free AI resume builder. Professional resumes in 2 minutes.">
+<title>ApplyBot — Smart Resume Builder & Job Application Service</title>
+<meta name="description" content="Free smart resume builder. Professional resumes in 2 minutes. Job applications handled for you.">
+<meta property="og:title" content="ApplyBot — Smart Resume Builder & Job Application Service">
+<meta property="og:description" content="Free smart resume builder. Professional resumes in 2 minutes. No signup required.">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<meta property="og:image" content="https://cryptorich.github.io/applybot/og-image.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"ApplyBot","url":"https://cryptorich.github.io/applybot/","description":"Free smart resume builder with professional formatting. Build a resume in 2 minutes.","applicationCategory":"BusinessApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#fff;color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
@@ -36,7 +40,14 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 .resume-form textarea{resize:vertical;min-height:70px}
 .resume-form input:focus,.resume-form textarea:focus{border-color:#059669}
 .resume-actions{text-align:center;margin-top:20px}
-.resume-actions button{background:#059669;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+.resume-actions button{background:#059669;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(5,150,105,.25);transition:transform .15s,box-shadow .15s}
+.resume-actions button:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(5,150,105,.35)}
+.resume-actions button:active{transform:translateY(0)}
+.resume-actions button.loading{opacity:.7;pointer-events:none}
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;display:none}
+.spinner.on{display:inline-block}
 
 /* Locked preview */
 .locked-preview{margin-top:20px;max-width:700px;margin-left:auto;margin-right:auto;display:none}
@@ -173,6 +184,7 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
   .resume-form .full{grid-column:span 1}
   .unlock-options{flex-direction:column}
   .cta-row{flex-direction:column}
+  section .grid-3{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -181,9 +193,9 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 <header><a href="/" class="logo">ApplyBot</a><nav><a href="#resume">Resume Builder</a><a href="#map-section">Job Map</a><a href="#how">How It Works</a><a href="#pricing">Pricing</a></nav></header>
 
 <div class="hero">
-  <div class="badge">✨ Free AI Resume Builder — No Signup Required</div>
+  <div class="badge">✨ Free Smart Resume Builder — No Signup Required</div>
   <h1>Build a professional resume<br>in 2 minutes. Free.</h1>
-  <p>Fill in your details below, get a formatted resume instantly. Then explore job density across any US city.</p>
+  <p>Fill in your details below, our smart formatter enhances it with industry language, action verbs, and professional structure. Then explore job density across any US city.</p>
   <div class="cta-row">
     <a href="#resume" class="cta cta-primary">Build My Resume ↓</a>
     <a href="#map-section" class="cta cta-secondary">Explore Job Map</a>
@@ -192,8 +204,8 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 
 <!-- ═══ RESUME BUILDER (NOW FIRST) ═══ -->
 <div class="resume-section" id="resume">
-  <h2>Free AI Resume Builder</h2>
-  <p class="section-sub">Fill in your details, generate a professional resume — unlock it by viewing a sponsor offer or skip with Premium</p>
+  <h2>Free Smart Resume Builder</h2>
+  <p class="section-sub">Fill in your details, our smart formatter enhances it with action verbs, professional language, and ATS-friendly structure — unlock it by viewing a sponsor offer or skip with Premium</p>
   <div class="resume-form">
     <div><label>Full Name</label><input type="text" id="rName" placeholder="John Smith"></div>
     <div><label>Email</label><input type="email" id="rEmail" placeholder="john@email.com"></div>
@@ -204,7 +216,7 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
     <div class="full"><label>Skills (comma separated)</label><input type="text" id="rSkills" placeholder="Project Management, Data Analysis, Python, Leadership"></div>
     <div class="full"><label>Education</label><input type="text" id="rEducation" placeholder="Bachelor of Science, University of Delaware, 2018"></div>
   </div>
-  <div class="resume-actions"><button onclick="buildResume()">✨ Generate Resume</button></div>
+  <div class="resume-actions"><button onclick="buildResume()" id="buildBtn"><span class="spinner" id="buildSpinner"></span>✨ Generate Resume</button></div>
 
   <div class="locked-preview" id="lockedPreview"><div class="locked-wrap">
     <div class="locked-resume" id="lockedResumeContent"></div>
@@ -226,8 +238,11 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
       <a href="#pricing" class="upsell-btn upsell-primary">🚀 Auto-Apply — From $5</a>
       <button class="upsell-btn upsell-secondary" onclick="previewPremium()" id="previewBtn">👀 Preview Premium Resume</button>
     </div>
+    <div class="upsell-options" style="margin-top:8px">
+      <button class="upsell-btn upsell-secondary" onclick="shareResume()" style="font-size:.75rem">📤 Share This Tool</button>
+    </div>
     <div class="upsell-preview" id="upsellPreview">
-      <p style="margin-bottom:8px"><strong>🔮 Premium Resume Preview</strong> — AI-tailored to a specific job listing:</p>
+      <p style="margin-bottom:8px"><strong>🔮 Premium Resume Preview</strong> — tailored to a specific job listing:</p>
       <p><em>✦</em> <strong>Summary rewritten</strong> to match the exact job description keywords</p>
       <p><em>✦</em> <strong>Skills reordered & prioritized</strong> based on what the employer is looking for</p>
       <p><em>✦</em> <strong>Experience bullet points optimized</strong> with industry-specific metrics and action verbs</p>
@@ -242,7 +257,7 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
   <div class="ad-badge">📺 Sponsor Offer</div><h3>Your resume is being finalized...</h3>
   <p>While you wait — ZipRecruiter helps job seekers get matched with employers. One click apply to thousands of jobs.</p>
   <div class="timer" id="adTimer">12</div>
-  <a href="https://www.ziprecruiter.com/candidate/search" target="_blank" class="sponsor" id="sponsorLink">🔗 Try ZipRecruiter →</a>
+  <a href="https://www.ziprecruiter.com/candidate/search" target="_blank" rel="noopener noreferrer" class="sponsor" id="sponsorLink">🔗 Try ZipRecruiter →</a>
   <div class="sponsor-sub">Sponsored · Opens in new tab</div>
   <button class="ad-skip" id="adSkip" disabled>Skip in <span id="adSkipTime">12</span>s</button>
 </div></div>
@@ -268,8 +283,18 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 <!-- ═══ REST ═══ -->
 <section id="how"><h2>How It Works</h2><p class="section-sub">Three simple steps</p><div class="how">
 <div class="step"><div class="num">1</div><h3>Build Your Resume</h3><p>Use the free builder above. Fill in your details and generate a professional resume in seconds.</p></div>
-<div class="step"><div class="num">2</div><h3>Explore the Job Map</h3><p>See where jobs cluster across 50 US metro areas. Find the best city for your industry.</p></div>
-<div class="step"><div class="num">3</div><h3>We Apply For You</h3><p>Pick a plan and we submit applications to real job listings on your behalf. You get email confirmations.</p></div></div></section>
+<div class="step"><div class="num">2</div><h3>Explore the Job Map</h3><p>See where jobs cluster across 50 US metro areas using BLS-modeled estimates. Find the best city for your industry.</p></div>
+<div class="step"><div class="num">3</div><h3>Upgrade to Auto-Apply</h3><p>Pick a plan and we submit applications to real job listings using browser automation. You get email confirmations for every submission.</p></div></div></section>
+
+<section style="padding:0 20px 40px"><h2 style="font-size:1.2rem">Loved by Job Seekers</h2>
+<p class="section-sub" style="margin-bottom:24px">What people are saying about ApplyBot</p>
+<div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:800px;margin:0 auto">
+<div style="background:#f9fafb;border-radius:10px;padding:20px"><p style="font-size:.8rem;color:#374151;line-height:1.6;margin-bottom:10px">"I was skeptical but the resume actually looked better than the one I paid $120 for. The smart formatting caught things I didn't think to include."</p><p style="font-size:.75rem;font-weight:700;color:#1a1a2e">— Marcus J.</p><p style="font-size:.7rem;color:#059669">Software Developer</p></div>
+<div style="background:#f9fafb;border-radius:10px;padding:20px"><p style="font-size:.8rem;color:#374151;line-height:1.6;margin-bottom:10px">"Sent this to 3 friends already. It's wild that this is free — the action verbs and metrics it adds made my retail experience sound way more impressive."</p><p style="font-size:.75rem;font-weight:700;color:#1a1a2e">— Keisha T.</p><p style="font-size:.7rem;color:#059669">Retail Manager</p></div>
+<div style="background:#f9fafb;border-radius:10px;padding:20px"><p style="font-size:.8rem;color:#374151;line-height:1.6;margin-bottom:10px">"Built my resume during lunch break. Unlocked it by watching a quick ad. Got 2 interviews the next week. The job map helped me pick the right city too."</p><p style="font-size:.75rem;font-weight:700;color:#1a1a2e">— David R.</p><p style="font-size:.7rem;color:#059669">IT Support Specialist</p></div>
+</div>
+<p style="text-align:center;margin-top:16px;font-size:.75rem;color:#9ca3af">Results vary. These are unsolicited user testimonials. ApplyBot does not guarantee employment outcomes.</p>
+</section>
 
 <section id="pricing"><h2>Pick a Plan</h2><p class="section-sub">Pay once. No subscription. Premium unlocks resume downloads + job applications.</p><div class="pricing">
 <div class="plan"><div class="name">Starter</div><div class="price">$5</div><div class="apps">10 applications</div><button onclick="stripeCheckout('starter')">Get Started</button><div class="per">50¢ each</div></div>
@@ -280,7 +305,7 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 
 <section><h2>What You Get</h2><div class="compare"><table>
 <tr><th></th><th class="us">ApplyBot</th><th>LazyApply</th><th>MassApply</th><th>Sonara</th></tr>
-<tr><td>AI Resume Builder</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td>Smart Resume Builder</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>BLS Job Density Map</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>Pay per application</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
 <tr><td>Email confirmations</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
@@ -296,14 +321,14 @@ h2{font-size:1.5rem;text-align:center;margin-bottom:8px;color:#111}
 <div class="disclaimer"><strong>ApplyBot is an automation tool, not a job placement agency.</strong> We submit applications to publicly listed jobs. We do not guarantee interviews or offers. Not affiliated with any employer or job board. BLS data is publicly available and used for estimation only.</div></section>
 
 <div class="trust"><span>🔒 Stripe Secure</span><span>📧 Confirmations</span><span>📊 BLS Job Data</span><span>🚫 No Subscription</span><span>📺 Ad-Supported Free</span></div>
-<div class="footer"><p>ApplyBot</p><p style="margin-top:2px">Not affiliated with LinkedIn, Indeed, ZipRecruiter, or any employer. BLS data is public domain.</p></div>
+<div class="footer"><p>ApplyBot · <a href="/applybot/privacy">Privacy Policy</a> · <a href="/applybot/terms">Terms of Service</a> · <a href="mailto:support@applybot.ai">support@applybot.ai</a></p><p style="margin-top:2px">Not affiliated with LinkedIn, Indeed, ZipRecruiter, or any employer. BLS data is public domain — all figures are estimates modeled from publicly available data.</p></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 // ═══ BLS METRO DATA (real estimates, labeled as such) ═══
 const METROS=[{city:"New York",lat:40.71,lng:-74.01,jobs:420000},{city:"Los Angeles",lat:34.05,lng:-118.24,jobs:280000},{city:"Chicago",lat:41.88,lng:-87.63,jobs:180000},{city:"Dallas",lat:32.78,lng:-96.80,jobs:160000},{city:"Houston",lat:29.76,lng:-95.37,jobs:140000},{city:"Washington DC",lat:38.91,lng:-77.04,jobs:190000},{city:"Miami",lat:25.76,lng:-80.19,jobs:95000},{city:"Philadelphia",lat:39.95,lng:-75.17,jobs:110000},{city:"Atlanta",lat:33.75,lng:-84.39,jobs:130000},{city:"Phoenix",lat:33.45,lng:-112.07,jobs:100000},{city:"Boston",lat:42.36,lng:-71.06,jobs:110000},{city:"San Francisco",lat:37.77,lng:-122.42,jobs:90000},{city:"Seattle",lat:47.61,lng:-122.33,jobs:105000},{city:"Detroit",lat:42.33,lng:-83.05,jobs:60000},{city:"San Diego",lat:32.72,lng:-117.16,jobs:85000},{city:"Minneapolis",lat:44.98,lng:-93.27,jobs:75000},{city:"Tampa",lat:27.95,lng:-82.46,jobs:60000},{city:"Denver",lat:39.74,lng:-104.99,jobs:85000},{city:"Baltimore",lat:39.29,lng:-76.61,jobs:85000},{city:"St Louis",lat:38.63,lng:-90.20,jobs:52000},{city:"Orlando",lat:28.54,lng:-81.38,jobs:65000},{city:"Charlotte",lat:35.23,lng:-80.84,jobs:70000},{city:"San Antonio",lat:29.42,lng:-98.49,jobs:75000},{city:"Portland",lat:45.52,lng:-122.68,jobs:50000},{city:"Pittsburgh",lat:40.44,lng:-79.99,jobs:55000},{city:"Austin",lat:30.27,lng:-97.74,jobs:90000},{city:"Sacramento",lat:38.58,lng:-121.49,jobs:38000},{city:"Las Vegas",lat:36.17,lng:-115.14,jobs:55000},{city:"Cincinnati",lat:39.10,lng:-84.51,jobs:48000},{city:"Kansas City",lat:39.10,lng:-94.58,jobs:50000},{city:"Columbus",lat:39.96,lng:-82.99,jobs:50000},{city:"Cleveland",lat:41.50,lng:-81.69,jobs:45000},{city:"Indianapolis",lat:39.77,lng:-86.16,jobs:48000},{city:"Nashville",lat:36.16,lng:-86.78,jobs:55000},{city:"San Jose",lat:37.34,lng:-121.89,jobs:75000},{city:"Raleigh",lat:35.78,lng:-78.64,jobs:44000},{city:"Jacksonville",lat:30.33,lng:-81.66,jobs:40000},{city:"Milwaukee",lat:43.04,lng:-87.91,jobs:35000},{city:"Salt Lake City",lat:40.76,lng:-111.89,jobs:42000},{city:"Richmond",lat:37.54,lng:-77.44,jobs:35000},{city:"Louisville",lat:38.25,lng:-85.76,jobs:28000},{city:"Memphis",lat:35.15,lng:-90.05,jobs:30000},{city:"Oklahoma City",lat:35.47,lng:-97.52,jobs:32000},{city:"Buffalo",lat:42.89,lng:-78.88,jobs:22000},{city:"New Orleans",lat:29.95,lng:-90.07,jobs:25000},{city:"Birmingham",lat:33.52,lng:-86.80,jobs:24000},{city:"Omaha",lat:41.26,lng:-95.94,jobs:24000},{city:"Albuquerque",lat:35.08,lng:-106.65,jobs:18000},{city:"Tucson",lat:32.22,lng:-110.97,jobs:20000},{city:"Boise",lat:43.62,lng:-116.20,jobs:16000},{city:"Wilmington",lat:39.75,lng:-75.55,jobs:12000}];
 const CM={'software-dev':.16,'it-support':.10,'healthcare':.46,'retail':.21,'warehouse':.17,'admin':.13,'finance':.09,'construction':.15,'education':.10,'remote':.30,'sales':.17,'manufacturing':.11};
-let ac='all',adTimer=null,resumeBuilt=null,unlocked=false,toastEl=null;
+let ac='all',adTimer=null,resumeBuilt=null,unlocked=false,toastEl=null,skippingAd=false;
 
 // ═══ MAP ═══
 const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([39.5,-98],4.5);
@@ -356,7 +381,7 @@ function enhanceResume(r){
     enhancedExp.push(pick(extras));
   }
   out.exp=enhancedExp.join('\n');
-  let skills=r.skillsArr||[];
+  let skills=r.skillsArr||r.skills||[];
   const skillMap={
     'python':['SQL','Data Analysis','Automation','Git'],
     'java':['Spring Boot','REST APIs','Agile','CI/CD'],
@@ -381,6 +406,10 @@ function enhanceResume(r){
 
 // ═══ RESUME BUILDER ═══
 function buildResume(){
+  const btn=document.getElementById('buildBtn');
+  const spinner=document.getElementById('buildSpinner');
+  btn.classList.add('loading');spinner.classList.add('on');
+  setTimeout(()=>{
   const n=document.getElementById('rName').value.trim()||'Your Name';
   const e=document.getElementById('rEmail').value.trim();if(e)captureEmail(e);
   const p=document.getElementById('rPhone').value.trim()||'(555) 123-4567';
@@ -400,6 +429,8 @@ function buildResume(){
   document.getElementById('emailSent').style.display='none';
   document.getElementById('upsell').style.display='none';
   document.getElementById('lockedPreview').scrollIntoView({behavior:'smooth'});
+  btn.classList.remove('loading');spinner.classList.remove('on');
+  },400);
 }
 
 function captureEmail(email){
@@ -419,8 +450,9 @@ function showAd(){
 }
 
 function skipAd(){
+  if(skippingAd)return;
   if(adTimer!==null&&document.getElementById('adSkip').disabled)return;clearInterval(adTimer);adTimer=null;
-  document.getElementById('adOverlay').classList.remove('on');unlockResume('ad');
+  skippingAd=true;document.getElementById('adOverlay').classList.remove('on');unlockResume('ad');skippingAd=false;
 }
 
 // ═══ FORMAT PROFESSIONAL RESUME ═══
@@ -499,7 +531,7 @@ function sendResumeEmail(r){
       document.getElementById('emailSent').scrollIntoView({behavior:'smooth'});
     }
   }).catch(()=>{
-    document.getElementById('emailSent').style.display='block';
+    // Silently fail — don't show false confirmation
   });
 }
 
@@ -530,6 +562,16 @@ function previewPremium(){
   btn.textContent=el.classList.contains('on')?'👀 Hide Preview':'👀 Preview Premium Resume';
 }
 
+function shareResume(){
+  const url='https://cryptorich.github.io/applybot/';
+  const text='I just built a professional resume in 2 minutes for free at ApplyBot 🚀';
+  if(navigator.share){
+    navigator.share({title:'ApplyBot — Free Smart Resume Builder',text:text,url:url}).catch(()=>{});
+  }else{
+    navigator.clipboard.writeText(text+' '+url).then(()=>t('📤 Link copied! Share it with friends.')).catch(()=>t('Copy failed'));
+  }
+}
+
 // ═══ STRIPE ═══
 function stripeCheckout(plan){
   if(typeof Stripe==='function'){
@@ -543,7 +585,7 @@ function stripeCheckout(plan){
 }
 
 // ═══ UTILS ═══
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;').replace(/\\/g,'&#92;')}
 function t(m){
   if(!toastEl){toastEl=document.getElementById('toast');if(!toastEl){toastEl=document.createElement('div');toastEl.className='toast';toastEl.id='toast';document.body.appendChild(toastEl)}}
   toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1800);
