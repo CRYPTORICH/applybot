@@ -1,0 +1,97 @@
+{
+  "Website Flipping": {
+    "id": "website-flipping",
+    "icon": "🌐",
+    "leadFields": [
+      {"key": "name", "label": "Business Name", "type": "text"},
+      {"key": "phone", "label": "Phone", "type": "phone"},
+      {"key": "category", "label": "Trade", "type": "select", "options": ["HVAC", "Electrician", "Plumber", "Roofer", "Painter", "Landscaper", "Locksmith"]},
+      {"key": "zip", "label": "ZIP", "type": "text"},
+      {"key": "website", "label": "Current Website", "type": "text"},
+      {"key": "site_status", "label": "Site Status", "type": "select", "options": ["no-site", "fake", "bad", "decent"]},
+      {"key": "opener", "label": "Opener Script", "type": "text"},
+      {"key": "slug", "label": "Demo Slug", "type": "text"}
+    ],
+    "badges": {
+      "no-site": {"label": "NO SITE", "color": "var(--dead)", "bg": "rgba(255,23,68,.2)"},
+      "fake": {"label": "FAKE", "color": "var(--hot)", "bg": "rgba(255,171,0,.15)"}
+    },
+    "pipeline": ["new","called","hot","sold","dead"],
+    "closeScript": "So here's the deal — <em>$500 and it's yours.</em> {value_prop}. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?",
+    "valueProps": {
+      "HVAC": "One AC repair call costs $300-500. This site costs less than <em>one call</em>.",
+      "Electrician": "One emergency electrical job pays $400-800. This site costs less than <em>one job</em>.",
+      "Plumber": "One emergency plumbing call pays $350-600. This site costs less than <em>one call</em>.",
+      "Roofer": "One roofing job is $5k+. This site is <em>10% of one customer</em>.",
+      "default": "I'll connect your domain, set up email, hand you the keys."
+    },
+    "objectionHandlers": [
+      {"trigger": "Already have a website", "emoji": "😐", "no_site": "I looked — you don't have <em>any</em> website. When someone Googles '{category} near me' they find <em>your competitors</em>. Let me text you what I built.", "has_site": "Actually — I looked at it. It's a <em>generic placeholder page</em>, not a real website. Let me text you what I built — you'll see the difference."},
+      {"trigger": "Too expensive", "emoji": "💸", "response": "What's <em>one new customer</em> worth? This site costs less than one service call. If it brings you even one job, it paid for itself. You pay <em>after</em> it's live."},
+      {"trigger": "Not interested", "emoji": "📞", "response": "No problem — keep the site anyway. I already built it. If you change your mind, <em>text me at this number</em>. Site's done, just needs your name on it."},
+      {"trigger": "Let me think about it", "emoji": "🤔", "response": "Totally fair. Is it the <em>price</em> or the <em>idea</em> you're unsure about? Because I can work with one of those."}
+    ],
+    "deliveryChecklist": [
+      "Collect $500 payment",
+      "Buy domain ($12/yr)",
+      "DNS to GitHub Pages",
+      "Set up email forwarding",
+      "Google Business Profile",
+      "Text client: 'Live!'",
+      "2-week check-in"
+    ],
+    "leadSource": "google-maps"
+  },
+  "Real Estate": {
+    "id": "real-estate",
+    "icon": "🏠",
+    "leadFields": [
+      {"key": "name", "label": "Owner Name", "type": "text"},
+      {"key": "phone", "label": "Phone", "type": "phone"},
+      {"key": "email", "label": "Email", "type": "text"},
+      {"key": "address", "label": "Property Address", "type": "text"},
+      {"key": "city", "label": "City", "type": "text"},
+      {"key": "state", "label": "State", "type": "text"},
+      {"key": "zip", "label": "ZIP", "type": "text"},
+      {"key": "property_type", "label": "Property Type", "type": "select", "options": ["SFR", "Condo", "Multi-Family", "Commercial", "Land"]},
+      {"key": "est_value", "label": "Est. Value", "type": "text"},
+      {"key": "equity_pct", "label": "Est. Equity %", "type": "text"},
+      {"key": "lead_type", "label": "Lead Type", "type": "select", "options": ["pre-foreclosure", "tax-delinquent", "probate", "absentee-owner", "divorce-filing", "expired-listing", "fsbo", "cold"]},
+      {"key": "last_sale_date", "label": "Last Sale Date", "type": "text"},
+      {"key": "days_owned", "label": "Days Owned", "type": "text"},
+      {"key": "mortgage_balance", "label": "Est. Mortgage", "type": "text"},
+      {"key": "notes", "label": "Notes", "type": "text"}
+    ],
+    "badges": {
+      "pre-foreclosure": {"label": "PRE-FC", "color": "var(--dead)", "bg": "rgba(255,23,68,.2)"},
+      "tax-delinquent": {"label": "TAX LIEN", "color": "var(--hot)", "bg": "rgba(255,171,0,.15)"},
+      "probate": {"label": "PROBATE", "color": "var(--sold)", "bg": "rgba(41,121,255,.2)"},
+      "absentee-owner": {"label": "ABSENTEE", "color": "var(--called)", "bg": "rgba(136,136,136,.2)"},
+      "divorce-filing": {"label": "DIVORCE", "color": "var(--hot)", "bg": "rgba(255,171,0,.15)"},
+      "expired-listing": {"label": "EXPIRED", "color": "var(--dead)", "bg": "rgba(255,23,68,.2)"},
+      "fsbo": {"label": "FSBO", "color": "var(--accent)", "bg": "rgba(0,230,118,.2)"}
+    },
+    "pipeline": ["new","contacted","appointment","negotiating","under-contract","closed","dead"],
+    "closeScript": "Here's what I'm thinking — your property at {address} has an estimated value around {est_value}. I have a <em>cash buyer</em> who's interested in the area. No agents, no commissions, no repairs needed. Can we take a look this week?",
+    "valueProps": {
+      "default": "No commissions. No repairs. Cash closing in 7-14 days."
+    },
+    "objectionHandlers": [
+      {"trigger": "Not looking to sell", "emoji": "🤷", "response": "Totally understand — most people aren't until the right offer comes along. If I could get you a <em>cash offer above market</em> with zero fees, would it be worth 10 minutes?"},
+      {"trigger": "Already have an agent", "emoji": "🏢", "response": "No problem at all. What if I told you we work <em>alongside</em> agents — you keep yours, we just bring the buyer? No dual agency, no conflict."},
+      {"trigger": "Send me info first", "emoji": "📧", "response": "Happy to. What's the best email? I'll send you a <em>free property valuation</em> and a sample offer range — no commitment, just numbers."},
+      {"trigger": "How did you get my info?", "emoji": "🔍", "response": "Public records — your property came up as one we can potentially help. We work with homeowners in situations like {lead_type} to get them <em>top dollar without the hassle</em>."}
+    ],
+    "deliveryChecklist": [
+      "Pull full title report",
+      "Run comps (3 comparable sales)",
+      "Prepare cash offer range",
+      "Schedule property walkthrough",
+      "Send offer letter",
+      "Open escrow",
+      "Schedule inspection",
+      "Close and record deed"
+    ],
+    "leadSource": "county-records"
+  }
+}

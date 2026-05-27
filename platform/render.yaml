@@ -1,0 +1,10 @@
+{
+  "name": "SiteLaunch Platform API",
+  "description": "Industry-agnostic lead management CRM",
+  "repository": "https://github.com/CRYPTORICH/site-launch-platform",
+  "buildCommand": "pip install -r api/requirements.txt",
+  "startCommand": "cd api && gunicorn server:app --bind 0.0.0.0:$PORT",
+  "env": {
+    "PYTHON_VERSION": "3.11"
+  }
+}
