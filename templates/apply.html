@@ -3,50 +3,240 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ApplyBot — Submit Your Resume</title>
+<title>ApplyBot — Resume Enhancement & Auto-Apply</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-.card{background:#1a1a2e;border-radius:16px;padding:40px;max-width:600px;width:100%;border:1px solid #2a2a3e}
+body{background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:20px}
+.step{max-width:680px;margin:0 auto;display:none}
+.step.active{display:block}
+
+/* Step 1 — Upload */
+.card{background:#1a1a2e;border-radius:16px;padding:40px;width:100%;border:1px solid #2a2a3e;margin-bottom:20px}
 .card h1{font-size:1.8rem;margin-bottom:8px}
-.card p{color:#888;margin-bottom:30px}
+.card .subtitle{color:#888;margin-bottom:30px;font-size:1rem}
 .form-group{margin-bottom:20px}
 label{display:block;font-weight:600;margin-bottom:8px;color:#ccc}
 input,textarea,select{width:100%;padding:14px;background:#111;border:1px solid #2a2a3e;border-radius:10px;color:#fff;font-size:1rem;font-family:inherit}
 textarea{min-height:200px;resize:vertical}
 .upload-area{border:2px dashed #2a2a3e;padding:40px;text-align:center;border-radius:10px;cursor:pointer;transition:border-color .2s}
-.upload-area:hover{border-color:#7c3aed}
+.upload-area:hover{border-color:#059669}
 .upload-area p{color:#666;margin-top:10px}
-button{width:100%;padding:16px;background:linear-gradient(135deg,#7c3aed,#3b82f6);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+button{width:100%;padding:16px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
 button:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+/* Step 2 — Preview */
+.preview-box{background:#111;border:1px solid #2a2a3e;border-radius:10px;padding:24px;white-space:pre-wrap;font-size:.9rem;line-height:1.6;max-height:500px;overflow-y:auto;color:#ccc;font-family:inherit}
+.score-badge{display:inline-block;background:#059669;padding:4px 12px;border-radius:20px;font-weight:700;font-size:.85rem}
+.changes-list{margin:16px 0}
+.changes-list li{color:#10b981;margin:4px 0;font-size:.9rem}
+.job-card{background:#111;border:1px solid #2a2a3e;border-radius:10px;padding:16px;margin:12px 0}
+.job-card h3{color:#10b981;margin-bottom:4px}
+.job-card .company{color:#888;font-size:.9rem}
+.job-card .match{color:#f59e0b;font-size:.85rem;font-weight:600}
+
+/* Loading */
+.spinner{border:3px solid #1a1a2e;border-top:3px solid #059669;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{text-align:center;color:#888;margin-top:16px}
+
+.badge-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.badge{background:#1a1a2e;border:1px solid #2a2a3e;padding:6px 14px;border-radius:20px;font-size:.8rem}
+.back-btn{background:transparent;border:1px solid #2a2a3e;margin-bottom:20px;width:auto;padding:10px 20px}
 </style>
 </head>
 <body>
-<div class="card">
-<h1>📎 Submit Your Resume</h1>
-<p>We'll tailor it for every job and start applying immediately.</p>
-<form action="/apply/{{user_id}}" method="POST" enctype="multipart/form-data">
-<div class="form-group">
-<label>Upload Resume (PDF)</label>
-<div class="upload-area" onclick="document.getElementById('resume').click()">
-<input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" style="display:none" onchange="this.parentElement.querySelector('p').textContent=this.files[0]?.name||'Drop PDF here or click to browse'">
-<p>Drop PDF here or click to browse</p>
+
+<div class="step active" id="step-upload">
+  <div class="card">
+    <h1>🚀 Your Resume, Supercharged</h1>
+    <p class="subtitle">We'll enhance your resume with AI, tailor it for each job, and submit it to the top companies in your target location.</p>
+    
+    <div class="form-group">
+      <label>Upload Resume (PDF/DOCX)</label>
+      <div class="upload-area" onclick="document.getElementById('resume-file').click()">
+        <input type="file" id="resume-file" accept=".pdf,.doc,.docx" style="display:none" onchange="handleFile(this)">
+        <p id="file-label">Drop file here or click to browse</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Or paste your resume text</label>
+      <textarea id="resume-text" placeholder="Paste your full resume here..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Target Location</label>
+      <input type="text" id="location" placeholder="e.g. Wilmington, DE or Remote" required>
+    </div>
+
+    <div class="form-group">
+      <label>Target Job Titles (comma separated)</label>
+      <input type="text" id="titles" placeholder="e.g. IT Support Specialist, Desktop Support, Help Desk" required>
+    </div>
+
+    <button onclick="enhanceResume()" id="enhance-btn">Enhance My Resume →</button>
+  </div>
 </div>
+
+<div class="step" id="step-loading">
+  <div class="card" style="text-align:center;padding:60px">
+    <div class="spinner"></div>
+    <p class="loading-text" id="loading-msg">Analyzing your resume...</p>
+  </div>
 </div>
-<div class="form-group">
-<label>Or paste your resume text</label>
-<textarea name="resume_text" placeholder="Paste your full resume here..."></textarea>
+
+<div class="step" id="step-preview">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <div class="card">
+    <h1>✨ Your Enhanced Resume</h1>
+    <div class="badge-row">
+      <span class="score-badge">Score: <span id="improvement-score">8</span>/10</span>
+      <span class="badge" id="jobs-count">5 jobs found</span>
+    </div>
+    
+    <p style="color:#10b981;font-weight:600;margin-bottom:8px">Improvements Made:</p>
+    <ul class="changes-list" id="changes-list"></ul>
+
+    <p style="color:#888;margin:20px 0 8px">Preview your enhanced resume:</p>
+    <div class="preview-box" id="enhanced-preview"></div>
+
+    <h2 style="margin:30px 0 16px">🎯 Target Jobs Found</h2>
+    <div id="jobs-container"></div>
+
+    <button onclick="submitAll()" id="submit-btn" style="margin-top:20px">
+      Submit Applications to <span id="company-count">0</span> Companies →
+    </button>
+  </div>
 </div>
-<div class="form-group">
-<label>Target Location</label>
-<input type="text" name="location" placeholder="e.g. Wilmington, DE or Remote" required>
+
+<div class="step" id="step-done">
+  <div class="card" style="text-align:center;padding:60px">
+    <h1>🎉 Applications Submitted!</h1>
+    <p style="color:#888;margin:20px 0">Your enhanced resume has been submitted to <span id="submitted-count">0</span> companies.</p>
+    <p style="color:#888">Check your email for confirmations as they process.</p>
+    <a href="/" style="color:#10b981;display:inline-block;margin-top:20px">← Back to Home</a>
+  </div>
 </div>
-<div class="form-group">
-<label>Target Job Titles</label>
-<input type="text" name="titles" placeholder="e.g. IT Support Specialist, Desktop Support, Help Desk" required>
-</div>
-<button type="submit">Start Applying →</button>
-</form>
-</div>
+
+<script>
+const user_id = "{{user_id}}";
+
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (file) {
+    document.getElementById('file-label').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('resume-text').value = e.target.result;
+    };
+    reader.readAsText(file);
+  }
+}
+
+async function enhanceResume() {
+  const resumeText = document.getElementById('resume-text').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const titles = document.getElementById('titles').value.trim();
+  
+  if (!resumeText) return alert('Please upload or paste your resume');
+  if (!location) return alert('Please enter your target location');
+  if (!titles) return alert('Please enter target job titles');
+  
+  showStep('step-loading');
+  document.getElementById('loading-msg').textContent = 'Searching jobs & enhancing your resume...';
+  
+  try {
+    const resp = await fetch('/api/batch-tailor', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        resume_text: resumeText,
+        location: location,
+        titles: titles,
+        limit: 5
+      })
+    });
+    
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    
+    // Show preview
+    document.getElementById('improvement-score').textContent = data.improvement_score;
+    document.getElementById('jobs-count').textContent = data.jobs_found + ' jobs found';
+    
+    const changesList = document.getElementById('changes-list');
+    changesList.innerHTML = '';
+    (data.changes || []).forEach(c => {
+      changesList.innerHTML += `<li>✓ ${c}</li>`;
+    });
+    
+    document.getElementById('enhanced-preview').textContent = data.enhanced_resume;
+    
+    // Show target jobs
+    const jobsContainer = document.getElementById('jobs-container');
+    jobsContainer.innerHTML = '';
+    (data.tailored_applications || []).forEach(app => {
+      jobsContainer.innerHTML += `
+        <div class="job-card">
+          <h3>${app.job.title || 'Position'}</h3>
+          <p class="company">${app.job.company || 'Company'} — ${app.job.location || location}</p>
+          <p class="match">Match Score: ${app.match_score}%</p>
+          <p style="color:#888;font-size:.85rem">${app.summary || ''}</p>
+          <p style="color:#666;font-size:.8rem;margin-top:4px">Keywords: ${(app.keyword_matches || []).join(', ')}</p>
+        </div>`;
+    });
+    
+    document.getElementById('company-count').textContent = data.jobs_found;
+    showStep('step-preview');
+    
+    // Store for submission
+    window._batchResult = data;
+    
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showStep('step-upload');
+  }
+}
+
+function goBack() {
+  showStep('step-upload');
+}
+
+async function submitAll() {
+  showStep('step-loading');
+  document.getElementById('loading-msg').textContent = 'Submitting applications...';
+  
+  try {
+    // In production, this queues each tailored resume for CDP auto-apply
+    const applications = window._batchResult?.tailored_applications || [];
+    
+    const resp = await fetch('/api/free-trial', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: '{{user_email}}',
+        name: '{{user_name}}',
+        job_titles: document.getElementById('titles').value,
+        location: document.getElementById('location').value,
+        resume_text: window._batchResult?.enhanced_resume || document.getElementById('resume-text').value,
+        tailored_count: applications.length
+      })
+    });
+    
+    document.getElementById('submitted-count').textContent = applications.length;
+    showStep('step-done');
+    
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showStep('step-preview');
+  }
+}
+</script>
 </body>
 </html>

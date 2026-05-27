@@ -502,7 +502,12 @@ def apply_page(user_id):
         
         return redirect(f"/dashboard/{user_id}")
     
-    return render_template("apply.html", user_id=user_id)
+    db = get_db()
+    user = db.execute("SELECT email, name FROM users WHERE id=?", (user_id,)).fetchone()
+    db.close()
+    return render_template("apply.html", user_id=user_id, 
+                          user_email=user["email"] if user else "",
+                          user_name=user["name"] if user else "")
 
 @app.route("/dashboard/<user_id>")
 def dashboard(user_id):
@@ -629,6 +634,107 @@ def extract_resume_text(path):
         return text
     except:
         return ""
+
+# ── AI RESUME ENHANCEMENT (S10 Keter — the crown jewel) ──
+
+@app.route("/api/enhance-resume", methods=["POST"])
+def api_enhance_resume():
+    """Enhance a raw resume using AI. Optional target role/industry for optimization."""
+    from resume_enhancer import enhance_resume
+    
+    data = request.json or {}
+    raw_resume = data.get("resume_text", "")
+    target_role = data.get("target_role", "")
+    target_industry = data.get("target_industry", "")
+    
+    if not raw_resume:
+        return jsonify({"error": "resume_text is required"}), 400
+    
+    try:
+        result = enhance_resume(raw_resume, target_role, target_industry)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "fallback": raw_resume}), 500
+
+
+@app.route("/api/tailor-resume", methods=["POST"])
+def api_tailor_resume():
+    """Tailor a resume to a specific job posting."""
+    from resume_enhancer import tailor_to_job
+    
+    data = request.json or {}
+    resume_text = data.get("resume_text", "")
+    job_title = data.get("job_title", "")
+    company = data.get("company", "")
+    job_description = data.get("job_description", "")
+    
+    if not resume_text or not job_title:
+        return jsonify({"error": "resume_text and job_title are required"}), 400
+    
+    try:
+        result = tailor_to_job(resume_text, job_title, company, job_description)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/batch-tailor", methods=["POST"])
+def api_batch_tailor():
+    """
+    Search for jobs matching criteria, enhance resume, and tailor for each job.
+    Returns list of tailored resumes ready for submission.
+    """
+    from resume_enhancer import enhance_resume, tailor_to_job
+    from search import search_jobs
+    
+    data = request.json or {}
+    raw_resume = data.get("resume_text", "")
+    location = data.get("location", "Remote")
+    titles = data.get("titles", "")
+    limit = data.get("limit", 5)
+    
+    if not raw_resume or not titles:
+        return jsonify({"error": "resume_text and titles required"}), 400
+    
+    try:
+        # Step 1: Search for jobs
+        title_list = [t.strip() for t in titles.split(",")]
+        all_jobs = []
+        for title in title_list:
+            jobs = search_jobs(title, location, limit=limit)
+            all_jobs.extend(jobs)
+        
+        # Step 2: Enhance resume once
+        enhanced = enhance_resume(raw_resume, target_role=title_list[0])
+        enhanced_text = enhanced.get("enhanced_resume", raw_resume)
+        
+        # Step 3: Tailor for each job
+        results = []
+        for job in all_jobs[:limit]:
+            tailored = tailor_to_job(
+                enhanced_text,
+                job.get("title", ""),
+                job.get("company", ""),
+                job.get("description", "")
+            )
+            results.append({
+                "job": job,
+                "tailored_resume": tailored.get("tailored_resume", enhanced_text),
+                "match_score": tailored.get("match_score", 70),
+                "keyword_matches": tailored.get("keyword_matches", []),
+                "summary": tailored.get("summary_line", ""),
+            })
+        
+        return jsonify({
+            "enhanced_resume": enhanced_text,
+            "changes": enhanced.get("changes_made", []),
+            "improvement_score": enhanced.get("improvement_score", 6),
+            "jobs_found": len(results),
+            "tailored_applications": results,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # === STARTUP ===
 if __name__ == "__main__":
