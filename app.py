@@ -502,12 +502,27 @@ def apply_page(user_id):
         
         return redirect(f"/dashboard/{user_id}")
     
+    return render_template("index.html")
+
+
+@app.route("/apply/demo")
+def apply_demo():
+    """Demo apply page — no login required, starts with free trial."""
+    return render_template("apply.html", user_id="demo",
+                          user_email="",
+                          user_name="Guest")
+
+
+@app.route("/apply/<user_id>")
+def apply_page(user_id):
+    """Show the apply page."""
     db = get_db()
     user = db.execute("SELECT email, name FROM users WHERE id=?", (user_id,)).fetchone()
     db.close()
     return render_template("apply.html", user_id=user_id, 
                           user_email=user["email"] if user else "",
                           user_name=user["name"] if user else "")
+
 
 @app.route("/dashboard/<user_id>")
 def dashboard(user_id):
