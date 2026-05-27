@@ -513,13 +513,6 @@ def apply_demo():
                           user_name="Guest")
 
 
-@app.route("/builder")
-def resume_builder():
-    """Standalone resume builder & job matcher."""
-    from flask import send_file
-    return send_file("resume-builder.html")
-
-
 @app.route("/apply/<user_id>")
 def apply_page(user_id):
     """Show the apply page."""
