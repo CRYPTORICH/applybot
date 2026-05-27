@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, send_from_directory
 import stripe
 
 # === CONFIG ===
@@ -170,6 +170,24 @@ def index():
         PRICE_STANDARD=PRICES["standard"]["id"],
         PRICE_PRO=PRICES["pro"]["id"],
         PRICE_UNLIMITED=PRICES["unlimited"]["id"])
+
+# === SiteLaunch Platform Routes ===
+@app.route("/crm")
+def crm_index():
+    """Serve the SiteLaunch CRM."""
+    return send_from_directory(str(BASE_DIR / "platform"), "index.html")
+
+@app.route("/crm/config/<path:filename>")
+def crm_config(filename):
+    return send_from_directory(str(BASE_DIR / "platform" / "config"), filename)
+
+@app.route("/crm/lead-sources/<path:filename>")
+def crm_leads(filename):
+    return send_from_directory(str(BASE_DIR / "platform" / "lead-sources"), filename)
+
+@app.route("/crm/<path:filename>")
+def crm_static(filename):
+    return send_from_directory(str(BASE_DIR / "platform"), filename)
 
 @app.route("/api/create-checkout", methods=["POST", "OPTIONS"])
 def create_checkout():
