@@ -349,12 +349,8 @@ function renderLeadBadges(l, st){
 
 // ── INIT ──
 async function init(){
-  // Detect base path (works on GitHub Pages, Render, and local)
-  const isRender = window.location.pathname.startsWith('/crm');
-  const basePath = isRender ? '/crm/' : '';
-  
   try{
-    const resp=await fetch(basePath + 'config/industries.json');
+    const resp=await fetch('config/industries.json');
     industries=await resp.json();
   }catch(e){
     // Fallback: try relative path
@@ -378,12 +374,10 @@ async function init(){
 }
 
 async function loadLeads(){
-  const isRender = window.location.pathname.startsWith('/crm');
-  const basePath = isRender ? '/crm/' : '';
   // Try to load leads for current industry
   const id=industryData.id||'website-flipping';
   const paths=[
-    basePath + `lead-sources/${id}-leads.json`,
+    `lead-sources/${id}-leads.json`,
     `../${id}-leads.json`,
     'leads.json',
     '../crm-repo/leads.json'
