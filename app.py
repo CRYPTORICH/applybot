@@ -516,9 +516,7 @@ def apply_demo():
 @app.route("/builder")
 def resume_builder():
     """Standalone resume builder & job matcher."""
-    from flask import send_from_directory
-    import os
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "resume-builder.html")
+    return render_template("builder.html")
 
 
 @app.route("/apply/<user_id>")
