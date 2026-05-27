@@ -516,8 +516,7 @@ def apply_demo():
 @app.route("/builder")
 def resume_builder():
     """Standalone resume builder & job matcher."""
-    import os
-    return send_from_directory(os.path.join(os.path.dirname(__file__), "static"), "builder.html")
+    return render_template("builder.html")
 
 
 @app.route("/apply/<user_id>")
