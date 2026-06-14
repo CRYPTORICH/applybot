@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Racks · Unified Demo Hub</title>
+<meta name="description" content="Every demo. Every feature. RacksRewards + ApplyBot.">
+<meta property="og:title" content="Racks · Unified Demo Hub">
+<meta property="og:description" content="Loyalty, Inventory, Intelligence, Ads + Resume Builder, Job Map, CRM, 238 Local Sites.">
+<meta property="og:type" content="website">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #060906;
+  --surface: #0d120d;
+  --border: #1a2a1a;
+  --green: #059669;
+  --green-bright: #10b981;
+  --gold: #d4a843;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --dim: #6b7280;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+  background: linear-gradient(180deg, #0a1a0a 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero .brand { font-size: 3rem; font-weight: 800; letter-spacing: -1px; }
+.hero .brand span { color: var(--green); }
+.hero .subtitle { font-size: 1.15rem; color: var(--muted); margin-top: 8px; max-width: 600px; margin-left: auto; margin-right: auto; }
+.hero .stats { display: flex; gap: 40px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat .num { font-size: 2rem; font-weight: 800; color: var(--green); }
+.stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+/* Section */
+section { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+h2 .emoji { margin-right: 8px; }
+.section-desc { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+/* Demo Cards Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s, transform 0.15s;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+}
+.card:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+.card .icon { font-size: 1.8rem; margin-bottom: 12px; }
+.card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; color: #fff; }
+.card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+.card .tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 12px;
+}
+.tag-live { background: #064e3b; color: #34d399; }
+.tag-demo { background: #78350f; color: #fbbf24; }
+.tag-new { background: #1e3a5f; color: #60a5fa; }
+.tag-pay { background: #4a1942; color: #e879f9; }
+
+/* Pill nav */
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.pill:hover { border-color: var(--green); color: var(--text); }
+.pill.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* Connection diagram */
+.connection {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  margin: 40px 0;
+}
+.connection .flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.flow-node {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 24px;
+  text-align: center;
+  min-width: 140px;
+}
+.flow-node .icon { font-size: 1.5rem; }
+.flow-node .name { font-weight: 700; font-size: 0.85rem; margin-top: 4px; }
+.flow-arrow { color: var(--green); font-size: 1.5rem; font-weight: 700; }
+.connection h3 { font-size: 1.3rem; margin-bottom: 4px; }
+
+/* Bottom CTA */
+.cta-bar {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(0deg, #0a1a0a 0%, var(--bg) 100%);
+  border-top: 1px solid var(--border);
+}
+.cta-bar h2 { font-size: 2rem; margin-bottom: 12px; }
+.cta-bar p { color: var(--muted); margin-bottom: 24px; }
+.cta-btn {
+  display: inline-block;
+  padding: 14px 32px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.cta-btn:hover { background: var(--green-bright); }
+
+footer {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--dim);
+  font-size: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--muted); text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .hero { padding: 50px 16px 40px; }
+  .hero .brand { font-size: 2rem; }
+  section { padding: 40px 16px; }
+  .grid { grid-template-columns: 1fr; }
+  .connection .flow { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="brand">Racks<span>Unified</span></div>
+  <div class="subtitle">Every demo. Every feature. One place.<br>Loyalty · Ads · Jobs · CRM · 238 Local Sites</div>
+  <div class="stats">
+    <div class="stat"><div class="num">11</div><div class="label">Live Demos</div></div>
+    <div class="stat"><div class="num">238</div><div class="label">Local Sites</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">Products</div></div>
+    <div class="stat"><div class="num">1</div><div class="label">Platform</div></div>
+  </div>
+</div>
+
+<!-- ========== RACKSREWARDS ========== -->
+<section>
+  <h2><span class="emoji">🏪</span> RacksRewards — Shop OS</h2>
+  <div class="section-desc">4-layer platform: Loyalty → Inventory → Intelligence → Ads Marketplace. Built for local shops. Everybody eats.</div>
+  <div class="grid">
+
+    <a href="https://racksrewards.com/" class="card" target="_blank">
+      <div class="icon">🏠</div>
+      <h3>Landing Page</h3>
+      <p>4-layer model, app directory, shop onboarding. The full vision.</p>
+      <span class="tag tag-live">Live · racksrewards.com</span>
+    </a>
+
+    <a href="https://racksrewards.com/index.html" class="card" target="_blank">
+      <div class="icon">🔐</div>
+      <h3>Staff Panel — Original</h3>
+      <p>Customer lookup, redeem points, visit history, store stats. 4-tab dashboard. The original working product.</p>
+      <span class="tag tag-live">Live · Original SPA</span>
+    </a>
+
+    <a href="https://racksrewards.com/demo" class="card" target="_blank">
+      <div class="icon">🎮</div>
+      <h3>Live Demo</h3>
+      <p>Create a test account with any phone number. Try the full customer experience in 10 seconds.</p>
+      <span class="tag tag-demo">Interactive Demo</span>
+    </a>
+
+    <a href="https://racksrewards.com/customer?shop=demo" class="card" target="_blank">
+      <div class="icon">👤</div>
+      <h3>Customer Portal</h3>
+      <p>Check points, redeem rewards, refer friends. Mobile-first. Every customer gets this.</p>
+      <span class="tag tag-live">Live</span>
+    </a>
+
+    <a href="https://racksrewards.com/inventory.html?shop=demo" class="card" target="_blank">
+      <div class="icon">📦</div>
+      <h3>Inventory Tracker</h3>
+      <p>Track stock levels, categories, low-stock alerts. Export CSV. Tax-ready. Lock-in feature for shops.</p>
+      <span class="tag tag-new">New · Layer 2</span>
+    </a>
+
+    <a href="https://racksrewards.com/analytics.html?shop=demo" class="card" target="_blank">
+      <div class="icon">📊</div>
+      <h3>Analytics & Tax</h3>
+      <p>Revenue trends, customer demographics, transaction history. Tax export pipeline. Shops never leave.</p>
+      <span class="tag tag-new">New · Layer 3</span>
+    </a>
+
+    <a href="https://racksrewards.com/advertise" class="card" target="_blank">
+      <div class="icon">📢</div>
+      <h3>Ad Marketplace</h3>
+      <p>Create campaigns. Set CPM bids. Reach verified buyers at point of sale. Purchase-verified targeting.</p>
+      <span class="tag tag-new">New · Layer 4</span>
+    </a>
+
+    <a href="https://racksrewards.com/advertiser-intel" class="card" target="_blank">
+      <div class="icon">🎯</div>
+      <h3>Audience Intelligence</h3>
+      <p>Target by age, location, product category. Facebook is $15 CPM unverified. We're $8 CPM verified.</p>
+      <span class="tag tag-new">New · Layer 4</span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ========== APPLYBOT ========== -->
+<section>
+  <h2><span class="emoji">🤖</span> ApplyBot — Jobs & Local Leads</h2>
+  <div class="section-desc">Resume builder, job density map, automated applications, CRM for 238 local service businesses.</div>
+  <div class="grid">
+
+    <a href="https://cryptorich.github.io/applybot/" class="card" target="_blank">
+      <div class="icon">📝</div>
+      <h3>Resume Builder</h3>
+      <p>Free smart resume builder. Professional resumes in 2 minutes. Locked preview → unlock with ad or pay.</p>
+      <span class="tag tag-live">Live</span>
+    </a>
+
+    <a href="https://cryptorich.github.io/applybot/" class="card" target="_blank">
+      <div class="icon">🗺️</div>
+      <h3>Job Density Map</h3>
+      <p>Explore BLS job density by city and category. Find where the jobs are before you apply.</p>
+      <span class="tag tag-live">Live · BLS Data</span>
+    </a>
+
+    <a href="https://cryptorich.github.io/applybot/" class="card" target="_blank">
+      <div class="icon">💳</div>
+      <h3>Auto-Apply Plans</h3>
+      <p>$5 for 10 apps, $19 for 50, $39 for 150, $79 for 400. Pay per application. No subscription.</p>
+      <span class="tag tag-pay">Paid Tiers</span>
+    </a>
+
+    <a href="https://cryptorich.github.io/applybot/sites/map/index.html" class="card" target="_blank">
+      <div class="icon">📍</div>
+      <h3>Site Map — 238 Businesses</h3>
+      <p>Interactive map of all 238 local service sites. Filter by trade: HVAC, Electrical, Plumbing, Roofing.</p>
+      <span class="tag tag-live">238 Sites</span>
+    </a>
+
+    <a href="https://cryptorich.github.io/applybot/sites/crm/index.html" class="card" target="_blank">
+      <div class="icon">📞</div>
+      <h3>Call CRM</h3>
+      <p>Search, filter, and call businesses. Track status: New, No Site, Late. By zip code and trade.</p>
+      <span class="tag tag-live">CRM Active</span>
+    </a>
+
+    <a href="https://cryptorich.github.io/applybot/sites/roof-doctor/index.html" class="card" target="_blank">
+      <div class="icon">🏗️</div>
+      <h3>Example Site: Roof Doctor</h3>
+      <p>One of 238 local business landing pages. Each gets its own SEO-optimized page with lead capture.</p>
+      <span class="tag tag-demo">Sample Site</span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ========== THE CONNECTION ========== -->
+<section>
+  <div class="connection">
+    <h3>🔗 How It All Connects</h3>
+    <p style="color:var(--muted);font-size:0.9rem;">The "everybody eats" flywheel</p>
+    <div class="flow">
+      <div class="flow-node">
+        <div class="icon">🏪</div>
+        <div class="name">Local Shops</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Use RacksRewards<br>for loyalty + inventory</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="icon">👥</div>
+        <div class="name">Customers</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Earn points<br>visit shops</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="icon">📊</div>
+        <div class="name">Data Layer</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Purchase-verified<br>demographics</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="icon">📢</div>
+        <div class="name">Advertisers</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Target verified<br>buyers at POS</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="icon">💵</div>
+        <div class="name">Revenue</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">Shops earn from ads<br>Platform takes cut</div>
+      </div>
+    </div>
+    <p style="margin-top:24px;color:var(--muted);font-size:0.85rem;">
+      <strong style="color:var(--green);">ApplyBot layer:</strong> Job seekers build resumes → they also shop local → they become RacksRewards customers.<br>
+      <strong style="color:var(--green);">238 local sites:</strong> Each business is a potential RacksRewards shop. CRM → pitch → onboard.
+    </p>
+  </div>
+</section>
+
+<!-- ========== WHY WE BUILT THIS ========== -->
+<section>
+  <h2><span class="emoji">💡</span> Why We Started This</h2>
+  <div class="section-desc">The original thesis. March 2026.</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:24px;">
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">🏪</div>
+      <h3>Shops were invisible</h3>
+      <p>Local smoke shops and corner stores had no digital loyalty. No CRM. No way to track customers. They ran on paper punch cards in 2026.</p>
+    </div>
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">👥</div>
+      <h3>Customers wanted rewards</h3>
+      <p>Every other industry has points. Coffee shops, airlines, grocery. But local shops? Nothing. Customers were ready to switch for a better experience.</p>
+    </div>
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">📊</div>
+      <h3>Data was the real product</h3>
+      <p>Purchase-verified customer data is worth 10x more than Facebook's inferred data. Nobody had it because nobody had the POS integration. We built it.</p>
+    </div>
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">💰</div>
+      <h3>Everybody eats</h3>
+      <p>Shops get free loyalty software. Customers get rewards. Advertisers get verified targeting. Platform takes 30% of ad revenue. Shops keep 70%. Zero cost to join.</p>
+    </div>
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">🤖</div>
+      <h3>ApplyBot was the wedge</h3>
+      <p>238 local business sites rank on Google. Free resume builder brings job seekers. CRM tracks every call. The pipeline feeds directly into RacksRewards onboarding.</p>
+    </div>
+    <div class="card" style="cursor:default;border-color:#1a3020;">
+      <div class="icon">🚀</div>
+      <h3>Zero customer acquisition cost</h3>
+      <p>ApplyBot's SEO sites rank locally. Job seekers find us organically. Shops get pitched by our CRM. We never paid for a single lead.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-bar">
+  <h2>Everything is live. Try it all.</h2>
+  <p>11 demos · 238 local sites · 1 unified platform · $0 marketing spend</p>
+  <a href="https://racksrewards.com/demo" class="cta-btn" target="_blank">🚀 Start Live Demo</a>
+  <div style="margin-top:16px;">
+    <a href="https://cryptorich.github.io/applybot/" class="cta-btn" target="_blank" style="background:var(--surface);border:1px solid var(--green);margin-left:8px;">🤖 Try ApplyBot</a>
+  </div>
+</div>
+
+<footer>
+  <strong>Racks Unified</strong> · racksrewards.com · cryptorich.github.io/applybot<br>
+  <a href="https://racksrewards.com/privacy">Privacy</a> · <a href="https://racksrewards.com/terms">Terms</a> · Built June 2026
+</footer>
+
+</body>
+</html>
