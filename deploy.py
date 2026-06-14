@@ -1,7 +1,7 @@
-import subprocess, urllib.parse
+import subprocess, urllib.parse, os
 
-user = "dejesusrichard89@gmail.com"
-password = "$0undWav3!$"
+user = os.environ.get("GITHUB_USER", "")
+password = os.environ.get("GITHUB_PASSWORD", "")
 encoded_pw = urllib.parse.quote(password, safe='')
 repo_name = "applybot"
 
