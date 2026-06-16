@@ -1,521 +1,507 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Call CRM — SiteLaunch</title>
-<style>
-:root{--bg:#080808;--card:#111;--surface:#1a1a1a;--border:#222;--accent:#00e676;--hot:#ffab00;--sold:#2979ff;--dead:#ff1744;--called:#888;--text:#fff;--sub:#999;--overdue:#ff4444}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;overflow-x:hidden;padding-bottom:55px}
-
-/* TOP BAR */
-.topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 8px;border-bottom:1px solid var(--border)}
-.topbar h1{font-size:13px;display:inline}
-.today-line{font-size:9px;color:var(--sub);float:right;margin-top:2px;text-align:right}
-.search-row{display:flex;gap:4px;margin-top:3px}
-.search-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 8px;border-radius:8px;font-size:12px;outline:none}
-.search-row input:focus{border-color:var(--accent)}
-.next-btn{background:var(--accent);color:#000;border:none;padding:7px 10px;border-radius:8px;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
-
-/* FILTERS — now compact row */
-.filt-row{display:flex;gap:3px;margin-top:4px;overflow-x:auto;scrollbar-width:none}
-.filt-row::-webkit-scrollbar{display:none}
-.filt-row button{flex-shrink:0;background:var(--surface);color:var(--sub);border:1px solid var(--border);padding:4px 8px;border-radius:8px;font-size:9px;cursor:pointer;white-space:nowrap}
-.filt-row button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
-.filt-row button.overdue-btn{background:rgba(255,68,68,.15);color:var(--overdue);border-color:rgba(255,68,68,.2)}
-.filt-row button.overdue-btn.on{background:var(--overdue);color:#fff}
-
-/* LEAD LIST */
-.lead-list{padding:3px 6px}
-.lead-row{display:flex;align-items:center;background:var(--card);border-radius:7px;margin-bottom:3px;padding:8px 7px;gap:7px;cursor:pointer;border-left:3px solid transparent;min-height:48px}
-.lead-row:active{background:var(--surface)}
-.lead-row.status-called{border-left-color:var(--called)}
-.lead-row.status-hot{border-left-color:var(--hot)}
-.lead-row.status-sold{border-left-color:var(--sold)}
-.lead-row.status-dead{border-left-color:var(--dead)}
-.lead-info{flex:1;min-width:0}
-.lead-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lead-meta{font-size:9px;color:var(--sub);margin-top:1px;display:flex;gap:3px;align-items:center;flex-wrap:wrap;line-height:1.3}
-.lead-note{font-size:9px;color:var(--hot);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.badge{font-size:7px;padding:1px 4px;border-radius:3px;font-weight:700;flex-shrink:0}
-.badge-nosite{background:rgba(255,23,68,.2);color:var(--dead)}
-.badge-fake{background:rgba(255,171,0,.15);color:var(--hot)}
-.badge-called{background:rgba(136,136,136,.2);color:var(--called)}
-.badge-hot{background:rgba(0,230,118,.2);color:var(--accent)}
-.badge-sold{background:rgba(41,121,255,.2);color:var(--sold)}
-.badge-dead{background:rgba(255,23,68,.2);color:var(--dead)}
-.badge-cb{background:rgba(0,230,118,.1);color:var(--accent)}
-.badge-overdue{background:rgba(255,68,68,.15);color:var(--overdue)}
-.call-icon{background:var(--accent);color:#000;min-width:36px;height:36px;border-radius:9px;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--bg);border-top:1px solid var(--border);display:flex;padding:1px 2px;padding-bottom:max(1px,env(safe-area-inset-bottom))}
-.nav-item{flex:1;text-align:center;padding:4px 1px;border:none;background:none;color:var(--sub);font-size:8px;cursor:pointer;border-radius:4px}
-.nav-item:active{background:var(--surface)}
-.nav-item.active{color:var(--accent);font-weight:700}
-.nav-count{display:block;font-size:14px;font-weight:700;margin-bottom:0;line-height:1}
-
-/* ON-CALL BAR */
-.oncall-bar{position:fixed;top:0;left:0;right:0;z-index:250;background:#0d0;color:#000;padding:10px 8px;display:none;align-items:center;gap:8px;animation:slideDown .2s ease-out}
-.oncall-bar.on{display:flex}
-@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
-.oncall-dot{width:8px;height:8px;background:#000;border-radius:50%;animation:pulse .8s infinite;flex-shrink:0}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.oncall-info{flex:1;min-width:0}
-.oncall-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.oncall-hint{font-size:8px;opacity:.7}
-.oncall-end{background:#000;color:#0d0;border:none;padding:8px 12px;border-radius:8px;font-weight:700;font-size:11px;cursor:pointer}
-
-/* DETAIL PANEL */
-.panel-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:150;display:none;align-items:flex-end;justify-content:center}
-.panel-back.on{display:flex}
-.panel{background:var(--card);border-radius:14px 14px 0 0;width:100%;max-width:500px;max-height:90dvh;overflow-y:auto;animation:slideUp .2s ease-out;padding-bottom:12px}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.panel-head{padding:12px 12px 6px;border-bottom:1px solid var(--border)}
-.panel-head .pname{font-size:15px;font-weight:700}
-.panel-head .pphone{font-size:12px;color:var(--accent);font-weight:600;margin-top:1px}
-.panel-body{padding:8px 12px}
-.sec-label{font-size:7px;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;margin:8px 0 3px}
-.script-box{background:var(--surface);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.5;color:#ddd;border:1px solid var(--border)}
-.script-box em{color:var(--accent);font-style:normal;font-weight:600}
-.site-url-text{font-family:monospace;font-size:9px;color:var(--accent);word-break:break-all;background:var(--surface);padding:6px 8px;border-radius:6px;display:block;margin-top:2px}
-.obj-block{display:none;margin-top:4px}
-.obj-block.show{display:block}
-.obj-toggle{display:block;width:100%;background:rgba(255,171,0,.12);color:var(--hot);border:1px solid rgba(255,171,0,.2);padding:8px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;text-align:center;margin:4px 0}
-.obj-card{background:rgba(255,171,0,.06);border:1px solid rgba(255,171,0,.15);border-radius:6px;padding:6px 8px;margin-bottom:3px}
-.obj-card .otag{font-size:8px;color:var(--hot);margin-bottom:2px}
-.obj-card .oline{font-size:10px;line-height:1.4;color:#ddd}
-.obj-card .oline em{color:var(--accent);font-style:normal;font-weight:600}
-.no-site-warn{background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.2);border-radius:6px;padding:6px;font-size:9px;color:var(--dead);margin-top:6px}
-.panel-actions{padding:6px 12px 0;display:flex;flex-direction:column;gap:5px}
-.btn-call{display:block;width:100%;background:var(--accent);color:#000;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
-.btn-call:active{filter:brightness(1.2)}
-.panel-row{display:flex;gap:4px}
-.panel-row button{flex:1;padding:10px;border-radius:8px;border:none;font-size:10px;font-weight:600;cursor:pointer}
-.btn-copy-link{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
-.btn-leftvm{background:rgba(255,171,0,.1);color:var(--hot);border:1px solid rgba(255,171,0,.2)}
-.btn-quickdead{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
-.btn-notint{background:rgba(136,136,136,.15);color:var(--called);border:1px solid rgba(136,136,136,.2)}
-.btn-panelclose{background:none;color:var(--sub);border:none;padding:8px;font-size:10px;cursor:pointer;width:100%}
-
-/* RESULT MODAL */
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.modal-back.on{display:flex}
-.modal-content{background:var(--card);border-radius:14px 14px 0 0;width:100%;max-width:500px;padding:14px 10px 20px;max-height:85dvh;overflow-y:auto;animation:slideUp .2s ease-out}
-.modal-content h2{font-size:13px;margin-bottom:1px}
-.modal-content .msub{font-size:9px;color:var(--sub);margin-bottom:6px}
-
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px}
-.stat-btn{padding:12px 4px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:var(--text);background:var(--surface)}
-.stat-btn:active{filter:brightness(1.3)}
-.stat-btn.sel{outline:2px solid #fff}
-.stat-voicemail{background:rgba(255,171,0,.15);color:var(--hot)}
-.stat-interested{background:rgba(0,230,118,.15);color:var(--accent)}
-.stat-noanswer{background:rgba(136,136,136,.2);color:var(--called)}
-.stat-notinterested{background:rgba(255,23,68,.1);color:var(--dead)}
-.stat-sold{background:rgba(41,121,255,.2);color:var(--sold)}
-
-.note-section{margin-bottom:5px}
-.note-section textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:8px;font-size:12px;resize:none;min-height:50px;outline:none;font-family:inherit}
-.note-section textarea:focus{border-color:var(--accent)}
-
-.chip-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
-.chip{background:var(--surface);border:1px solid var(--border);color:var(--sub);padding:4px 7px;border-radius:10px;font-size:9px;cursor:pointer}
-.chip:active{background:var(--accent);color:#000;border-color:var(--accent)}
-
-.cb-section{margin:6px 0}
-.cb-section .lbl{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
-.cb-row{display:flex;gap:3px;flex-wrap:wrap}
-.cb-btn{background:rgba(0,230,118,.1);color:var(--accent);border:1px solid rgba(0,230,118,.2);padding:5px 8px;border-radius:6px;font-size:9px;cursor:pointer;white-space:nowrap}
-.cb-btn:active{background:var(--accent);color:#000}
-.cb-clear{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
-.cb-preview{font-size:9px;color:var(--accent);margin-top:3px;display:none}
-
-.action-row{display:flex;gap:6px;margin-top:6px}
-.btn-save-main{flex:1;padding:12px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#000}
-.btn-skip-main{flex:1;padding:12px;border-radius:8px;border:none;font-size:10px;cursor:pointer;background:none;color:var(--sub)}
-
-.del-item{display:flex;align-items:center;gap:6px;padding:8px;background:var(--surface);border-radius:6px;font-size:11px;margin-bottom:3px}
-.del-item input{width:14px;height:14px;accent-color:var(--accent)}
-
-.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:6px 14px;border-radius:16px;font-weight:700;font-size:10px;z-index:300;opacity:0;transition:opacity .15s;pointer-events:none}
-.toast.show{opacity:1}
-.empty-state{text-align:center;padding:30px 12px;color:var(--sub);font-size:11px}
-.empty-state strong{color:var(--text);display:block;margin-bottom:2px}
-</style>
-</head>
-<body>
-
-<!-- ON-CALL BAR -->
-<div class="oncall-bar" id="oncallBar">
-  <div class="oncall-dot"></div>
-  <div class="oncall-info"><div class="oncall-name" id="oncallName"></div><div class="oncall-hint">On call — tap End when done</div></div>
-  <button class="oncall-end" onclick="endCallNow()">✕ End</button>
+     1|<!DOCTYPE html>
+     2|<html lang="en">
+     3|<head>
+     4|<meta charset="UTF-8">
+     5|<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+     6|<title>Call CRM — SiteLaunch</title>
+     7|<style>
+     8|:root{--bg:#080808;--card:#111;--surface:#1a1a1a;--border:#222;--accent:#00e676;--hot:#ffab00;--sold:#2979ff;--dead:#ff1744;--called:#888;--text:#fff;--sub:#999;--overdue:#ff4444}
+     9|*{margin:0;padding:0;box-sizing:border-box}
+    10|body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent;overflow-x:hidden;padding-bottom:55px}
+    11|
+    12|/* TOP BAR */
+    13|.topbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 8px;border-bottom:1px solid var(--border)}
+    14|.topbar h1{font-size:13px;display:inline}
+    15|.today-line{font-size:9px;color:var(--sub);float:right;margin-top:2px;text-align:right}
+    16|.search-row{display:flex;gap:4px;margin-top:3px}
+    17|.search-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 8px;border-radius:8px;font-size:12px;outline:none}
+    18|.search-row input:focus{border-color:var(--accent)}
+    19|.next-btn{background:var(--accent);color:#000;border:none;padding:7px 10px;border-radius:8px;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
+    20|
+    21|/* FILTERS — now compact row */
+    22|.filt-row{display:flex;gap:3px;margin-top:4px;overflow-x:auto;scrollbar-width:none}
+    23|.filt-row::-webkit-scrollbar{display:none}
+    24|.filt-row button{flex-shrink:0;background:var(--surface);color:var(--sub);border:1px solid var(--border);padding:4px 8px;border-radius:8px;font-size:9px;cursor:pointer;white-space:nowrap}
+    25|.filt-row button.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+    26|.filt-row button.overdue-btn{background:rgba(255,68,68,.15);color:var(--overdue);border-color:rgba(255,68,68,.2)}
+    27|.filt-row button.overdue-btn.on{background:var(--overdue);color:#fff}
+    28|
+    29|/* LEAD LIST */
+    30|.lead-list{padding:3px 6px}
+    31|.lead-row{display:flex;align-items:center;background:var(--card);border-radius:7px;margin-bottom:3px;padding:8px 7px;gap:7px;cursor:pointer;border-left:3px solid transparent;min-height:48px}
+    32|.lead-row:active{background:var(--surface)}
+    33|.lead-row.status-called{border-left-color:var(--called)}
+    34|.lead-row.status-hot{border-left-color:var(--hot)}
+    35|.lead-row.status-sold{border-left-color:var(--sold)}
+    36|.lead-row.status-dead{border-left-color:var(--dead)}
+    37|.lead-info{flex:1;min-width:0}
+    38|.lead-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    39|.lead-meta{font-size:9px;color:var(--sub);margin-top:1px;display:flex;gap:3px;align-items:center;flex-wrap:wrap;line-height:1.3}
+    40|.lead-note{font-size:9px;color:var(--hot);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    41|.badge{font-size:7px;padding:1px 4px;border-radius:3px;font-weight:700;flex-shrink:0}
+    42|.badge-nosite{background:rgba(255,23,68,.2);color:var(--dead)}
+    43|.badge-fake{background:rgba(255,171,0,.15);color:var(--hot)}
+    44|.badge-called{background:rgba(136,136,136,.2);color:var(--called)}
+    45|.badge-hot{background:rgba(0,230,118,.2);color:var(--accent)}
+    46|.badge-sold{background:rgba(41,121,255,.2);color:var(--sold)}
+    47|.badge-dead{background:rgba(255,23,68,.2);color:var(--dead)}
+    48|.badge-cb{background:rgba(0,230,118,.1);color:var(--accent)}
+    49|.badge-overdue{background:rgba(255,68,68,.15);color:var(--overdue)}
+    50|.call-icon{background:var(--accent);color:#000;min-width:36px;height:36px;border-radius:9px;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    51|
+    52|/* BOTTOM NAV */
+    53|.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--bg);border-top:1px solid var(--border);display:flex;padding:1px 2px;padding-bottom:max(1px,env(safe-area-inset-bottom))}
+    54|.nav-item{flex:1;text-align:center;padding:4px 1px;border:none;background:none;color:var(--sub);font-size:8px;cursor:pointer;border-radius:4px}
+    55|.nav-item:active{background:var(--surface)}
+    56|.nav-item.active{color:var(--accent);font-weight:700}
+    57|.nav-count{display:block;font-size:14px;font-weight:700;margin-bottom:0;line-height:1}
+    58|
+    59|/* ON-CALL BAR */
+    60|.oncall-bar{position:fixed;top:0;left:0;right:0;z-index:250;background:#0d0;color:#000;padding:10px 8px;display:none;align-items:center;gap:8px;animation:slideDown .2s ease-out}
+    61|.oncall-bar.on{display:flex}
+    62|@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+    63|.oncall-dot{width:8px;height:8px;background:#000;border-radius:50%;animation:pulse .8s infinite;flex-shrink:0}
+    64|@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    65|.oncall-info{flex:1;min-width:0}
+    66|.oncall-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    67|.oncall-hint{font-size:8px;opacity:.7}
+    68|.oncall-end{background:#000;color:#0d0;border:none;padding:8px 12px;border-radius:8px;font-weight:700;font-size:11px;cursor:pointer}
+    69|
+    70|/* DETAIL PANEL */
+    71|.panel-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:150;display:none;align-items:flex-end;justify-content:center}
+    72|.panel-back.on{display:flex}
+    73|.panel{background:var(--card);border-radius:14px 14px 0 0;width:100%;max-width:500px;max-height:90dvh;overflow-y:auto;animation:slideUp .2s ease-out;padding-bottom:12px}
+    74|@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    75|.panel-head{padding:12px 12px 6px;border-bottom:1px solid var(--border)}
+    76|.panel-head .pname{font-size:15px;font-weight:700}
+    77|.panel-head .pphone{font-size:12px;color:var(--accent);font-weight:600;margin-top:1px}
+    78|.panel-body{padding:8px 12px}
+    79|.sec-label{font-size:7px;color:var(--sub);text-transform:uppercase;letter-spacing:1.5px;margin:8px 0 3px}
+    80|.script-box{background:var(--surface);border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.5;color:#ddd;border:1px solid var(--border)}
+    81|.script-box em{color:var(--accent);font-style:normal;font-weight:600}
+    82|.site-url-text{font-family:monospace;font-size:9px;color:var(--accent);word-break:break-all;background:var(--surface);padding:6px 8px;border-radius:6px;display:block;margin-top:2px}
+    83|.obj-block{display:none;margin-top:4px}
+    84|.obj-block.show{display:block}
+    85|.obj-toggle{display:block;width:100%;background:rgba(255,171,0,.12);color:var(--hot);border:1px solid rgba(255,171,0,.2);padding:8px;border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;text-align:center;margin:4px 0}
+    86|.obj-card{background:rgba(255,171,0,.06);border:1px solid rgba(255,171,0,.15);border-radius:6px;padding:6px 8px;margin-bottom:3px}
+    87|.obj-card .otag{font-size:8px;color:var(--hot);margin-bottom:2px}
+    88|.obj-card .oline{font-size:10px;line-height:1.4;color:#ddd}
+    89|.obj-card .oline em{color:var(--accent);font-style:normal;font-weight:600}
+    90|.no-site-warn{background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.2);border-radius:6px;padding:6px;font-size:9px;color:var(--dead);margin-top:6px}
+    91|.panel-actions{padding:6px 12px 0;display:flex;flex-direction:column;gap:5px}
+    92|.btn-call{display:block;width:100%;background:var(--accent);color:#000;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+    93|.btn-call:active{filter:brightness(1.2)}
+    94|.panel-row{display:flex;gap:4px}
+    95|.panel-row button{flex:1;padding:10px;border-radius:8px;border:none;font-size:10px;font-weight:600;cursor:pointer}
+    96|.btn-copy-link{background:var(--surface);color:var(--accent);border:1px solid var(--accent)}
+    97|.btn-leftvm{background:rgba(255,171,0,.1);color:var(--hot);border:1px solid rgba(255,171,0,.2)}
+    98|.btn-quickdead{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
+    99|.btn-notint{background:rgba(136,136,136,.15);color:var(--called);border:1px solid rgba(136,136,136,.2)}
+   100|.btn-panelclose{background:none;color:var(--sub);border:none;padding:8px;font-size:10px;cursor:pointer;width:100%}
+   101|
+   102|/* RESULT MODAL */
+   103|.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+   104|.modal-back.on{display:flex}
+   105|.modal-content{background:var(--card);border-radius:14px 14px 0 0;width:100%;max-width:500px;padding:14px 10px 20px;max-height:85dvh;overflow-y:auto;animation:slideUp .2s ease-out}
+   106|.modal-content h2{font-size:13px;margin-bottom:1px}
+   107|.modal-content .msub{font-size:9px;color:var(--sub);margin-bottom:6px}
+   108|
+   109|.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px}
+   110|.stat-btn{padding:12px 4px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:var(--text);background:var(--surface)}
+   111|.stat-btn:active{filter:brightness(1.3)}
+   112|.stat-btn.sel{outline:2px solid #fff}
+   113|.stat-voicemail{background:rgba(255,171,0,.15);color:var(--hot)}
+   114|.stat-interested{background:rgba(0,230,118,.15);color:var(--accent)}
+   115|.stat-noanswer{background:rgba(136,136,136,.2);color:var(--called)}
+   116|.stat-notinterested{background:rgba(255,23,68,.1);color:var(--dead)}
+   117|.stat-sold{background:rgba(41,121,255,.2);color:var(--sold)}
+   118|
+   119|.note-section{margin-bottom:5px}
+   120|.note-section textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:8px;font-size:12px;resize:none;min-height:50px;outline:none;font-family:inherit}
+   121|.note-section textarea:focus{border-color:var(--accent)}
+   122|
+   123|.chip-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+   124|.chip{background:var(--surface);border:1px solid var(--border);color:var(--sub);padding:4px 7px;border-radius:10px;font-size:9px;cursor:pointer}
+   125|.chip:active{background:var(--accent);color:#000;border-color:var(--accent)}
+   126|
+   127|.cb-section{margin:6px 0}
+   128|.cb-section .lbl{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+   129|.cb-row{display:flex;gap:3px;flex-wrap:wrap}
+   130|.cb-btn{background:rgba(0,230,118,.1);color:var(--accent);border:1px solid rgba(0,230,118,.2);padding:5px 8px;border-radius:6px;font-size:9px;cursor:pointer;white-space:nowrap}
+   131|.cb-btn:active{background:var(--accent);color:#000}
+   132|.cb-clear{background:rgba(255,23,68,.1);color:var(--dead);border:1px solid rgba(255,23,68,.2)}
+   133|.cb-preview{font-size:9px;color:var(--accent);margin-top:3px;display:none}
+   134|
+   135|.action-row{display:flex;gap:6px;margin-top:6px}
+   136|.btn-save-main{flex:1;padding:12px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#000}
+   137|.btn-skip-main{flex:1;padding:12px;border-radius:8px;border:none;font-size:10px;cursor:pointer;background:none;color:var(--sub)}
+   138|
+   139|.del-item{display:flex;align-items:center;gap:6px;padding:8px;background:var(--surface);border-radius:6px;font-size:11px;margin-bottom:3px}
+   140|.del-item input{width:14px;height:14px;accent-color:var(--accent)}
+   141|
+   142|.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:6px 14px;border-radius:16px;font-weight:700;font-size:10px;z-index:300;opacity:0;transition:opacity .15s;pointer-events:none}
+   143|.toast.show{opacity:1}
+   144|.empty-state{text-align:center;padding:30px 12px;color:var(--sub);font-size:11px}
+   145|.empty-state strong{color:var(--text);display:block;margin-bottom:2px}
+   146|</style>
+   147|</head>
+   148|<body>
+<div style="background:#111;padding:4px 1rem;font-size:10px;text-align:center;border-bottom:1px solid #222">
+  <a href="https://cryptorich.github.io/applybot/unified.html" style="color:#00e676;text-decoration:none;">🏠 Racks Unified</a> &nbsp;›&nbsp;
+  <a href="https://cryptorich.github.io/applybot/" style="color:#888;text-decoration:none;">ApplyBot</a> &nbsp;›&nbsp;
+  <span style="color:#666">Call CRM — SiteLaunch</span>
 </div>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <h1>📞 Call CRM</h1>
-  <div class="today-line" id="todayLine"></div>
-  <div class="search-row">
-    <input type="text" placeholder="Search name or number..." id="search" oninput="debounceRender()">
-    <button class="next-btn" onclick="nextCall()">▶ Next</button>
-  </div>
-  <div class="filt-row">
-    <button class="on" onclick="setFilter('all',this)">All</button>
-    <button onclick="setFilter('new',this)">🆕 New</button>
-    <button onclick="setFilter('no-site',this)">No Site</button>
-    <button onclick="setFilter('HVAC',this)">HVAC</button>
-    <button onclick="setFilter('Electrician',this)">Elec</button>
-    <button onclick="setFilter('Plumber',this)">Plumb</button>
-    <button onclick="setFilter('Roofer',this)">Roof</button>
-    <button onclick="setFilter('19805',this)">19805</button>
-    <button onclick="setFilter('19720',this)">19720</button>
-    <button onclick="setFilter('21921',this)">21921</button>
-    <button class="overdue-btn" onclick="setFilter('overdue',this)">⚠ Late</button>
-  </div>
-</div>
-
-<!-- LEAD LIST -->
-<div class="lead-list" id="leadList"></div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <button class="nav-item active" onclick="setNav('all',this)"><span class="nav-count" id="navAll">0</span>All</button>
-  <button class="nav-item" onclick="setNav('called',this)"><span class="nav-count" id="navCalled">0</span>Called</button>
-  <button class="nav-item" onclick="setNav('hot',this)"><span class="nav-count" id="navHot">0</span>Hot</button>
-  <button class="nav-item" onclick="setNav('sold',this)"><span class="nav-count" id="navSold">0</span>Sold</button>
-  <button class="nav-item" onclick="setNav('dead',this)"><span class="nav-count" id="navDead">0</span>Dead</button>
-</div>
-
-<!-- DETAIL PANEL -->
-<div class="panel-back" id="detailPanel">
-  <div class="panel">
-    <div class="panel-head">
-      <div class="pname" id="dName"></div>
-      <div class="pphone" id="dPhone"></div>
-    </div>
-    <div class="panel-body">
-      <div class="sec-label">🗣️ OPENER</div>
-      <div class="script-box" id="dOpener"></div>
-
-      <button class="obj-toggle" id="objToggle" onclick="toggleObj()">👇 Objection Handlers (4)</button>
-      <div class="obj-block" id="objBlock">
-        <div class="obj-card"><div class="otag">😐 "I already have a website"</div><div class="oline" id="obj1"></div></div>
-        <div class="obj-card"><div class="otag">💸 "Too expensive"</div><div class="oline" id="obj2"></div></div>
-        <div class="obj-card"><div class="otag">📞 "Not interested"</div><div class="oline">"No problem — keep the site anyway. I already built it. If you change your mind, <em>text me at this number</em>. Site's done, just needs your name on it."</div></div>
-        <div class="obj-card"><div class="otag">🤔 "Let me think about it"</div><div class="oline">"Totally fair. Is it the <em>price</em> or the <em>idea</em> you're unsure about? Because I can work with one of those."</div></div>
-      </div>
-
-      <div class="sec-label">💰 CLOSE</div>
-      <div class="script-box" id="dClose"></div>
-
-      <div class="sec-label">🔗 SITE LINK</div>
-      <span class="site-url-text" id="dSiteUrl"></span>
-      <div id="dNoSiteWarn" class="no-site-warn" style="display:none">⚠️ This lead has NO website. Link goes to demo. Build one before pitching.</div>
-
-      <div class="sec-label" id="dNotesHdr" style="display:none">💬 NOTES</div>
-      <div style="color:var(--hot);font-size:10px;white-space:pre-wrap;display:none" id="dNotesBox"></div>
-      <div class="sec-label" id="dCbHdr" style="display:none">📅 CALLBACK</div>
-      <div style="font-size:10px;font-weight:600" id="dCbVal"></div>
-    </div>
-    <div class="panel-actions">
-      <a class="btn-call" id="dCallBtn" href="#">📞 Call Now</a>
-      <div class="panel-row">
-        <button class="btn-copy-link" onclick="copySiteLink()">📋 Copy Link</button>
-        <button class="btn-leftvm" onclick="quickAction('voicemail')">📱 Left VM</button>
-      </div>
-      <div class="panel-row">
-        <button class="btn-quickdead" onclick="quickAction('dead')">☠️ Dead / Wrong #</button>
-        <button class="btn-notint" onclick="quickAction('notinterested')">🚫 Not Interested</button>
-      </div>
-      <button class="btn-panelclose" onclick="closeDetail()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- RESULT MODAL -->
-<div class="modal-back" id="resultModal">
-  <div class="modal-content">
-    <h2 id="modalTitle">How'd it go?</h2>
-    <div class="msub" id="modalSub"></div>
-    <div class="stat-grid">
-      <button class="stat-btn stat-voicemail" onclick="pickResult('voicemail')">📱 Voicemail</button>
-      <button class="stat-btn stat-interested" onclick="pickResult('interested')">🔥 Interested</button>
-      <button class="stat-btn stat-noanswer" onclick="pickResult('noanswer')">📵 No Answer</button>
-      <button class="stat-btn stat-notinterested" onclick="pickResult('notinterested')">🚫 Not Interested</button>
-      <button class="stat-btn stat-sold" onclick="pickResult('sold')" style="grid-column:span 2">💰 SOLD</button>
-    </div>
-    <div class="note-section">
-      <textarea id="noteInput" placeholder="Type notes..." oninput="saveDraftNotes()"></textarea>
-    </div>
-    <div class="chip-row">
-      <span class="chip" onclick="insertChip('Voicemail')">📱 VM</span>
-      <span class="chip" onclick="insertChip('No answer')">📵 No ans</span>
-      <span class="chip" onclick="insertChip('Wrong number')">❌ Wrong #</span>
-      <span class="chip" onclick="insertChip('Sent site')">🔗 Sent site</span>
-      <span class="chip" onclick="insertChip('Think about it')">🤔 Thinking</span>
-      <span class="chip" onclick="insertChip('Not interested')">🚫 No int</span>
-      <span class="chip" onclick="insertChip('Has website')">🌐 Has site</span>
-      <span class="chip" onclick="insertChip('Office closed')">🏢 Closed</span>
-    </div>
-    <div class="cb-section">
-      <div class="lbl">Schedule callback</div>
-      <div class="cb-row">
-        <span class="cb-btn" onclick="setCB('tomorrow')">📅 Tmrw</span>
-        <span class="cb-btn" onclick="setCB('monday')">📅 Mon</span>
-        <span class="cb-btn" onclick="setCB('2days')">📅 2d</span>
-        <span class="cb-btn" onclick="setCB('3days')">📅 3d</span>
-        <span class="cb-btn" onclick="setCB('1week')">📅 1w</span>
-        <span class="cb-btn cb-clear" onclick="setCB('clear')">✕</span>
-      </div>
-      <div class="cb-preview" id="cbPreview"></div>
-    </div>
-    <div class="action-row">
-      <button class="btn-skip-main" onclick="dismissModal()">Skip</button>
-      <button class="btn-save-main" onclick="saveAndNext()">💾 Save & Next →</button>
-    </div>
-  </div>
-</div>
-
-<!-- DELIVERY CHECKLIST -->
-<div class="modal-back" id="checklistModal">
-  <div class="modal-content" id="checklistContent">
-    <h2>🎉 Sold! Delivery Checklist</h2>
-    <div class="msub" id="checklistSub"></div>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">💰 Collect $500 payment</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">🌐 Buy domain ($12/yr)</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">🔗 DNS to GitHub Pages</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📧 Set up email forwarding</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📍 Google Business Profile</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📱 Text client: "Live!"</label>
-    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📅 2-week check-in</label>
-    <button class="btn-save-main" style="width:100%;margin-top:6px" onclick="closeChecklist()">✓ Done</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ── STATE ──
-let leads=[], nav='all', filter='all', activeLead=null, onCall=false, selectedResult=null, selectedCb=null, _renderTimer=null, _endCallFired=false;
-const TODAY=new Date().toDateString();
-
-function state(){try{return{status:JSON.parse(localStorage.getItem('ls')||'{}'),notes:JSON.parse(localStorage.getItem('ln')||'{}'),cbs:JSON.parse(localStorage.getItem('lc')||'{}'),today:JSON.parse(localStorage.getItem('lt')||'{}'),checklist:JSON.parse(localStorage.getItem('lch')||'{}')}}catch(e){return{status:{},notes:{},cbs:{},today:{},checklist:{}}}}
-function ss(n,s){try{let d=state();d.status[n]=s;localStorage.setItem('ls',JSON.stringify(d.status))}catch(e){}}
-function sn(n,t){try{let d=state();d.notes[n]=t;localStorage.setItem('ln',JSON.stringify(d.notes))}catch(e){}}
-function sc(n,iso){try{let d=state();iso?d.cbs[n]=iso:delete d.cbs[n];localStorage.setItem('lc',JSON.stringify(d.cbs))}catch(e){}}
-function st(n){try{let d=state();d.today[n]=TODAY;localStorage.setItem('lt',JSON.stringify(d.today))}catch(e){}}
-function gs(n){return state().status[n]||'new'}
-function gn(n){return state().notes[n]||''}
-function gc(n){return state().cbs[n]||null}
-function istoday(n){return state().today[n]===TODAY}
-function surl(l){return l.slug?'https://cryptorich.github.io/applybot/sites/'+l.slug+'/':'#'}
-
-// ── SAFE HTML ESCAPE (Brain 8 fix) ──
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-
-// ── CATEGORY-SPECIFIC SCRIPTS (Brain 1 fix) ──
-const CAT_SCRIPTS={
-  HVAC:{close:"So here's the deal — <em>$500 and it's yours.</em> One AC repair call costs $300-500. This site costs less than <em>one call</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
-  Electrician:{close:"So here's the deal — <em>$500 and it's yours.</em> One emergency electrical job pays $400-800. This site costs less than <em>one job</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
-  Plumber:{close:"So here's the deal — <em>$500 and it's yours.</em> One emergency plumbing call pays $350-600. This site costs less than <em>one call</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
-  Roofer:{close:"So here's the deal — <em>$500 and it's yours.</em> One roofing job is $5k+. This site is <em>10% of one customer</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
-  Unknown:{close:"So here's the deal — <em>$500 and it's yours.</em> I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live under your name. Want to do this?"}
-};
-
-// ── INIT ──
-async function init(){
-  try{
-    const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),8000);
-    const resp=await fetch('leads.json',{signal:controller.signal});
-    clearTimeout(timeout);
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    leads=await resp.json();
-  }catch(e){
-    try{
-      const resp2=await fetch('../leads.json');
-      if(resp2.ok)leads=await resp2.json();
-    }catch(e2){leads=[]}
-  }
-  if(!leads.length){document.getElementById('leadList').innerHTML='<div class="empty-state"><strong>No leads loaded</strong>Check your connection and refresh</div>';return}
-  leads=leads.map(l=>({...l,name:(l.name||'').trim(),phone:(l.phone||'').replace(/\D/g,''),category:l.category||l.cat||'Unknown',type:l.no_site?'NO_SITE':'FAKE',website:l.website||'',opener:l.opener||'',zip:l.zip||'',slug:(l.slug||(l.name||'x').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')).substring(0,50)||'unknown'}));
-  const d=state();let imp=false;
-  leads.forEach(l=>{if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imp=true}});
-  if(imp){try{localStorage.setItem('ls',JSON.stringify(d.status));localStorage.setItem('ln',JSON.stringify(d.notes))}catch(e){}}
-  setup();renderAll();
-}
-
-// ── RENDER ──
-function renderAll(){renderLeads();updateCounts();updateToday()}
-
-function updateToday(){
-  const d=state();let t=0;leads.forEach(l=>{if(d.today[l.name]===TODAY)t++});
-  document.getElementById('todayLine').textContent=t?'📞 '+t+' calls today':'No calls yet today';
-}
-
-function updateCounts(){
-  const d=state();let c={all:leads.length,called:0,hot:0,sold:0,dead:0,overdue:0};
-  const now=new Date();
-  leads.forEach(l=>{
-    const s=d.status[l.name]||'new';
-    if(s==='called')c.called++;if(s==='hot')c.hot++;if(s==='sold')c.sold++;if(s==='dead')c.dead++;
-    const cb=d.cbs[l.name];if(cb&&new Date(cb)<now)c.overdue++;
-  });
-  ['All','Called','Hot','Sold','Dead'].forEach(k=>{const el=document.getElementById('nav'+k);if(el)el.textContent=c[k.toLowerCase()]});
-}
-
-function renderLeads(){
-  const q=(document.getElementById('search')?.value||'').toLowerCase(),d=state();let f=[...leads];
-  if(q)f=f.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q));
-  if(filter==='no-site')f=f.filter(l=>l.type==='NO_SITE');
-  else if(filter==='new')f=f.filter(l=>(d.status[l.name]||'new')==='new');
-  else if(filter==='overdue'){const now=new Date();f=f.filter(l=>{const cb=d.cbs[l.name];return cb&&new Date(cb)<now})}
-  else if(['HVAC','Electrician','Plumber','Roofer'].includes(filter))f=f.filter(l=>l.category===filter);
-  else if(['19805','19720','21921'].includes(filter))f=f.filter(l=>l.zip===filter);
-  if(nav==='called')f=f.filter(l=>(d.status[l.name]||'new')==='called');
-  if(nav==='hot')f=f.filter(l=>(d.status[l.name]||'new')==='hot');
-  if(nav==='sold')f=f.filter(l=>(d.status[l.name]||'new')==='sold');
-  if(nav==='dead')f=f.filter(l=>(d.status[l.name]||'new')==='dead');
-  f.sort((a,b)=>{
-    const ca=d.cbs[a.name],cb=d.cbs[b.name];const now=new Date();
-    const aOver=ca&&new Date(ca)<now,bOver=cb&&new Date(cb)<now;
-    if(aOver&&!bOver)return -1;if(bOver&&!aOver)return 1;
-    if(ca&&cb)return new Date(ca)-new Date(cb);
-    if(ca)return -1;if(cb)return 1;
-    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
-    if(sa==='new'&&sb!=='new')return -1;
-    if(sb==='new'&&sa!=='new')return 1;
-    return 0;
-  });
-  const lst=document.getElementById('leadList');
-  if(!f.length){lst.innerHTML='<div class="empty-state"><strong>No leads</strong>Try a different filter</div>';return}
-  lst.innerHTML=f.map(l=>{
-    const st=d.status[l.name]||'new',nt=d.notes[l.name]||'',cb=d.cbs[l.name];
-    const pf=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')||'No phone';
-    let b='';
-    if(l.type==='NO_SITE')b+='<span class="badge badge-nosite">NO SITE</span>';
-    else b+='<span class="badge badge-fake">FAKE</span>';
-    if(st==='called')b+=' <span class="badge badge-called">CALLED</span>';
-    if(st==='hot')b+=' <span class="badge badge-hot">HOT</span>';
-    if(st==='sold')b+=' <span class="badge badge-sold">SOLD</span>';
-    if(st==='dead')b+=' <span class="badge badge-dead">DEAD</span>';
-    if(cb){const dt=new Date(cb),now=new Date();const isOver=dt<now;const diff=Math.ceil((dt-now)/86400000);const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const lbl=isOver?'⚠ OVERDUE':diff<=0?'Today':diff===1?'Tmrw':diff<=7?dn[dt.getDay()]:`${dt.getMonth()+1}/${dt.getDate()}`;b+=' <span class="badge '+(isOver?'badge-overdue':'badge-cb')+'">📅'+lbl+'</span>';}
-    let nl='';if(nt)nl='<div class="lead-note">💬 '+esc(nt.substring(0,55))+(nt.length>55?'…':'')+'</div>';
-    return'<div class="lead-row status-'+st+'" onclick="openDetail(\''+esc(l.name)+'\')"><div class="lead-info"><div class="lead-name">'+esc(l.name)+'</div><div class="lead-meta">'+esc(l.zip)+' · '+esc(l.category)+' · '+esc(pf)+' '+b+'</div>'+nl+'</div><div class="call-icon">📞</div></div>';
-  }).join('');
-}
-
-// ── DEBOUNCE (Brain 5 fix) ──
-function debounceRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(renderLeads,200)}
-
-// ── NAV ──
-function setNav(v,btn){nav=v;document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLeads()}
-function setFilter(f,btn){filter=f;document.querySelectorAll('.filt-row button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLeads()}
-
-// ── DETAIL PANEL ──
-function openDetail(name){
-  if(onCall)return;
-  const l=leads.find(x=>x.name===name);if(!l)return;activeLead=l;
-  document.getElementById('dName').textContent=l.name;
-  document.getElementById('dPhone').textContent=l.phone?l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'No phone';
-  const cat=l.category||'Unknown';
-  document.getElementById('dOpener').innerHTML=l.opener||'Hey, is this <em>'+esc(l.name.split(' ')[0])+'</em>? I\'m Rick with <em>SiteLaunch</em> — I couldn\'t find a real website for your <em>'+esc(cat.toLowerCase())+'</em> business. I actually built one. Want me to text you the link?';
-  // Category-specific close
-  document.getElementById('dClose').innerHTML=(CAT_SCRIPTS[cat]||CAT_SCRIPTS.Unknown).close;
-  // Category-specific objections
-  const obj1=document.getElementById('obj1'),obj2=document.getElementById('obj2');
-  if(l.type==='NO_SITE'){
-    obj1.innerHTML='"I looked — you don\'t have <em>any</em> website. When someone Googles \''+esc(cat.toLowerCase())+' near me\' they find <em>your competitors</em>. Here, text me your number and I\'ll send you what I built."';
-    obj2.innerHTML='"What\'s <em>one new customer</em> worth? This site costs less than one service call. If it brings you even one job, it paid for itself. You pay <em>after</em> it\'s live."';
-  }else{
-    obj1.innerHTML='"Actually — I looked at it. It\'s a <em>generic placeholder page</em>, not a real website. Here, let me text you what I built — you\'ll see the difference."';
-    obj2.innerHTML='"What\'s <em>one new customer</em> worth to you? This site costs less than one service call. If it brings you even one job, it paid for itself."';
-  }
-  document.getElementById('dSiteUrl').textContent=surl(l);
-  document.getElementById('dCallBtn').href=l.phone?'tel:+1'+l.phone:'#';
-  document.getElementById('dNoSiteWarn').style.display=l.type==='NO_SITE'?'block':'none';
-  const nt=gn(l.name);const nh=document.getElementById('dNotesHdr'),nb=document.getElementById('dNotesBox');
-  if(nt){nh.style.display='';nb.style.display='';nb.textContent=nt}else{nh.style.display='none';nb.style.display='none'}
-  const cb=gc(l.name);const ch=document.getElementById('dCbHdr'),cv=document.getElementById('dCbVal');
-  if(cb){ch.style.display='';const d=new Date(cb);const isOver=d<new Date();cv.innerHTML=(isOver?'<span style="color:var(--overdue)">⚠ OVERDUE</span> ':'📅 ')+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}else{ch.style.display='none';cv.textContent=''}
-  document.getElementById('objBlock').classList.remove('show');
-  document.getElementById('objToggle').textContent='👇 Objection Handlers (4)';
-  document.getElementById('detailPanel').classList.add('on');
-}
-function toggleObj(){const b=document.getElementById('objBlock');b.classList.toggle('show');document.getElementById('objToggle').textContent=b.classList.contains('show')?'👆 Hide Objection Handlers':'👇 Objection Handlers (4)'}
-function closeDetail(){document.getElementById('detailPanel').classList.remove('on');activeLead=null;renderAll()}
-function copySiteLink(){if(!activeLead)return;const url=surl(activeLead);if(url==='#'){showToast('No site built for this lead');return}navigator.clipboard.writeText(url).then(()=>showToast('Link copied! 📋')).catch(()=>showToast('Copy failed'))}
-function quickAction(a){if(!activeLead)return;const m={voicemail:'called',dead:'dead',notinterested:'dead'};const st=m[a]||'called';ss(activeLead.name,st);st(activeLead.name);showToast({voicemail:'📱 Left VM',dead:'☠️ Dead',notinterested:'🚫 Not interested'}[a]||'✓ Saved');closeDetail();if(st==='dead')setTimeout(()=>{if(!activeLead&&!onCall)nextCall()},600)}
-
-// ── CALL FLOW ──
-function startCall(){if(!activeLead||onCall)return;onCall=true;_endCallFired=false;document.getElementById('oncallName').textContent=activeLead.name;document.getElementById('oncallBar').classList.add('on');document.getElementById('detailPanel').classList.remove('on')}
-function endCallNow(){if(!onCall||_endCallFired)return;_endCallFired=true;onCall=false;document.getElementById('oncallBar').classList.remove('on');if(!activeLead)return;setTimeout(()=>{if(_endCallFired===true){_endCallFired=false;showResultModal()}},150)}
-
-// ── RESULT MODAL ──
-function showResultModal(){
-  if(!activeLead)return;const l=activeLead;
-  document.getElementById('modalTitle').textContent='How\'d it go with '+esc(l.name.split(' ')[0])+'?';
-  document.getElementById('modalSub').textContent=esc(l.category)+' · '+(l.phone?l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'No phone');
-  document.getElementById('noteInput').value=gn(l.name)||'';
-  selectedResult=null;selectedCb=null;document.querySelectorAll('.stat-btn').forEach(b=>b.classList.remove('sel'));
-  document.getElementById('cbPreview').style.display='none';
-  const cb=gc(l.name);if(cb){selectedCb=cb;document.getElementById('cbPreview').textContent='Callback: '+new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});document.getElementById('cbPreview').style.display='block'}
-  document.getElementById('resultModal').classList.add('on');
-  setTimeout(()=>document.getElementById('noteInput').focus(),300);
-}
-function pickResult(st){selectedResult=st;document.querySelectorAll('.stat-btn').forEach(b=>b.classList.remove('sel'));const idx={voicemail:0,interested:1,noanswer:2,notinterested:3,sold:4}[st];if(idx!==undefined)document.querySelectorAll('.stat-btn')[idx].classList.add('sel')}
-function insertChip(t){const ta=document.getElementById('noteInput');const sep=ta.value&&!ta.value.endsWith(',')&&ta.value.length?', ':'';ta.value+=sep+t;ta.focus();saveDraftNotes()}
-function setCB(w){if(w==='clear'){selectedCb=null;document.getElementById('cbPreview').style.display='none';return}const now=new Date();let t=new Date(now);switch(w){case'tomorrow':t.setDate(t.getDate()+1);t.setHours(9,0,0,0);break;case'monday':{const d=(8-now.getDay())%7||7;t.setDate(t.getDate()+d);t.setHours(9,0,0,0);break}case'2days':t.setDate(t.getDate()+2);t.setHours(9,0,0,0);break;case'3days':t.setDate(t.getDate()+3);t.setHours(9,0,0,0);break;case'1week':t.setDate(t.getDate()+7);t.setHours(9,0,0,0);break}selectedCb=t.toISOString();document.getElementById('cbPreview').textContent='Callback: '+t.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});document.getElementById('cbPreview').style.display='block'}
-function saveDraftNotes(){if(activeLead)sn(activeLead.name,document.getElementById('noteInput').value)}
-function saveAndNext(){
-  if(!activeLead)return;
-  const notes=document.getElementById('noteInput').value.trim();
-  const sm={voicemail:'called',interested:'hot',noanswer:'called',notinterested:'dead',sold:'sold'};
-  const st=sm[selectedResult||'called'];
-  ss(activeLead.name,st);sn(activeLead.name,notes);st(activeLead.name);
-  if(selectedCb)sc(activeLead.name,selectedCb);else sc(activeLead.name,null);
-  if(st==='sold'){document.getElementById('resultModal').classList.remove('on');document.getElementById('checklistSub').textContent=activeLead.name+' · '+(activeLead.phone?activeLead.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'');document.getElementById('checklistModal').classList.add('on');restoreChecklist()}else{document.getElementById('resultModal').classList.remove('on')}
-  showToast({hot:'🔥 Hot!',sold:'💰 Sold!',called:'📱 Logged',dead:'☠️ Dead'}[st]||'✓ Saved');
-  activeLead=null;renderAll();
-  if(st==='dead')setTimeout(()=>{if(!activeLead&&!onCall)nextCall()},800);
-}
-function dismissModal(){if(activeLead){sn(activeLead.name,document.getElementById('noteInput').value);if(selectedCb)sc(activeLead.name,selectedCb);st(activeLead.name);if(gs(activeLead.name)==='new')ss(activeLead.name,'called')}document.getElementById('resultModal').classList.remove('on');activeLead=null;renderAll()}
-
-// ── CHECKLIST PERSISTENCE (Brain 9 fix) ──
-function saveChecklist(){const boxes=document.querySelectorAll('#checklistContent input[type=checkbox]');const state=Array.from(boxes).map(b=>b.checked);try{localStorage.setItem('lch',JSON.stringify(state))}catch(e){}}
-function restoreChecklist(){try{const saved=JSON.parse(localStorage.getItem('lch')||'[]');const boxes=document.querySelectorAll('#checklistContent input[type=checkbox]');boxes.forEach((b,i)=>{if(i<saved.length)b.checked=saved[i]})}catch(e){}}
-function closeChecklist(){saveChecklist();document.getElementById('checklistModal').classList.remove('on');renderAll()}
-
-// ── NEXT CALL ──
-function nextCall(){
-  if(onCall)return;const d=state(),now=new Date();
-  let list=leads.filter(l=>{const s=d.status[l.name]||'new';return s!=='sold'&&s!=='dead'});
-  list.sort((a,b)=>{
-    const ca=d.cbs[a.name],cb=d.cbs[b.name];
-    const aOver=ca&&new Date(ca)<now,bOver=cb&&new Date(cb)<now;
-    if(aOver&&!bOver)return -1;if(bOver&&!aOver)return 1;
-    if(ca&&cb)return new Date(ca)-new Date(cb);
-    if(ca)return -1;if(cb)return 1;
-    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
-    if(sa==='new'&&sb!=='new')return -1;if(sb==='new'&&sa!=='new')return 1;
-    return 0;
-  });
-  if(!list.length){showToast('All leads done! 🎉');return}
-  openDetail(list[0].name);
-}
-
-// ── SETUP ──
-function setup(){
-  document.getElementById('dCallBtn').addEventListener('click',function(e){e.preventDefault();startCall();setTimeout(()=>{if(this.href&&this.href!=='#')window.location.href=this.href},50)});
-  document.getElementById('detailPanel').addEventListener('click',function(e){if(e.target===this)closeDetail()});
-  document.getElementById('resultModal').addEventListener('click',function(e){if(e.target===this)dismissModal()});
-  document.getElementById('checklistModal').addEventListener('click',function(e){if(e.target===this)closeChecklist()});
-}
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
-document.addEventListener('DOMContentLoaded',init);
-</script>
-</body>
-</html>
+   149|
+   150|<!-- ON-CALL BAR -->
+   151|<div class="oncall-bar" id="oncallBar">
+   152|  <div class="oncall-dot"></div>
+   153|  <div class="oncall-info"><div class="oncall-name" id="oncallName"></div><div class="oncall-hint">On call — tap End when done</div></div>
+   154|  <button class="oncall-end" onclick="endCallNow()">✕ End</button>
+   155|</div>
+   156|
+   157|<!-- TOP BAR -->
+   158|<div class="topbar">
+   159|  <h1>📞 Call CRM</h1>
+   160|  <div class="today-line" id="todayLine"></div>
+   161|  <div class="search-row">
+   162|    <input type="text" placeholder="Search name or number..." id="search" oninput="debounceRender()">
+   163|    <button class="next-btn" onclick="nextCall()">▶ Next</button>
+   164|  </div>
+   165|  <div class="filt-row">
+   166|    <button class="on" onclick="setFilter('all',this)">All</button>
+   167|    <button onclick="setFilter('new',this)">🆕 New</button>
+   168|    <button onclick="setFilter('no-site',this)">No Site</button>
+   169|    <button onclick="setFilter('HVAC',this)">HVAC</button>
+   170|    <button onclick="setFilter('Electrician',this)">Elec</button>
+   171|    <button onclick="setFilter('Plumber',this)">Plumb</button>
+   172|    <button onclick="setFilter('Roofer',this)">Roof</button>
+   173|    <button onclick="setFilter('19805',this)">19805</button>
+   174|    <button onclick="setFilter('19720',this)">19720</button>
+   175|    <button onclick="setFilter('21921',this)">21921</button>
+   176|    <button class="overdue-btn" onclick="setFilter('overdue',this)">⚠ Late</button>
+   177|  </div>
+   178|</div>
+   179|
+   180|<!-- LEAD LIST -->
+   181|<div class="lead-list" id="leadList"></div>
+   182|
+   183|<!-- BOTTOM NAV -->
+   184|<div class="bottom-nav">
+   185|  <button class="nav-item active" onclick="setNav('all',this)"><span class="nav-count" id="navAll">0</span>All</button>
+   186|  <button class="nav-item" onclick="setNav('called',this)"><span class="nav-count" id="navCalled">0</span>Called</button>
+   187|  <button class="nav-item" onclick="setNav('hot',this)"><span class="nav-count" id="navHot">0</span>Hot</button>
+   188|  <button class="nav-item" onclick="setNav('sold',this)"><span class="nav-count" id="navSold">0</span>Sold</button>
+   189|  <button class="nav-item" onclick="setNav('dead',this)"><span class="nav-count" id="navDead">0</span>Dead</button>
+   190|</div>
+   191|
+   192|<!-- DETAIL PANEL -->
+   193|<div class="panel-back" id="detailPanel">
+   194|  <div class="panel">
+   195|    <div class="panel-head">
+   196|      <div class="pname" id="dName"></div>
+   197|      <div class="pphone" id="dPhone"></div>
+   198|    </div>
+   199|    <div class="panel-body">
+   200|      <div class="sec-label">🗣️ OPENER</div>
+   201|      <div class="script-box" id="dOpener"></div>
+   202|
+   203|      <button class="obj-toggle" id="objToggle" onclick="toggleObj()">👇 Objection Handlers (4)</button>
+   204|      <div class="obj-block" id="objBlock">
+   205|        <div class="obj-card"><div class="otag">😐 "I already have a website"</div><div class="oline" id="obj1"></div></div>
+   206|        <div class="obj-card"><div class="otag">💸 "Too expensive"</div><div class="oline" id="obj2"></div></div>
+   207|        <div class="obj-card"><div class="otag">📞 "Not interested"</div><div class="oline">"No problem — keep the site anyway. I already built it. If you change your mind, <em>text me at this number</em>. Site's done, just needs your name on it."</div></div>
+   208|        <div class="obj-card"><div class="otag">🤔 "Let me think about it"</div><div class="oline">"Totally fair. Is it the <em>price</em> or the <em>idea</em> you're unsure about? Because I can work with one of those."</div></div>
+   209|      </div>
+   210|
+   211|      <div class="sec-label">💰 CLOSE</div>
+   212|      <div class="script-box" id="dClose"></div>
+   213|
+   214|      <div class="sec-label">🔗 SITE LINK</div>
+   215|      <span class="site-url-text" id="dSiteUrl"></span>
+   216|      <div id="dNoSiteWarn" class="no-site-warn" style="display:none">⚠️ This lead has NO website. Link goes to demo. Build one before pitching.</div>
+   217|
+   218|      <div class="sec-label" id="dNotesHdr" style="display:none">💬 NOTES</div>
+   219|      <div style="color:var(--hot);font-size:10px;white-space:pre-wrap;display:none" id="dNotesBox"></div>
+   220|      <div class="sec-label" id="dCbHdr" style="display:none">📅 CALLBACK</div>
+   221|      <div style="font-size:10px;font-weight:600" id="dCbVal"></div>
+   222|    </div>
+   223|    <div class="panel-actions">
+   224|      <a class="btn-call" id="dCallBtn" href="#">📞 Call Now</a>
+   225|      <div class="panel-row">
+   226|        <button class="btn-copy-link" onclick="copySiteLink()">📋 Copy Link</button>
+   227|        <button class="btn-leftvm" onclick="quickAction('voicemail')">📱 Left VM</button>
+   228|      </div>
+   229|      <div class="panel-row">
+   230|        <button class="btn-quickdead" onclick="quickAction('dead')">☠️ Dead / Wrong #</button>
+   231|        <button class="btn-notint" onclick="quickAction('notinterested')">🚫 Not Interested</button>
+   232|      </div>
+   233|      <button class="btn-panelclose" onclick="closeDetail()">Close</button>
+   234|    </div>
+   235|  </div>
+   236|</div>
+   237|
+   238|<!-- RESULT MODAL -->
+   239|<div class="modal-back" id="resultModal">
+   240|  <div class="modal-content">
+   241|    <h2 id="modalTitle">How'd it go?</h2>
+   242|    <div class="msub" id="modalSub"></div>
+   243|    <div class="stat-grid">
+   244|      <button class="stat-btn stat-voicemail" onclick="pickResult('voicemail')">📱 Voicemail</button>
+   245|      <button class="stat-btn stat-interested" onclick="pickResult('interested')">🔥 Interested</button>
+   246|      <button class="stat-btn stat-noanswer" onclick="pickResult('noanswer')">📵 No Answer</button>
+   247|      <button class="stat-btn stat-notinterested" onclick="pickResult('notinterested')">🚫 Not Interested</button>
+   248|      <button class="stat-btn stat-sold" onclick="pickResult('sold')" style="grid-column:span 2">💰 SOLD</button>
+   249|    </div>
+   250|    <div class="note-section">
+   251|      <textarea id="noteInput" placeholder="Type notes..." oninput="saveDraftNotes()"></textarea>
+   252|    </div>
+   253|    <div class="chip-row">
+   254|      <span class="chip" onclick="insertChip('Voicemail')">📱 VM</span>
+   255|      <span class="chip" onclick="insertChip('No answer')">📵 No ans</span>
+   256|      <span class="chip" onclick="insertChip('Wrong number')">❌ Wrong #</span>
+   257|      <span class="chip" onclick="insertChip('Sent site')">🔗 Sent site</span>
+   258|      <span class="chip" onclick="insertChip('Think about it')">🤔 Thinking</span>
+   259|      <span class="chip" onclick="insertChip('Not interested')">🚫 No int</span>
+   260|      <span class="chip" onclick="insertChip('Has website')">🌐 Has site</span>
+   261|      <span class="chip" onclick="insertChip('Office closed')">🏢 Closed</span>
+   262|    </div>
+   263|    <div class="cb-section">
+   264|      <div class="lbl">Schedule callback</div>
+   265|      <div class="cb-row">
+   266|        <span class="cb-btn" onclick="setCB('tomorrow')">📅 Tmrw</span>
+   267|        <span class="cb-btn" onclick="setCB('monday')">📅 Mon</span>
+   268|        <span class="cb-btn" onclick="setCB('2days')">📅 2d</span>
+   269|        <span class="cb-btn" onclick="setCB('3days')">📅 3d</span>
+   270|        <span class="cb-btn" onclick="setCB('1week')">📅 1w</span>
+   271|        <span class="cb-btn cb-clear" onclick="setCB('clear')">✕</span>
+   272|      </div>
+   273|      <div class="cb-preview" id="cbPreview"></div>
+   274|    </div>
+   275|    <div class="action-row">
+   276|      <button class="btn-skip-main" onclick="dismissModal()">Skip</button>
+   277|      <button class="btn-save-main" onclick="saveAndNext()">💾 Save & Next →</button>
+   278|    </div>
+   279|  </div>
+   280|</div>
+   281|
+   282|<!-- DELIVERY CHECKLIST -->
+   283|<div class="modal-back" id="checklistModal">
+   284|  <div class="modal-content" id="checklistContent">
+   285|    <h2>🎉 Sold! Delivery Checklist</h2>
+   286|    <div class="msub" id="checklistSub"></div>
+   287|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">💰 Collect $500 payment</label>
+   288|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">🌐 Buy domain ($12/yr)</label>
+   289|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">🔗 DNS to GitHub Pages</label>
+   290|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📧 Set up email forwarding</label>
+   291|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📍 Google Business Profile</label>
+   292|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📱 Text client: "Live!"</label>
+   293|    <label class="del-item"><input type="checkbox" onchange="saveChecklist()">📅 2-week check-in</label>
+   294|    <button class="btn-save-main" style="width:100%;margin-top:6px" onclick="closeChecklist()">✓ Done</button>
+   295|  </div>
+   296|</div>
+   297|
+   298|<div class="toast" id="toast"></div>
+   299|
+   300|<script>
+   301|// ── STATE ──
+   302|let leads=[], nav='all', filter='all', activeLead=null, onCall=false, selectedResult=null, selectedCb=null, _renderTimer=null, _endCallFired=false;
+   303|const TODAY=new Date().toDateString();
+   304|
+   305|function state(){try{return{status:JSON.parse(localStorage.getItem('ls')||'{}'),notes:JSON.parse(localStorage.getItem('ln')||'{}'),cbs:JSON.parse(localStorage.getItem('lc')||'{}'),today:JSON.parse(localStorage.getItem('lt')||'{}'),checklist:JSON.parse(localStorage.getItem('lch')||'{}')}}catch(e){return{status:{},notes:{},cbs:{},today:{},checklist:{}}}}
+   306|function ss(n,s){try{let d=state();d.status[n]=s;localStorage.setItem('ls',JSON.stringify(d.status))}catch(e){}}
+   307|function sn(n,t){try{let d=state();d.notes[n]=t;localStorage.setItem('ln',JSON.stringify(d.notes))}catch(e){}}
+   308|function sc(n,iso){try{let d=state();iso?d.cbs[n]=iso:delete d.cbs[n];localStorage.setItem('lc',JSON.stringify(d.cbs))}catch(e){}}
+   309|function st(n){try{let d=state();d.today[n]=TODAY;localStorage.setItem('lt',JSON.stringify(d.today))}catch(e){}}
+   310|function gs(n){return state().status[n]||'new'}
+   311|function gn(n){return state().notes[n]||''}
+   312|function gc(n){return state().cbs[n]||null}
+   313|function istoday(n){return state().today[n]===TODAY}
+   314|function surl(l){return l.slug?'https://cryptorich.github.io/applybot/sites/'+l.slug+'/':'#'}
+   315|
+   316|// ── SAFE HTML ESCAPE (Brain 8 fix) ──
+   317|function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+   318|
+   319|// ── CATEGORY-SPECIFIC SCRIPTS (Brain 1 fix) ──
+   320|const CAT_SCRIPTS={
+   321|  HVAC:{close:"So here's the deal — <em>$500 and it's yours.</em> One AC repair call costs $300-500. This site costs less than <em>one call</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
+   322|  Electrician:{close:"So here's the deal — <em>$500 and it's yours.</em> One emergency electrical job pays $400-800. This site costs less than <em>one job</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
+   323|  Plumber:{close:"So here's the deal — <em>$500 and it's yours.</em> One emergency plumbing call pays $350-600. This site costs less than <em>one call</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
+   324|  Roofer:{close:"So here's the deal — <em>$500 and it's yours.</em> One roofing job is $5k+. This site is <em>10% of one customer</em>. I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live. Want to do this?"},
+   325|  Unknown:{close:"So here's the deal — <em>$500 and it's yours.</em> I'll connect your domain, set up email, hand you the keys. You pay <em>after</em> it's live under your name. Want to do this?"}
+   326|};
+   327|
+   328|// ── INIT ──
+   329|async function init(){
+   330|  try{
+   331|    const controller=new AbortController();
+   332|    const timeout=setTimeout(()=>controller.abort(),8000);
+   333|    const resp=await fetch('leads.json',{signal:controller.signal});
+   334|    clearTimeout(timeout);
+   335|    if(!resp.ok)throw new Error('HTTP '+resp.status);
+   336|    leads=await resp.json();
+   337|  }catch(e){
+   338|    try{
+   339|      const resp2=await fetch('../leads.json');
+   340|      if(resp2.ok)leads=await resp2.json();
+   341|    }catch(e2){leads=[]}
+   342|  }
+   343|  if(!leads.length){document.getElementById('leadList').innerHTML='<div class="empty-state"><strong>No leads loaded</strong>Check your connection and refresh</div>';return}
+   344|  leads=leads.map(l=>({...l,name:(l.name||'').trim(),phone:(l.phone||'').replace(/\D/g,''),category:l.category||l.cat||'Unknown',type:l.no_site?'NO_SITE':'FAKE',website:l.website||'',opener:l.opener||'',zip:l.zip||'',slug:(l.slug||(l.name||'x').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')).substring(0,50)||'unknown'}));
+   345|  const d=state();let imp=false;
+   346|  leads.forEach(l=>{if(l.status&&!d.status[l.name]){d.status[l.name]=l.status;d.notes[l.name]=l.notes||'';imp=true}});
+   347|  if(imp){try{localStorage.setItem('ls',JSON.stringify(d.status));localStorage.setItem('ln',JSON.stringify(d.notes))}catch(e){}}
+   348|  setup();renderAll();
+   349|}
+   350|
+   351|// ── RENDER ──
+   352|function renderAll(){renderLeads();updateCounts();updateToday()}
+   353|
+   354|function updateToday(){
+   355|  const d=state();let t=0;leads.forEach(l=>{if(d.today[l.name]===TODAY)t++});
+   356|  document.getElementById('todayLine').textContent=t?'📞 '+t+' calls today':'No calls yet today';
+   357|}
+   358|
+   359|function updateCounts(){
+   360|  const d=state();let c={all:leads.length,called:0,hot:0,sold:0,dead:0,overdue:0};
+   361|  const now=new Date();
+   362|  leads.forEach(l=>{
+   363|    const s=d.status[l.name]||'new';
+   364|    if(s==='called')c.called++;if(s==='hot')c.hot++;if(s==='sold')c.sold++;if(s==='dead')c.dead++;
+   365|    const cb=d.cbs[l.name];if(cb&&new Date(cb)<now)c.overdue++;
+   366|  });
+   367|  ['All','Called','Hot','Sold','Dead'].forEach(k=>{const el=document.getElementById('nav'+k);if(el)el.textContent=c[k.toLowerCase()]});
+   368|}
+   369|
+   370|function renderLeads(){
+   371|  const q=(document.getElementById('search')?.value||'').toLowerCase(),d=state();let f=[...leads];
+   372|  if(q)f=f.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q));
+   373|  if(filter==='no-site')f=f.filter(l=>l.type==='NO_SITE');
+   374|  else if(filter==='new')f=f.filter(l=>(d.status[l.name]||'new')==='new');
+   375|  else if(filter==='overdue'){const now=new Date();f=f.filter(l=>{const cb=d.cbs[l.name];return cb&&new Date(cb)<now})}
+   376|  else if(['HVAC','Electrician','Plumber','Roofer'].includes(filter))f=f.filter(l=>l.category===filter);
+   377|  else if(['19805','19720','21921'].includes(filter))f=f.filter(l=>l.zip===filter);
+   378|  if(nav==='called')f=f.filter(l=>(d.status[l.name]||'new')==='called');
+   379|  if(nav==='hot')f=f.filter(l=>(d.status[l.name]||'new')==='hot');
+   380|  if(nav==='sold')f=f.filter(l=>(d.status[l.name]||'new')==='sold');
+   381|  if(nav==='dead')f=f.filter(l=>(d.status[l.name]||'new')==='dead');
+   382|  f.sort((a,b)=>{
+   383|    const ca=d.cbs[a.name],cb=d.cbs[b.name];const now=new Date();
+   384|    const aOver=ca&&new Date(ca)<now,bOver=cb&&new Date(cb)<now;
+   385|    if(aOver&&!bOver)return -1;if(bOver&&!aOver)return 1;
+   386|    if(ca&&cb)return new Date(ca)-new Date(cb);
+   387|    if(ca)return -1;if(cb)return 1;
+   388|    const sa=d.status[a.name]||'new',sb=d.status[b.name]||'new';
+   389|    if(sa==='new'&&sb!=='new')return -1;
+   390|    if(sb==='new'&&sa!=='new')return 1;
+   391|    return 0;
+   392|  });
+   393|  const lst=document.getElementById('leadList');
+   394|  if(!f.length){lst.innerHTML='<div class="empty-state"><strong>No leads</strong>Try a different filter</div>';return}
+   395|  lst.innerHTML=f.map(l=>{
+   396|    const st=d.status[l.name]||'new',nt=d.notes[l.name]||'',cb=d.cbs[l.name];
+   397|    const pf=l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3')||'No phone';
+   398|    let b='';
+   399|    if(l.type==='NO_SITE')b+='<span class="badge badge-nosite">NO SITE</span>';
+   400|    else b+='<span class="badge badge-fake">FAKE</span>';
+   401|    if(st==='called')b+=' <span class="badge badge-called">CALLED</span>';
+   402|    if(st==='hot')b+=' <span class="badge badge-hot">HOT</span>';
+   403|    if(st==='sold')b+=' <span class="badge badge-sold">SOLD</span>';
+   404|    if(st==='dead')b+=' <span class="badge badge-dead">DEAD</span>';
+   405|    if(cb){const dt=new Date(cb),now=new Date();const isOver=dt<now;const diff=Math.ceil((dt-now)/86400000);const dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const lbl=isOver?'⚠ OVERDUE':diff<=0?'Today':diff===1?'Tmrw':diff<=7?dn[dt.getDay()]:`${dt.getMonth()+1}/${dt.getDate()}`;b+=' <span class="badge '+(isOver?'badge-overdue':'badge-cb')+'">📅'+lbl+'</span>';}
+   406|    let nl='';if(nt)nl='<div class="lead-note">💬 '+esc(nt.substring(0,55))+(nt.length>55?'…':'')+'</div>';
+   407|    return'<div class="lead-row status-'+st+'" onclick="openDetail(\''+esc(l.name)+'\')"><div class="lead-info"><div class="lead-name">'+esc(l.name)+'</div><div class="lead-meta">'+esc(l.zip)+' · '+esc(l.category)+' · '+esc(pf)+' '+b+'</div>'+nl+'</div><div class="call-icon">📞</div></div>';
+   408|  }).join('');
+   409|}
+   410|
+   411|// ── DEBOUNCE (Brain 5 fix) ──
+   412|function debounceRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(renderLeads,200)}
+   413|
+   414|// ── NAV ──
+   415|function setNav(v,btn){nav=v;document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLeads()}
+   416|function setFilter(f,btn){filter=f;document.querySelectorAll('.filt-row button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLeads()}
+   417|
+   418|// ── DETAIL PANEL ──
+   419|function openDetail(name){
+   420|  if(onCall)return;
+   421|  const l=leads.find(x=>x.name===name);if(!l)return;activeLead=l;
+   422|  document.getElementById('dName').textContent=l.name;
+   423|  document.getElementById('dPhone').textContent=l.phone?l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'No phone';
+   424|  const cat=l.category||'Unknown';
+   425|  document.getElementById('dOpener').innerHTML=l.opener||'Hey, is this <em>'+esc(l.name.split(' ')[0])+'</em>? I\'m Rick with <em>SiteLaunch</em> — I couldn\'t find a real website for your <em>'+esc(cat.toLowerCase())+'</em> business. I actually built one. Want me to text you the link?';
+   426|  // Category-specific close
+   427|  document.getElementById('dClose').innerHTML=(CAT_SCRIPTS[cat]||CAT_SCRIPTS.Unknown).close;
+   428|  // Category-specific objections
+   429|  const obj1=document.getElementById('obj1'),obj2=document.getElementById('obj2');
+   430|  if(l.type==='NO_SITE'){
+   431|    obj1.innerHTML='"I looked — you don\'t have <em>any</em> website. When someone Googles \''+esc(cat.toLowerCase())+' near me\' they find <em>your competitors</em>. Here, text me your number and I\'ll send you what I built."';
+   432|    obj2.innerHTML='"What\'s <em>one new customer</em> worth? This site costs less than one service call. If it brings you even one job, it paid for itself. You pay <em>after</em> it\'s live."';
+   433|  }else{
+   434|    obj1.innerHTML='"Actually — I looked at it. It\'s a <em>generic placeholder page</em>, not a real website. Here, let me text you what I built — you\'ll see the difference."';
+   435|    obj2.innerHTML='"What\'s <em>one new customer</em> worth to you? This site costs less than one service call. If it brings you even one job, it paid for itself."';
+   436|  }
+   437|  document.getElementById('dSiteUrl').textContent=surl(l);
+   438|  document.getElementById('dCallBtn').href=l.phone?'tel:+1'+l.phone:'#';
+   439|  document.getElementById('dNoSiteWarn').style.display=l.type==='NO_SITE'?'block':'none';
+   440|  const nt=gn(l.name);const nh=document.getElementById('dNotesHdr'),nb=document.getElementById('dNotesBox');
+   441|  if(nt){nh.style.display='';nb.style.display='';nb.textContent=nt}else{nh.style.display='none';nb.style.display='none'}
+   442|  const cb=gc(l.name);const ch=document.getElementById('dCbHdr'),cv=document.getElementById('dCbVal');
+   443|  if(cb){ch.style.display='';const d=new Date(cb);const isOver=d<new Date();cv.innerHTML=(isOver?'<span style="color:var(--overdue)">⚠ OVERDUE</span> ':'📅 ')+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}else{ch.style.display='none';cv.textContent=''}
+   444|  document.getElementById('objBlock').classList.remove('show');
+   445|  document.getElementById('objToggle').textContent='👇 Objection Handlers (4)';
+   446|  document.getElementById('detailPanel').classList.add('on');
+   447|}
+   448|function toggleObj(){const b=document.getElementById('objBlock');b.classList.toggle('show');document.getElementById('objToggle').textContent=b.classList.contains('show')?'👆 Hide Objection Handlers':'👇 Objection Handlers (4)'}
+   449|function closeDetail(){document.getElementById('detailPanel').classList.remove('on');activeLead=null;renderAll()}
+   450|function copySiteLink(){if(!activeLead)return;const url=surl(activeLead);if(url==='#'){showToast('No site built for this lead');return}navigator.clipboard.writeText(url).then(()=>showToast('Link copied! 📋')).catch(()=>showToast('Copy failed'))}
+   451|function quickAction(a){if(!activeLead)return;const m={voicemail:'called',dead:'dead',notinterested:'dead'};const st=m[a]||'called';ss(activeLead.name,st);st(activeLead.name);showToast({voicemail:'📱 Left VM',dead:'☠️ Dead',notinterested:'🚫 Not interested'}[a]||'✓ Saved');closeDetail();if(st==='dead')setTimeout(()=>{if(!activeLead&&!onCall)nextCall()},600)}
+   452|
+   453|// ── CALL FLOW ──
+   454|function startCall(){if(!activeLead||onCall)return;onCall=true;_endCallFired=false;document.getElementById('oncallName').textContent=activeLead.name;document.getElementById('oncallBar').classList.add('on');document.getElementById('detailPanel').classList.remove('on')}
+   455|function endCallNow(){if(!onCall||_endCallFired)return;_endCallFired=true;onCall=false;document.getElementById('oncallBar').classList.remove('on');if(!activeLead)return;setTimeout(()=>{if(_endCallFired===true){_endCallFired=false;showResultModal()}},150)}
+   456|
+   457|// ── RESULT MODAL ──
+   458|function showResultModal(){
+   459|  if(!activeLead)return;const l=activeLead;
+   460|  document.getElementById('modalTitle').textContent='How\'d it go with '+esc(l.name.split(' ')[0])+'?';
+   461|  document.getElementById('modalSub').textContent=esc(l.category)+' · '+(l.phone?l.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'No phone');
+   462|  document.getElementById('noteInput').value=gn(l.name)||'';
+   463|  selectedResult=null;selectedCb=null;document.querySelectorAll('.stat-btn').forEach(b=>b.classList.remove('sel'));
+   464|  document.getElementById('cbPreview').style.display='none';
+   465|  const cb=gc(l.name);if(cb){selectedCb=cb;document.getElementById('cbPreview').textContent='Callback: '+new Date(cb).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});document.getElementById('cbPreview').style.display='block'}
+   466|  document.getElementById('resultModal').classList.add('on');
+   467|  setTimeout(()=>document.getElementById('noteInput').focus(),300);
+   468|}
+   469|function pickResult(st){selectedResult=st;document.querySelectorAll('.stat-btn').forEach(b=>b.classList.remove('sel'));const idx={voicemail:0,interested:1,noanswer:2,notinterested:3,sold:4}[st];if(idx!==undefined)document.querySelectorAll('.stat-btn')[idx].classList.add('sel')}
+   470|function insertChip(t){const ta=document.getElementById('noteInput');const sep=ta.value&&!ta.value.endsWith(',')&&ta.value.length?', ':'';ta.value+=sep+t;ta.focus();saveDraftNotes()}
+   471|function setCB(w){if(w==='clear'){selectedCb=null;document.getElementById('cbPreview').style.display='none';return}const now=new Date();let t=new Date(now);switch(w){case'tomorrow':t.setDate(t.getDate()+1);t.setHours(9,0,0,0);break;case'monday':{const d=(8-now.getDay())%7||7;t.setDate(t.getDate()+d);t.setHours(9,0,0,0);break}case'2days':t.setDate(t.getDate()+2);t.setHours(9,0,0,0);break;case'3days':t.setDate(t.getDate()+3);t.setHours(9,0,0,0);break;case'1week':t.setDate(t.getDate()+7);t.setHours(9,0,0,0);break}selectedCb=t.toISOString();document.getElementById('cbPreview').textContent='Callback: '+t.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});document.getElementById('cbPreview').style.display='block'}
+   472|function saveDraftNotes(){if(activeLead)sn(activeLead.name,document.getElementById('noteInput').value)}
+   473|function saveAndNext(){
+   474|  if(!activeLead)return;
+   475|  const notes=document.getElementById('noteInput').value.trim();
+   476|  const sm={voicemail:'called',interested:'hot',noanswer:'called',notinterested:'dead',sold:'sold'};
+   477|  const st=sm[selectedResult||'called'];
+   478|  ss(activeLead.name,st);sn(activeLead.name,notes);st(activeLead.name);
+   479|  if(selectedCb)sc(activeLead.name,selectedCb);else sc(activeLead.name,null);
+   480|  if(st==='sold'){document.getElementById('resultModal').classList.remove('on');document.getElementById('checklistSub').textContent=activeLead.name+' · '+(activeLead.phone?activeLead.phone.replace(/(\d{3})(\d{3})(\d{4})/,'($1) $2-$3'):'');document.getElementById('checklistModal').classList.add('on');restoreChecklist()}else{document.getElementById('resultModal').classList.remove('on')}
+   481|  showToast({hot:'🔥 Hot!',sold:'💰 Sold!',called:'📱 Logged',dead:'☠️ Dead'}[st]||'✓ Saved');
+   482|  activeLead=null;renderAll();
+   483|  if(st==='dead')setTimeout(()=>{if(!activeLead&&!onCall)nextCall()},800);
+   484|}
+   485|function dismissModal(){if(activeLead){sn(activeLead.name,document.getElementById('noteInput').value);if(selectedCb)sc(activeLead.name,selectedCb);st(activeLead.name);if(gs(activeLead.name)==='new')ss(activeLead.name,'called')}document.getElementById('resultModal').classList.remove('on');activeLead=null;renderAll()}
+   486|
+   487|// ── CHECKLIST PERSISTENCE (Brain 9 fix) ──
+   488|function saveChecklist(){const boxes=document.querySelectorAll('#checklistContent input[type=checkbox]');const state=Array.from(boxes).map(b=>b.checked);try{localStorage.setItem('lch',JSON.stringify(state))}catch(e){}}
+   489|function restoreChecklist(){try{const saved=JSON.parse(localStorage.getItem('lch')||'[]');const boxes=document.querySelectorAll('#checklistContent input[type=checkbox]');boxes.forEach((b,i)=>{if(i<saved.length)b.checked=saved[i]})}catch(e){}}
+   490|function closeChecklist(){saveChecklist();document.getElementById('checklistModal').classList.remove('on');renderAll()}
+   491|
+   492|// ── NEXT CALL ──
+   493|function nextCall(){
+   494|  if(onCall)return;const d=state(),now=new Date();
+   495|  let list=leads.filter(l=>{const s=d.status[l.name]||'new';return s!=='sold'&&s!=='dead'});
+   496|  list.sort((a,b)=>{
+   497|    const ca=d.cbs[a.name],cb=d.cbs[b.name];
+   498|    const aOver=ca&&new Date(ca)<now,bOver=cb&&new Date(cb)<now;
+   499|    if(aOver&&!bOver)return -1;if(bOver&&!aOver)return 1;
+   500|    if(ca&&cb)return new Date(ca)-new Date(cb);
+   501|
