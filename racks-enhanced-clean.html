@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#020807">
+<title>RacksRewards — Turn Every Customer Into a Revenue Engine</title>
+<meta name="description" content="Customer loyalty that works at the counter — QR signup, staff PIN checkout, points and rewards. No app download required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+RACKSREWARDS V2 — DESIGN SYSTEM
+============================================================ */
+:root {
+--bg: #010503;
+--bg-soft: #051A0D;
+--surface: rgba(10,30,20,0.5);
+--surface-2: rgba(15,35,24,0.6);
+--surface-3: rgba(20,45,30,0.7);
+--border: rgba(255,255,255,0.05);
+--border-strong: rgba(0,229,153,0.15);
+--green: #00E599;
+--green-2: #1AFFAD;
+--green-dark: #00B377;
+--gold: #E8B830;
+--gold-soft: #F4D930;
+--text: #FFFFFF;
+--text-soft: rgba(240,245,242,0.72);
+--muted: rgba(240,245,242,0.4);
+--danger: #FF453A;
+--warning: #F4B83F;
+--radius-sm: 12px;
+--radius-md: 16px;
+--radius-lg: 24px;
+--radius-btn: 50px;
+--btn-height: 48px;
+--spring: cubic-bezier(0.175,0.885,0.32,1.275);
+--ease-out: cubic-bezier(0.16,1,0.3,1);
+--line: rgba(255,255,255,0.08);
+--line-green: rgba(0,201,133,0.24);
+}
+
+/* ---- reset & base ---- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+background:#010503!important;color:var(--text);line-height:1.6;overflow-x:hidden;
+background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,229,153,0.04) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 85% 60%,rgba(232,184,48,0.02) 0%,transparent 50%);
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
+
+/* ---- utilities ---- */
+.container{width:100%;max-width:1100px;margin:0 auto;padding:0 20px}
+.section{padding:88px 0;position:relative}
+.section-dark{background:var(--bg-soft)}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:var(--green);margin-bottom:12px;display:inline-block}
+.section-title{font-size:clamp(1.8rem,3.6vw,2.8rem);font-weight:800;line-height:1.12;letter-spacing:-0.02em;margin-bottom:16px}
+.section-subtitle{font-size:clamp(0.95rem,1.4vw,1.08rem);color:var(--text-soft);max-width:600px;line-height:1.6}
+.section-header{text-align:center;margin-bottom:56px}
+.section-header .section-subtitle{margin:0 auto}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:var(--btn-height);padding:0 26px;border-radius:var(--radius-btn);font-size:15px;font-weight:600;transition:all 0.22s var(--ease-out);white-space:nowrap;min-width:44px;min-height:44px}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:linear-gradient(135deg,var(--green) 0%,var(--green-2) 100%);color:#020807}
+.btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 4px 24px rgba(0,201,133,0.22)}
+.btn-secondary{background:transparent;color:var(--text);border:1.5px solid var(--border-strong)}
+.btn-secondary:hover{border-color:var(--green);background:rgba(0,201,133,0.05)}
+.btn-sm{height:40px;padding:0 16px;font-size:13px}
+.btn-lg{height:56px;padding:0 34px;font-size:16px}
+
+/* ============================================================
+1. HEADER — sticky glassmorphism
+============================================================ */
+.header{position:sticky;top:0;z-index:100;background:rgba(2,8,7,0.84);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 20px}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:var(--surface-3);border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.logo-icon::after{content:'R';font-size:20px;font-weight:800;color:var(--text);line-height:1}
+.logo-icon::before{content:'$';position:absolute;font-size:10px;font-weight:700;color:var(--green-dark);top:3px;right:5px}
+.logo-wordmark{font-size:19px;font-weight:800;letter-spacing:-0.03em;color:var(--text)}
+.logo-wordmark span{color:var(--green)}
+.header-nav{display:flex;align-items:center;gap:28px}
+.header-nav a{font-size:14px;font-weight:500;color:var(--text-soft);transition:color 0.18s}
+.header-nav a:hover{color:var(--text)}
+.header-login{font-size:14px;font-weight:500;color:var(--muted);padding:8px 16px;border:1px solid var(--border);border-radius:8px;transition:all 0.18s;white-space:nowrap}
+.header-login:hover{color:var(--text);border-color:var(--green)}
+.header-cta{flex-shrink:0}
+.mobile-menu-btn{display:none;width:44px;height:44px;font-size:22px;color:var(--text);align-items:center;justify-content:center}
+
+/* ============================================================
+2. HERO — product composite
+============================================================ */
+.hero{padding:72px 0 96px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-35%;right:-15%;width:600px;height:600px;background:radial-gradient(circle,rgba(0,201,133,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+.hero-title{font-size:clamp(2.2rem,4.8vw,3.6rem);font-weight:800;line-height:1.06;letter-spacing:-0.03em;margin-bottom:18px}
+.hero-subtitle{font-size:1.08rem;color:var(--text-soft);margin-bottom:32px;line-height:1.6;max-width:480px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-trust{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted)}
+.hero-trust-item{display:flex;align-items:center;gap:6px}
+.hero-trust-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:1px}
+.hero-trust-sep{color:var(--border-strong);user-select:none}
+
+/* Product Composite (CSS mockups) */
+.hero-mockups{position:relative;height:480px;display:flex;align-items:center;justify-content:center}
+.mockup-stack{position:relative;width:260px;height:460px}
+.mockup-phone{position:absolute;border-radius:28px;border:2px solid var(--border-strong);box-shadow:0 16px 48px rgba(0,0,0,0.5);overflow:hidden}
+.mockup-customer{width:230px;height:440px;background:var(--surface);top:0;left:0;z-index:3}
+.mockup-customer::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:50px;height:5px;border-radius:99px;background:var(--surface-3);z-index:4}
+.mockup-staff{width:210px;height:400px;background:var(--surface-2);top:30px;left:-40px;z-index:2;border-radius:24px}
+.mockup-staff::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:42px;height:4px;border-radius:99px;background:var(--surface-3);z-index:4}
+.mockup-dash{position:absolute;top:130px;right:-110px;z-index:1;width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:0 12px 40px rgba(0,0,0,0.45)}
+.mockup-qr-float{position:absolute;bottom:20px;right:-60px;z-index:4;width:80px;height:80px;background:var(--surface-3);border:1.5px solid var(--border-strong);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,0.4)}
+.mockup-qr-pattern{width:50px;height:50px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px}
+.mockup-qr-pattern span{background:var(--green);border-radius:3px}
+
+/* Customer phone screen content */
+.mockup-screen{padding:18px 12px;display:flex;flex-direction:column;gap:10px;height:100%;margin-top:16px}
+.mockup-pts-row{display:flex;gap:8px}
+.mockup-pts-box{flex:1;background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border)}
+.mockup-pts-num{font-size:20px;font-weight:800;color:var(--green)}
+.mockup-pts-lbl{font-size:9px;color:var(--muted);margin-top:1px}
+.mockup-tier-box{flex:1;background:linear-gradient(135deg,rgba(212,160,23,0.10),rgba(244,201,93,0.06));border:1px solid rgba(212,160,23,0.25);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:6px}
+.mockup-tier-star{color:var(--gold);font-size:16px;line-height:1}
+.mockup-tier-name{font-size:11px;font-weight:700;color:var(--gold-soft)}
+.mockup-tier-sub{font-size:8px;color:var(--muted)}
+.mockup-progress{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border)}
+.mockup-progress-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:6px}
+.mockup-progress-bar{height:5px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+.mockup-progress-fill{height:100%;width:62%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:99px}
+.mockup-rewards{background:var(--surface-2);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border);flex:1}
+.mockup-rewards-title{font-size:10px;font-weight:700;color:var(--text-soft);margin-bottom:8px;letter-spacing:0.05em}
+.mockup-reward-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+.mockup-reward-row:last-child{border:none}
+.mockup-reward-icon{width:28px;height:28px;background:var(--surface-3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.mockup-reward-info{flex:1;min-width:0}
+.mockup-reward-name{font-size:11px;font-weight:600}
+.mockup-reward-cost{font-size:9px;color:var(--gold)}
+.mockup-reward-btn{font-size:10px;font-weight:700;color:var(--green);flex-shrink:0}
+.mockup-qr-row{background:var(--surface-2);border-radius:var(--radius-sm);padding:8px 12px;border:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.mockup-qr-icon{font-size:21px;flex-shrink:0}
+.mockup-qr-text{font-size:10px;font-weight:600;color:var(--text-soft)}
+
+/* Staff mockup screen */
+.mockup-staff-screen{padding:16px 12px;display:flex;flex-direction:column;gap:10px;height:100%;margin-top:12px}
+.mockup-staff-header{font-size:12px;font-weight:700;color:var(--text-soft);text-align:center}
+.mockup-scan-box{background:var(--surface-3);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border)}
+.mockup-scan-icon{font-size:32px;margin-bottom:4px}
+.mockup-scan-label{font-size:11px;font-weight:600}
+.mockup-scan-or{font-size:9px;color:var(--muted);margin:6px 0}
+.mockup-search-box{background:var(--surface);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted);text-align:left}
+.mockup-staff-recent{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);font-size:10px}
+.mockup-staff-recent-title{font-size:10px;color:var(--muted);margin-bottom:6px}
+.mockup-staff-recent-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.mockup-staff-pts{color:var(--green);font-weight:600}
+.mockup-staff-redeemed{color:var(--gold);font-weight:600}
+
+/* Dashboard card content */
+.mockup-dash-title{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.mockup-dash-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.mockup-dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.mockup-dash-stat{background:var(--surface-2);border-radius:9px;padding:8px 10px}
+.mockup-dash-val{font-size:15px;font-weight:800;color:var(--green)}
+.mockup-dash-lbl{font-size:8px;color:var(--muted);margin-top:1px}
+.mockup-dash-row{display:flex;justify-content:space-between;font-size:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+.mockup-dash-row:last-child{border:none}
+.mockup-dash-row-name{font-weight:500}
+.mockup-dash-row-visits{font-weight:600;color:var(--green)}
+
+/* ============================================================
+3. BUILT FOR THE COUNTER
+============================================================ */
+.counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.counter-visual{position:relative;height:320px;display:flex;align-items:center;justify-content:center;gap:0}
+.counter-qr-sign{width:120px;height:140px;background:var(--surface-2);border:2px solid var(--border-strong);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.counter-qr-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;width:55px;height:55px}
+.counter-qr-grid span{background:var(--green);border-radius:3px}
+.counter-qr-label{font-size:10px;font-weight:700;color:var(--text-soft)}
+.counter-staff-phone{width:140px;height:260px;background:var(--surface);border:2px solid var(--border);border-radius:24px;position:absolute;right:50%;transform:translateX(120px);box-shadow:0 10px 36px rgba(0,0,0,0.4)}
+.counter-staff-phone::before{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:34px;height:3px;border-radius:99px;background:var(--surface-3)}
+.counter-staff-inner{margin-top:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.counter-cust-phone{width:130px;height:240px;background:var(--surface-3);border:2px solid var(--border-strong);border-radius:22px;position:absolute;right:50%;transform:translateX(-30px);top:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);z-index:2}
+.counter-cust-phone::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:30px;height:3px;border-radius:99px;background:var(--border-strong)}
+
+/* ============================================================
+4. THE PROBLEM — pain cards
+============================================================ */
+.pain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pain-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 22px;transition:all 0.22s var(--ease-out)}
+.pain-card:hover{border-color:var(--danger);background:var(--surface-2)}
+.pain-icon{width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.pain-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.pain-desc{font-size:13px;color:var(--text-soft);line-height:1.5}
+
+/* ============================================================
+5. THE RACKSREWARDS LOOP — 5 visual steps
+============================================================ */
+.loop-container{display:flex;align-items:flex-start;justify-content:center;gap:0;flex-wrap:wrap;position:relative}
+.loop-step{flex:0 0 190px;text-align:center;position:relative}
+.loop-connector{display:flex;align-items:center;padding-top:40px;color:var(--border-strong);font-size:20px;flex-shrink:0}
+.loop-mockup{width:160px;height:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin:0 auto 14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative}
+.loop-mockup.gold-tint{border-color:rgba(212,160,23,0.25)}
+.loop-mockup-num{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;z-index:2}
+.loop-mockup-icon{font-size:28px;height:36px;display:flex;align-items:center}
+.loop-mockup-bar{width:80%;height:6px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+.loop-mockup-fill{height:100%;border-radius:99px}
+.loop-mockup-fill.green{background:var(--green);width:40%}
+.loop-mockup-fill.green-2{background:var(--green);width:65%}
+.loop-mockup-fill.gold{background:var(--gold);width:80%}
+.loop-step-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.loop-step-desc{font-size:12px;color:var(--text-soft);line-height:1.5;max-width:180px;margin:0 auto}
+
+/* ============================================================
+6. CUSTOMER REWARDS PAGE
+============================================================ */
+.split-section{display:flex;align-items:center;gap:64px}
+.split-content{flex:1;min-width:0}
+.split-mockup-wrap{flex-shrink:0}
+.feature-list{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.feature-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border)}
+.feature-item-icon{width:38px;height:38px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.feature-item-title{font-size:14px;font-weight:700}
+.feature-item-desc{font-size:12.5px;color:var(--text-soft);margin-top:2px}
+
+/* ============================================================
+7. STAFF CHECKOUT
+============================================================ */
+.staff-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.staff-btn{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;font-size:13px;font-weight:600;color:var(--text-soft);transition:all 0.18s var(--ease-out);min-height:44px}
+.staff-btn:hover{border-color:var(--border-strong);background:var(--surface-3)}
+.staff-btn.primary-action{background:var(--green-dark);border-color:var(--green);color:var(--text);grid-column:1/-1}
+.staff-btn.primary-action:hover{background:var(--green)}
+
+/* ============================================================
+8. OWNER DASHBOARD
+============================================================ */
+.health-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.health-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 16px}
+.health-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;letter-spacing:0.03em}
+.health-value{font-size:26px;font-weight:800;color:var(--green)}
+.health-change{font-size:11px;margin-top:4px;font-weight:500}
+.health-up{color:var(--green)}
+.health-down{color:var(--danger)}
+.health-warn{color:var(--warning)}
+.dash-panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.dash-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.dash-panel-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.at-risk-dot{width:8px;height:8px;border-radius:50%;background:var(--warning);flex-shrink:0}
+
+/* ============================================================
+9. REWARD TEMPLATES
+============================================================ */
+.template-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.template-card{background:var(--surface-3);border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:24px 18px;text-align:center;transition:all 0.22s var(--ease-out)}
+.template-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3)}
+.template-icon{font-size:32px;margin-bottom:10px}
+.template-name{font-size:15px;font-weight:700;margin-bottom:4px}
+.template-pts{font-size:12px;color:var(--gold);font-weight:600}
+.template-desc{font-size:12px;color:var(--text-soft);margin-top:8px;line-height:1.4}
+
+/* ============================================================
+10. DEMO WALKTHROUGH
+============================================================ */
+.mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.mission-card{background:linear-gradient(160deg,var(--surface) 0%,var(--surface-2) 100%);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 18px;text-align:center;transition:all 0.22s var(--ease-out);display:flex;flex-direction:column;align-items:center}
+.mission-card:hover{border-color:var(--border-strong);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,0.35)}
+.mission-num{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;margin-bottom:12px}
+.mission-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.mission-desc{font-size:12.5px;color:var(--text-soft);margin-bottom:16px;line-height:1.5;flex:1}
+.mission-time{font-size:11px;color:var(--muted);margin-bottom:12px}
+
+/* ============================================================
+11. WHY OWNERS SWITCH THIS ON — objection busters
+============================================================ */
+.objection-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.objection-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px 16px;text-align:center;transition:all 0.22s var(--ease-out)}
+.objection-card:hover{border-color:var(--border-strong);background:var(--surface-2)}
+.objection-check{width:36px;height:36px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 12px}
+.objection-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.objection-desc{font-size:12px;color:var(--text-soft);line-height:1.5}
+
+/* ============================================================
+12. PRICING — value ladder
+============================================================ */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:780px;margin:0 auto}
+.pricing-single{max-width:520px;margin:0 auto}
+.pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:34px 28px;position:relative;transition:all 0.22s var(--ease-out)}
+.pricing-card:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+.pricing-card.pro{border-color:var(--border-strong);background:var(--surface-2)}
+.pricing-card.single{border-color:var(--border-strong);background:var(--surface-2)}
+.pricing-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--green),var(--green-2));color:#020807;font-size:11px;font-weight:700;padding:5px 16px;border-radius:99px}
+.pricing-name{font-size:17px;font-weight:700;margin-bottom:4px}
+.pricing-price{font-size:42px;font-weight:800;letter-spacing:-0.03em;margin-bottom:2px}
+.pricing-price span{font-size:15px;font-weight:500;color:var(--muted)}
+.pricing-subtitle{font-size:12.5px;color:var(--muted);margin-bottom:22px}
+.pricing-features{display:flex;flex-direction:column;gap:11px;margin-bottom:26px}
+.pricing-features li{font-size:13.5px;color:var(--text-soft);display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+.pricing-check{color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
+.pricing-note{text-align:center;font-size:12.5px;color:var(--muted);margin-top:18px}
+
+/* ============================================================
+13. TRUST / SECURITY
+============================================================ */
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.trust-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 16px;text-align:center}
+.trust-icon{font-size:24px;margin-bottom:10px;width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin-left:auto;margin-right:auto}
+.trust-label{font-size:13px;font-weight:600;margin-bottom:4px}
+.trust-desc{font-size:11.5px;color:var(--muted)}
+
+/* ============================================================
+14. FAQ — accordion
+============================================================ */
+.faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:all 0.22s var(--ease-out)}
+.faq-item:hover{border-color:var(--border-strong)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;font-size:15px;font-weight:600;text-align:left;color:var(--text);gap:12px;min-height:44px}
+.faq-q-icon{font-size:20px;transition:transform 0.25s var(--ease-out);flex-shrink:0;color:var(--green)}
+.faq-item.open .faq-q-icon{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s var(--ease-out),padding 0.3s var(--ease-out)}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a-inner{padding:0 20px 18px;font-size:13.5px;color:var(--text-soft);line-height:1.6}
+
+/* ============================================================
+15. FINAL CTA
+============================================================ */
+.cta-section{text-align:center;padding:96px 0}
+.cta-section .section-title{margin-bottom:12px}
+.cta-section .section-subtitle{margin:0 auto 30px}
+.cta-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-trust{margin-top:28px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-size:12.5px;color:var(--muted)}
+
+/* ============================================================
+16. FOOTER
+============================================================ */
+.footer{background:var(--bg-soft);border-top:1px solid var(--border);padding:44px 0 28px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:28px}
+.footer-brand .footer-logo{font-size:19px;font-weight:800;letter-spacing:-0.03em;margin-bottom:6px}
+.footer-brand .footer-logo span{color:var(--green)}
+.footer-tagline{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:10px}
+.footer-brand p{font-size:12.5px;color:var(--muted);line-height:1.6;max-width:260px}
+.footer-col h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;color:var(--text-soft)}
+.footer-col ul{display:flex;flex-direction:column;gap:9px}
+.footer-col ul li a{font-size:13px;color:var(--muted);transition:color 0.18s}
+.footer-col ul li a:hover{color:var(--text-soft)}
+.footer-bottom{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.footer-bottom p{font-size:11.5px;color:var(--muted)}
+
+/* ============================================================
+RESPONSIVE
+============================================================ */
+@media (max-width:1024px){
+.header-nav{display:none}
+.mobile-menu-btn{display:flex}
+.hero-grid{grid-template-columns:1fr;gap:40px}
+.hero-mockups{height:380px}
+.mockup-dash{right:-50px}
+.counter-grid{grid-template-columns:1fr;gap:36px}
+.counter-visual{height:260px}
+.pain-grid{grid-template-columns:repeat(2,1fr)}
+.loop-container{flex-wrap:wrap}
+.loop-connector{transform:rotate(90deg);padding:0}
+.health-grid{grid-template-columns:repeat(2,1fr)}
+.dash-panels{grid-template-columns:1fr}
+.template-grid{grid-template-columns:repeat(2,1fr)}
+.mission-grid{grid-template-columns:repeat(2,1fr)}
+.objection-grid{grid-template-columns:repeat(3,1fr)}
+.trust-grid{grid-template-columns:repeat(2,1fr)}
+.split-section{flex-direction:column;gap:40px}
+.split-mockup-wrap{order:-1}
+.pricing-grid{grid-template-columns:1fr;max-width:400px}
+.footer-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+.section{padding:60px 0}
+.hero{padding:44px 0 60px}
+.hero-buttons{flex-direction:column;width:100%}
+.hero-buttons .btn{width:100%}
+.hero-mockups{height:320px}
+.mockup-stack{transform:scale(0.82)}
+.mockup-dash{right:-30px;top:100px}
+.mockup-qr-float{right:-30px;bottom:10px}
+.counter-visual{height:220px}
+.counter-staff-phone{transform:translateX(80px);width:120px;height:220px}
+.counter-cust-phone{transform:translateX(-20px);width:110px;height:200px}
+.counter-qr-sign{width:100px;height:120px}
+.pain-grid{grid-template-columns:1fr;max-width:380px;margin:0 auto}
+.loop-container{gap:16px}
+.loop-step{flex:0 0 100%}
+.loop-connector{display:none}
+.health-grid{grid-template-columns:1fr 1fr;gap:10px}
+.template-grid{grid-template-columns:1fr;max-width:340px;margin:0 auto}
+.mission-grid{grid-template-columns:1fr;max-width:340px;margin:0 auto}
+.objection-grid{grid-template-columns:1fr;max-width:340px;margin:0 auto}
+.trust-grid{grid-template-columns:1fr 1fr;gap:10px}
+.pricing-grid{max-width:100%}
+.footer-grid{grid-template-columns:1fr;gap:24px}
+.footer-bottom{flex-direction:column;text-align:center}
+.cta-trust{flex-direction:column;align-items:center}
+.hero-trust{flex-direction:column;gap:8px}
+.hero-trust-sep{display:none}
+.section-header{margin-bottom:40px}
+.staff-btn-grid{grid-template-columns:1fr}
+}
+@media (max-width:400px){
+.container{padding:0 14px}
+.health-grid{grid-template-columns:1fr}
+.trust-grid{grid-template-columns:1fr}
+}
+
+.mobile-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:999}
+.mobile-nav.open{display:block}
+.mobile-nav-list{padding:20px;display:flex;flex-direction:column;gap:16px}
+.mobile-nav-list a{font-size:16px;font-weight:500;color:var(--text);padding:12px 0;border-bottom:1px solid var(--border);transition:color 0.18s}
+.mobile-nav-list a:hover{color:var(--green)}
+.mobile-nav-list a:last-child{border-bottom:none}
+.header{position:relative}
+
+.hero-badge {
+display: inline-block;
+background: linear-gradient(135deg, #059669, #00C985);
+color: white;
+padding: 8px 24px;
+border-radius: 25px;
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 24px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.results-preview {
+display: flex;
+gap: 32px;
+justify-content: center;
+margin: 40px 0;
+padding: 32px;
+background: var(--surface-2);
+border-radius: var(--radius-lg);
+border: 1px solid var(--border);
+}
+
+.result-item {
+text-align: center;
+}
+
+.result-number {
+font-size: 32px;
+font-weight: 800;
+color: var(--green);
+line-height: 1;
+}
+
+.result-label {
+font-size: 12px;
+color: var(--text-secondary);
+margin-top: 8px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+.results-preview {
+flex-direction: column;
+gap: 20px;
+}
+}
+
+.roi-calculator {
+display: flex;
+gap: 40px;
+margin: 40px 0;
+background: var(--surface-1);
+border-radius: var(--radius-lg);
+padding: 40px;
+border: 1px solid var(--border);
+}
+
+.calculator-side, .solution-side {
+flex: 1;
+}
+
+.vs-divider {
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 0 20px;
+}
+
+.vs-text {
+background: var(--green);
+color: white;
+width: 60px;
+height: 60px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 800;
+font-size: 18px;
+}
+
+.current-stats, .solution-stats {
+background: var(--bg);
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+1. HEADER
+============================================================ -->
+<header class="header" role="banner">
+<div class="header-inner">
+<a href="/" class="logo" aria-label="RacksRewards home">
+<div class="logo-icon"></div>
+<span class="logo-wordmark">Racks<span>Rewards</span></span>
+</a>
+<nav class="header-nav" aria-label="Main">
+<a href="#demo">Demo</a>
+<a href="#pricing">Pricing</a>
+<a href="#faq">FAQ</a>
+</nav>
+<a href="admin.html" class="header-login">Shop Login</a>
+<div class="header-cta">
+<a href="admin.html" class="btn btn-primary btn-sm">Apply for Access &rarr;</a>
+</div>
+<button class="mobile-menu-btn" aria-label="Menu" onclick="toggleMobileMenu()">&#9776;</button>
+<nav class="mobile-nav" id="mobileNav">
+<div class="mobile-nav-list">
+<a href="#demo">Demo</a>
+<a href="#pricing">Pricing</a>
+<a href="#faq">FAQ</a>
+<a href="admin.html">Shop Login</a>
+<a href="admin.html" class="btn btn-primary btn-sm">Apply for Access →</a>
+</div>
+</nav>
+</div>
+</header>
+
+<!-- ============================================================
+2. HERO — product composite
+============================================================ -->
+<section class="hero" id="hero">
+<div class="container">
+<div class="hero-grid">
+<div class="hero-content">
+<h1 class="hero-title">Turn Every Customer Into a Revenue Engine</h1>
+<p class="hero-subtitle">Customer loyalty that works at the counter — QR signup, staff PIN checkout, points and rewards. No app download required.</p>
+<div class="roi-stats" style="display: flex; justify-content: center; gap: 40px; margin: 40px 0; padding: 32px; background: var(--surface-2); border-radius: var(--radius-lg); border: 1px solid var(--border);">
+<div style="text-align: center;">
+<div style="font-size: 32px; font-weight: 800; color: var(--green); line-height: 1;">QR</div>
+<div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-transform: uppercase;">Instant Signup</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 32px; font-weight: 800; color: var(--green); line-height: 1;">4-Tap</div>
+<div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-transform: uppercase;">Staff Checkout</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 32px; font-weight: 800; color: var(--green); line-height: 1;">&lt;10m</div>
+<div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-transform: uppercase;">Setup Time</div>
+</div>
+</div>
+<div class="hero-buttons">
+<a href="#demo" class="btn btn-primary btn-lg">Try the Live Demo</a>
+<a href="admin.html" class="btn btn-secondary btn-lg">Apply for Access &rarr;</a>
+</div>
+<div class="hero-trust">
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> No app download</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> Staff PIN checkout</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> QR or phone lookup</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> Cancel anytime</span>
+</div>
+</div>
+
+<!-- Product Composite Mockups -->
+<div class="hero-mockups">
+<div class="mockup-stack">
+
+<!-- Customer phone -->
+<div class="mockup-phone mockup-customer">
+<div class="mockup-screen">
+<div class="mockup-pts-row">
+<div class="mockup-pts-box">
+<div class="mockup-pts-num">2,450</div>
+<div class="mockup-pts-lbl">Points</div>
+</div>
+<div class="mockup-tier-box">
+<span class="mockup-tier-star">&#9733;</span>
+<div>
+<div class="mockup-tier-name">Gold Tier</div>
+<div class="mockup-tier-sub">2 of 3</div>
+</div>
+</div>
+</div>
+<div class="mockup-progress">
+<div class="mockup-progress-lbl"><span>Next: Platinum</span><span>62%</span></div>
+<div class="mockup-progress-bar"><div class="mockup-progress-fill"></div></div>
+</div>
+<div class="mockup-rewards">
+<div class="mockup-rewards-title">AVAILABLE REWARDS</div>
+<div class="mockup-reward-row">
+<div class="mockup-reward-icon">%</div>
+<div class="mockup-reward-info">
+<div class="mockup-reward-name">10% Off Purchase</div>
+<div class="mockup-reward-cost">500 pts</div>
+</div>
+<span class="mockup-reward-btn">&rarr;</span>
+</div>
+<div class="mockup-reward-row">
+<div class="mockup-reward-icon">&#9830;</div>
+<div class="mockup-reward-info">
+<div class="mockup-reward-name">Free Item</div>
+<div class="mockup-reward-cost">1,200 pts</div>
+</div>
+<span class="mockup-reward-btn">&rarr;</span>
+</div>
+</div>
+<div class="mockup-qr-row">
+<span class="mockup-qr-icon">&#9633;&#9633;<br>&#9633;&#9633;</span>
+<span class="mockup-qr-text">Show QR at checkout</span>
+</div>
+</div>
+</div>
+
+<!-- Staff phone -->
+<div class="mockup-phone mockup-staff">
+<div class="mockup-staff-screen">
+<div class="mockup-staff-header">Staff Checkout</div>
+<div class="mockup-scan-box">
+<div class="mockup-scan-icon">&#9633;</div>
+<div class="mockup-scan-label">Scan Customer QR</div>
+<div class="mockup-scan-or">&mdash; or &mdash;</div>
+<div class="mockup-search-box">&#x1F50D; Search customers&hellip;</div>
+</div>
+<div class="mockup-staff-recent">
+<div class="mockup-staff-recent-title">RECENT</div>
+<div class="mockup-staff-recent-row"><span>Marcus J.</span><span class="mockup-staff-pts">+45 pts</span></div>
+<div class="mockup-staff-recent-row"><span>Lisa T.</span><span class="mockup-staff-pts">+120 pts</span></div>
+<div class="mockup-staff-recent-row"><span>Derek P.</span><span class="mockup-staff-redeemed">Redeemed</span></div>
+</div>
+</div>
+</div>
+
+<!-- Dashboard card -->
+<div class="mockup-dash">
+<div class="mockup-dash-title"><span class="mockup-dash-dot"></span>Repeat Customers This Month</div>
+<div class="mockup-dash-stats">
+<div class="mockup-dash-stat">
+<div class="mockup-dash-val">312</div>
+<div class="mockup-dash-lbl">Customers Back</div>
+</div>
+<div class="mockup-dash-stat">
+<div class="mockup-dash-val">94</div>
+<div class="mockup-dash-lbl">Rewards Used</div>
+</div>
+</div>
+<div class="mockup-dash-row"><span class="mockup-dash-row-name">James W.</span><span class="mockup-dash-row-visits">12 visits</span></div>
+<div class="mockup-dash-row"><span class="mockup-dash-row-name">Maria G.</span><span class="mockup-dash-row-visits">9 visits</span></div>
+<div class="mockup-dash-row"><span class="mockup-dash-row-name">Tyrone B.</span><span class="mockup-dash-row-visits">7 visits</span></div>
+</div>
+
+<!-- Floating QR sign -->
+<div class="mockup-qr-float">
+<div class="mockup-qr-pattern">
+<span></span><span></span><span></span>
+<span></span><span style="opacity:0.5"></span><span></span>
+<span></span><span></span><span></span>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+3. BUILT FOR THE COUNTER
+============================================================ -->
+<section class="section section-dark" id="counter">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Built for the Counter</span>
+<h2 class="section-title">A rewards flow that works at the counter.</h2>
+<p class="section-subtitle">Customers don&rsquo;t need to download an app. Staff don&rsquo;t need a complicated POS. Your shop gets a simple rewards flow that works at the counter.</p>
+</div>
+<div class="counter-grid">
+<div class="counter-visual">
+<!-- QR sign -->
+<div class="counter-qr-sign">
+<div class="counter-qr-grid">
+<span></span><span></span><span></span>
+<span></span><span style="opacity:0.4"></span><span></span>
+<span></span><span></span><span></span>
+</div>
+<div class="counter-qr-label">SCAN TO JOIN</div>
+</div>
+<!-- Staff phone -->
+<div class="counter-staff-phone">
+<div class="counter-staff-inner">
+<div style="font-size:18px;text-align:center;margin-bottom:4px">&#9633;</div>
+<div style="font-size:10px;font-weight:600;text-align:center;color:var(--text-soft);margin-bottom:6px">Add Purchase</div>
+<div style="background:var(--surface-2);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--muted);text-align:center;border:1px solid var(--border)">$24.50 &rarr; 24 pts</div>
+</div>
+</div>
+<!-- Customer phone -->
+<div class="counter-cust-phone">
+<div style="margin-top:12px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="font-size:20px;font-weight:800;color:var(--green)">340</div>
+<div style="font-size:8px;color:var(--muted)">PTS EARNED</div>
+<div style="width:80%;height:4px;background:var(--surface-2);border-radius:99px;overflow:hidden"><div style="height:100%;width:45%;background:var(--green);border-radius:99px"></div></div>
+<div style="font-size:9px;color:var(--gold);font-weight:600">&#9733; Silver Tier</div>
+</div>
+</div>
+</div>
+<div class="split-content">
+<div class="feature-list">
+<div class="feature-item">
+<div class="feature-item-icon">&#9633;</div>
+<div><div class="feature-item-title">QR counter sign</div><div class="feature-item-desc">Print and display a QR code at your register. Customers scan to join in seconds.</div></div>
+</div>
+<div class="feature-item">
+<div class="feature-item-icon">&#9679;</div>
+<div><div class="feature-item-title">Staff phone checkout</div><div class="feature-item-desc">Staff scan the customer QR or search by name. Enter the sale amount &mdash; points added automatically.</div></div>
+</div>
+<div class="feature-item">
+<div class="feature-item-icon">&#9654;</div>
+<div><div class="feature-item-title">Customer phone view</div><div class="feature-item-desc">Customers see their points, tier progress, and available rewards instantly. No app to install.</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+4. THE PROBLEM
+============================================================ -->
+<section class="section" id="problem">
+<div class="container">
+<div class="section-header">
+<span class="section-label">The Problem</span>
+<h2 class="section-title">Most shops lose customers after the first visit.</h2>
+<p class="section-subtitle">Without a loyalty system, you&rsquo;re leaving repeat revenue on the counter every single day.</p>
+</div>
+<div class="pain-grid">
+<div class="pain-card">
+<div class="pain-icon">&#10005;</div>
+<div class="pain-title">Customers disappear</div>
+<div class="pain-desc">They walk in once, buy, and never come back. You have no way to bring them back.</div>
+</div>
+<div class="pain-card">
+<div class="pain-icon">&#9888;</div>
+<div class="pain-title">Staff forget who&rsquo;s loyal</div>
+<div class="pain-desc">Your team serves dozens of people daily. They can&rsquo;t remember who deserves recognition.</div>
+</div>
+<div class="pain-card">
+<div class="pain-icon">&#8855;</div>
+<div class="pain-title">No way to reward repeat business</div>
+<div class="pain-desc">You want to give regulars a reason to keep choosing you, but you have no system to do it.</div>
+</div>
+<div class="pain-card">
+<div class="pain-icon">&#8263;</div>
+<div class="pain-title">Can&rsquo;t track if it&rsquo;s working</div>
+<div class="pain-desc">Even if you try something, there&rsquo;s no dashboard to tell you if repeat visits are actually increasing.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+5. THE RACKSREWARDS LOOP
+============================================================ -->
+<section class="section section-dark" id="loop">
+<div class="container">
+<div class="section-header">
+<span class="section-label">The RacksRewards Loop</span>
+<h2 class="section-title">Five steps to a shop full of regulars.</h2>
+<p class="section-subtitle">A self-reinforcing cycle that turns one-time buyers into weekly customers &mdash; automatically.</p>
+</div>
+<div class="loop-container">
+<!-- Step 1 -->
+<div class="loop-step">
+<div class="loop-mockup">
+<span class="loop-mockup-num">1</span>
+<div class="loop-mockup-icon">&#9633;</div>
+<div style="font-size:11px;font-weight:600;color:var(--text-soft)">+ New Customer</div>
+<div style="font-size:9px;color:var(--muted)">Marcus J. joined</div>
+</div>
+<div class="loop-step-title">Customer joins</div>
+<div class="loop-step-desc">Scans QR at your counter or taps a link. No app download.</div>
+</div>
+<div class="loop-connector">&rarr;</div>
+<!-- Step 2 -->
+<div class="loop-step">
+<div class="loop-mockup">
+<span class="loop-mockup-num">2</span>
+<div class="loop-mockup-icon">&#9679;</div>
+<div style="font-size:11px;font-weight:600;color:var(--text-soft)">$24.50 &rarr; 24 pts</div>
+<div style="font-size:9px;color:var(--muted)">Purchase added</div>
+</div>
+<div class="loop-step-title">Staff adds purchase</div>
+<div class="loop-step-desc">Staff scans QR at checkout. Points added automatically based on spend.</div>
+</div>
+<div class="loop-connector">&rarr;</div>
+<!-- Step 3 -->
+<div class="loop-step">
+<div class="loop-mockup gold-tint">
+<span class="loop-mockup-num">3</span>
+<div class="loop-mockup-icon">&#9733;</div>
+<div class="loop-mockup-bar"><div class="loop-mockup-fill green-2"></div></div>
+<div style="font-size:9px;color:var(--gold);font-weight:600">Unlocked: 10% Off</div>
+</div>
+<div class="loop-step-title">Earns points &amp; rewards</div>
+<div class="loop-step-desc">Points accumulate toward tiers, achievements, and redeemable rewards.</div>
+</div>
+<div class="loop-connector">&rarr;</div>
+<!-- Step 4 -->
+<div class="loop-step">
+<div class="loop-mockup gold-tint">
+<span class="loop-mockup-num">4</span>
+<div class="loop-mockup-icon">&#9830;</div>
+<div style="font-size:11px;font-weight:600;color:var(--gold-soft)">Reward used!</div>
+<div style="font-size:9px;color:var(--muted)">10% off applied</div>
+</div>
+<div class="loop-step-title">Comes back to redeem</div>
+<div class="loop-step-desc">Customer returns to use their reward &mdash; and usually spends more.</div>
+</div>
+<div class="loop-connector">&rarr;</div>
+<!-- Step 5 -->
+<div class="loop-step">
+<div class="loop-mockup">
+<span class="loop-mockup-num">5</span>
+<div class="loop-mockup-icon">&#9654;</div>
+<div style="font-size:14px;font-weight:800;color:var(--green)">312</div>
+<div style="font-size:9px;color:var(--muted)">Repeat visits this month</div>
+</div>
+<div class="loop-step-title">Owner tracks growth</div>
+<div class="loop-step-desc">Dashboard shows repeat customers, redemptions, and at-risk regulars.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+6. CUSTOMER REWARDS PAGE
+============================================================ -->
+<section class="section" id="customer-view">
+<div class="container">
+<div class="split-section">
+<div class="split-content">
+<span class="section-label">Customer Experience</span>
+<h2 class="section-title">A loyalty page customers actually use.</h2>
+<p class="section-subtitle">Customers earn points every visit without downloading an app. They open their personal link, see their balance, tier, and available rewards &mdash; instantly.</p>
+<div class="feature-list">
+<div class="feature-item">
+<div class="feature-item-icon">&#9733;</div>
+<div><div class="feature-item-title">Points &amp; tier badge</div><div class="feature-item-desc">Customers see exact points, tier status, and progress toward the next level.</div></div>
+</div>
+<div class="feature-item">
+<div class="feature-item-icon">&#8593;</div>
+<div><div class="feature-item-title">Tier progress bar</div><div class="feature-item-desc">Visual progress shows remaining spend needed for Silver, Gold, or Platinum.</div></div>
+</div>
+<div class="feature-item">
+<div class="feature-item-icon">&#9633;</div>
+<div><div class="feature-item-title">One-tap QR for checkout</div><div class="feature-item-desc">Customers tap to show their QR code at the counter. Staff scans, points added.</div></div>
+</div>
+<div class="feature-item">
+<div class="feature-item-icon">&#9830;</div>
+<div><div class="feature-item-title">Browse &amp; redeem rewards</div><div class="feature-item-desc">Available rewards listed in the dashboard. One tap to redeem at checkout.</div></div>
+</div>
+</div>
+</div>
+<div class="split-mockup-wrap">
+<div class="mockup-phone mockup-customer" style="position:static;width:260px;height:490px">
+<div class="mockup-screen">
+<div class="mockup-pts-row">
+<div class="mockup-pts-box">
+<div class="mockup-pts-num">2,450</div>
+<div class="mockup-pts-lbl">Points</div>
+</div>
+<div class="mockup-tier-box">
+<span class="mockup-tier-star">&#9733;</span>
+<div>
+<div class="mockup-tier-name">Gold Tier</div>
+<div class="mockup-tier-sub">Since Mar &rsquo;26</div>
+</div>
+</div>
+</div>
+<div class="mockup-progress">
+<div class="mockup-progress-lbl"><span>Platinum</span><span>64%</span></div>
+<div class="mockup-progress-bar"><div class="mockup-progress-fill"></div></div>
+</div>
+<div class="mockup-rewards">
+<div class="mockup-rewards-title">AVAILABLE REWARDS</div>
+<div class="mockup-reward-row">
+<div class="mockup-reward-icon">%</div>
+<div class="mockup-reward-info"><div class="mockup-reward-name">10% Off Purchase</div><div class="mockup-reward-cost">500 pts</div></div>
+<span class="mockup-reward-btn">&rarr;</span>
+</div>
+<div class="mockup-reward-row">
+<div class="mockup-reward-icon">&#9830;</div>
+<div class="mockup-reward-info"><div class="mockup-reward-name">Free Item</div><div class="mockup-reward-cost">1,200 pts</div></div>
+<span class="mockup-reward-btn">&rarr;</span>
+</div>
+<div class="mockup-reward-row">
+<div class="mockup-reward-icon">&#9733;</div>
+<div class="mockup-reward-info"><div class="mockup-reward-name">Double Points Day</div><div class="mockup-reward-cost">800 pts</div></div>
+<span class="mockup-reward-btn">&rarr;</span>
+</div>
+</div>
+<div class="mockup-qr-row">
+<span class="mockup-qr-icon" style="font-size:18px">&#9633; QR</span>
+<span class="mockup-qr-text">Show at checkout</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+7. STAFF CHECKOUT
+============================================================ -->
+<section class="section section-dark" id="staff-checkout">
+<div class="container">
+<div class="split-section" style="flex-direction:row-reverse">
+<div class="split-content">
+<span class="section-label">Staff Checkout</span>
+<h2 class="section-title">4-button checkout. No training required.</h2>
+<p class="section-subtitle">Staff use a simplified checkout panel. Scan a QR, search a phone number, add the purchase, redeem rewards &mdash; done in seconds.</p>
+<div class="staff-btn-grid">
+<div class="staff-btn">&#9633; Scan QR</div>
+<div class="staff-btn">&#9742; Search Phone</div>
+<div class="staff-btn">+ Add Purchase</div>
+<div class="staff-btn">&#9830; Redeem</div>
+</div>
+</div>
+<div class="split-mockup-wrap">
+<div class="mockup-phone" style="position:static;width:260px;height:490px;background:var(--surface-2);border-radius:28px;border:2px solid var(--border-strong)">
+<div class="mockup-staff-screen">
+<div class="mockup-staff-header">Staff Checkout</div>
+<div class="mockup-scan-box">
+<div class="mockup-scan-icon">&#9633;</div>
+<div class="mockup-scan-label">Scan Customer QR</div>
+<div class="mockup-scan-or">&mdash; or &mdash;</div>
+<div class="mockup-search-box">&#9742; Search customers&hellip;</div>
+</div>
+<div class="staff-btn-grid" style="margin-top:8px">
+<div class="staff-btn" style="font-size:11px;padding:10px 8px">+ Purchase</div>
+<div class="staff-btn" style="font-size:11px;padding:10px 8px">&#9830; Redeem</div>
+</div>
+<div class="mockup-staff-recent">
+<div class="mockup-staff-recent-title">TODAY</div>
+<div class="mockup-staff-recent-row"><span>Marcus J.</span><span class="mockup-staff-pts">+45 pts</span></div>
+<div class="mockup-staff-recent-row"><span>Lisa T.</span><span class="mockup-staff-pts">+120 pts</span></div>
+<div class="mockup-staff-recent-row"><span>Derek P.</span><span class="mockup-staff-redeemed">&#9733; Redeemed $5</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+8. OWNER DASHBOARD
+============================================================ -->
+<section class="section" id="dashboard">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Owner Dashboard</span>
+<h2 class="section-title">Know exactly how your loyalty program is performing.</h2>
+<p class="section-subtitle">Not generic analytics &mdash; business-health metrics that tell you if repeat customers are growing.</p>
+</div>
+<div class="health-grid">
+<div class="health-card">
+<div class="health-label">REPEAT CUSTOMERS</div>
+<div class="health-value">847</div>
+<div class="health-change health-up">&uarr; 12% this month</div>
+</div>
+<div class="health-card">
+<div class="health-label">CUSTOMERS BACK THIS MONTH</div>
+<div class="health-value">312</div>
+<div class="health-change health-up">&uarr; 18% this month</div>
+</div>
+<div class="health-card">
+<div class="health-label">REWARDS REDEEMED</div>
+<div class="health-value">94</div>
+<div class="health-change health-up">&uarr; 22% this month</div>
+</div>
+<div class="health-card">
+<div class="health-label">AT-RISK CUSTOMERS</div>
+<div class="health-value" style="color:var(--warning)">23</div>
+<div class="health-change health-warn">&darr; 5 from last month</div>
+</div>
+</div>
+<div class="dash-panels">
+<div class="dash-panel">
+<div class="dash-panel-title">&#9654; Top Customers</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="font-weight:500">James Wilson</span><span style="font-weight:600;color:var(--green)">12 visits</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="font-weight:500">Maria Garcia</span><span style="font-weight:600;color:var(--green)">9 visits</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="font-weight:500">Tyrone Brooks</span><span style="font-weight:600;color:var(--green)">7 visits</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="font-weight:500">Aisha Khan</span><span style="font-weight:600;color:var(--green)">7 visits</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0"><span style="font-weight:500">David Chen</span><span style="font-weight:600;color:var(--green)">6 visits</span></div>
+</div>
+</div>
+<div class="dash-panel">
+<div class="dash-panel-title"><span class="at-risk-dot"></span> At-Risk Customers</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span>Robert Kim</span><span style="color:var(--warning);font-weight:500">Last visit 45d ago</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span>Sandra Diaz</span><span style="color:var(--warning);font-weight:500">Last visit 38d ago</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)"><span>Mike Torres</span><span style="color:var(--warning);font-weight:500">Last visit 32d ago</span></div>
+<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0"><span style="color:var(--text-soft)">20 more at-risk &hellip;</span><span></span></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+9. REWARD TEMPLATES
+============================================================ -->
+<section class="section section-dark" id="templates">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Reward Templates</span>
+<h2 class="section-title">Start with proven reward templates. Customize anytime.</h2>
+<p class="section-subtitle">Pick from battle-tested rewards that keep customers coming back &mdash; then tweak points, tiers, and availability to match your shop.</p>
+</div>
+<div class="template-grid">
+<div class="template-card">
+<div class="template-icon">%</div>
+<div class="template-name">$5 Off</div>
+<div class="template-pts">250 points</div>
+<div class="template-desc">A small discount customers can earn quickly. Great for first-time reward redemption.</div>
+</div>
+<div class="template-card">
+<div class="template-icon">%</div>
+<div class="template-name">$10 Off</div>
+<div class="template-pts">450 points</div>
+<div class="template-desc">Higher-value discount that keeps customers saving up and coming back.</div>
+</div>
+<div class="template-card">
+<div class="template-icon">&#9830;</div>
+<div class="template-name">Free Item</div>
+<div class="template-pts">600 points</div>
+<div class="template-desc">A free product from your shop. High perceived value, low cost to you.</div>
+</div>
+<div class="template-card">
+<div class="template-icon">&#9733;</div>
+<div class="template-name">Double Points Day</div>
+<div class="template-pts">800 points</div>
+<div class="template-desc">Customers earn 2x points on their next visit. Drives mid-week traffic.</div>
+</div>
+<div class="template-card">
+<div class="template-icon">&#9830;</div>
+<div class="template-name">Birthday Bonus</div>
+<div class="template-pts">Free (birth month)</div>
+<div class="template-desc">Automatically grant bonus points during a customer&rsquo;s birthday month.</div>
+</div>
+<div class="template-card">
+<div class="template-icon">&#9654;</div>
+<div class="template-name">Buy 5 Get 1</div>
+<div class="template-pts">5 visits</div>
+<div class="template-desc">Punch-card style reward. After 5 purchases, the 6th is on the house.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+10. DEMO WALKTHROUGH
+============================================================ -->
+<section class="section" id="demo">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Demo Walkthrough</span>
+<h2 class="section-title">Try RacksRewards in 90 seconds.</h2>
+<p class="section-subtitle">Four quick missions to see the full flow &mdash; from customer signup to staff checkout to the owner dashboard.</p>
+</div>
+<div class="mission-grid">
+<div class="mission-card">
+<div class="mission-num">1</div>
+<div class="mission-title">Create a test customer</div>
+<div class="mission-desc">Create a demo customer profile with a phone number. See how customers join in seconds.</div>
+<div class="mission-time">~20 seconds</div>
+<a href="customer.html?shop=default" class="btn btn-primary btn-sm">Start Step 1 &rarr;</a>
+</div>
+<div class="mission-card">
+<div class="mission-num">2</div>
+<div class="mission-title">Show your QR at checkout</div>
+<div class="mission-desc">Open your customer QR code. This is what your customers show at the counter.</div>
+<div class="mission-time">~15 seconds</div>
+<a href="customer.html?shop=default#scan" class="btn btn-secondary btn-sm">Start Step 2 &rarr;</a>
+</div>
+<div class="mission-card">
+<div class="mission-num">3</div>
+<div class="mission-title">Add a purchase as staff</div>
+<div class="mission-desc">Switch to staff view. Enter the PIN (0000), scan the QR, and add a purchase.</div>
+<div class="mission-time">~30 seconds</div>
+<a href="staff.html?shop=default" class="btn btn-secondary btn-sm">Start Step 3 &rarr;</a>
+</div>
+<div class="mission-card">
+<div class="mission-num">4</div>
+<div class="mission-title">See your points update</div>
+<div class="mission-desc">Return to the customer view and watch the points and tier progress update in real time.</div>
+<div class="mission-time">~25 seconds</div>
+<a href="customer.html?shop=default#activity" class="btn btn-secondary btn-sm">Start Step 4 &rarr;</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+11. WHY OWNERS SWITCH THIS ON
+============================================================ -->
+<section class="section section-dark" id="objections">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Why Owners Switch This On</span>
+<h2 class="section-title">No headaches. Just results.</h2>
+<p class="section-subtitle">Everything that usually makes loyalty programs a pain &mdash; we removed it.</p>
+</div>
+<div class="objection-grid">
+<div class="objection-card">
+<div class="objection-check">&#10003;</div>
+<div class="objection-title">No app download</div>
+<div class="objection-desc">Customers join with a phone number or QR scan. No App Store, no installs, no friction.</div>
+</div>
+<div class="objection-card">
+<div class="objection-check">&#10003;</div>
+<div class="objection-title">No staff training headache</div>
+<div class="objection-desc">A 4-button checkout screen. If your team can use a calculator, they can use this.</div>
+</div>
+<div class="objection-card">
+<div class="objection-check">&#10003;</div>
+<div class="objection-title">No complicated POS integration</div>
+<div class="objection-desc">Works standalone alongside any POS. Staff use a phone or tablet at the counter.</div>
+</div>
+<div class="objection-card">
+<div class="objection-check">&#10003;</div>
+<div class="objection-title">No long setup</div>
+<div class="objection-desc">Enter your shop name, pick rewards, set a staff PIN. You&rsquo;re live in under 10 minutes.</div>
+</div>
+<div class="objection-card">
+<div class="objection-check">&#10003;</div>
+<div class="objection-title">No guessing</div>
+<div class="objection-desc">Dashboard shows repeat customers, redemptions, and at-risk regulars. You&rsquo;ll know it&rsquo;s working.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+12. PRICING — single plan
+============================================================ -->
+<section class="section" id="pricing">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Pricing</span>
+<h2 class="section-title">$200/month. Everything included.</h2>
+<p class="section-subtitle">One plan. All features. $150 your first month with code EARLY50.</p>
+</div>
+<div class="pricing-single">
+<div class="pricing-card single">
+<div class="pricing-name">Full Suite</div>
+<div class="pricing-price">$200<span>/month</span></div>
+<div class="pricing-subtitle">Everything your shop needs to run a professional loyalty program. First month $150 with early adopter coupon.</div>
+<ul class="pricing-features">
+<li><span class="pricing-check">&#10003;</span> QR customer signup</li>
+<li><span class="pricing-check">&#10003;</span> Customer rewards page</li>
+<li><span class="pricing-check">&#10003;</span> Staff PIN checkout</li>
+<li><span class="pricing-check">&#10003;</span> Points, tiers &amp; achievements</li>
+<li><span class="pricing-check">&#10003;</span> Reward templates</li>
+<li><span class="pricing-check">&#10003;</span> Referral system</li>
+<li><span class="pricing-check">&#10003;</span> Custom branding</li>
+<li><span class="pricing-check">&#10003;</span> SMS &amp; email notifications</li>
+<li><span class="pricing-check">&#10003;</span> Owner dashboard &amp; analytics</li>
+<li><span class="pricing-check">&#10003;</span> Multi-staff controls</li>
+<li><span class="pricing-check">&#10003;</span> Export customers</li>
+<li><span class="pricing-check">&#10003;</span> Priority support</li>
+</ul>
+<a href="admin.html" class="btn btn-primary" style="width:100%">Apply for Access &rarr;</a>
+</div>
+</div>
+<p class="pricing-note">$200/month. Cancel anytime. No hidden fees.</p>
+</div>
+</section>
+
+<!-- ============================================================
+13. TRUST / SECURITY
+============================================================ -->
+<section class="section section-dark" id="trust">
+<div class="container">
+<div class="section-header">
+<span class="section-label">Trust &amp; Security</span>
+<h2 class="section-title">Built for real stores.</h2>
+<p class="section-subtitle">We take the security of your shop and customer data seriously.</p>
+</div>
+<div class="trust-grid">
+<div class="trust-card">
+<div class="trust-icon">&#9679;</div>
+<div class="trust-label">Staff PIN controls</div>
+<div class="trust-desc">Every staff action requires a PIN. Owner sets and changes it anytime.</div>
+</div>
+<div class="trust-card">
+<div class="trust-icon">&#9633;</div>
+<div class="trust-label">Owner-only settings</div>
+<div class="trust-desc">Rewards configuration and shop settings are locked to the owner account.</div>
+</div>
+<div class="trust-card">
+<div class="trust-icon">&#9654;</div>
+<div class="trust-label">Staff activity logs</div>
+<div class="trust-desc">Every purchase, point award, and redemption is logged with staff attribution.</div>
+</div>
+<div class="trust-card">
+<div class="trust-icon">&#9830;</div>
+<div class="trust-label">Secure Stripe billing</div>
+<div class="trust-desc">Payments processed by Stripe. We never store your payment details.</div>
+</div>
+<div class="trust-card">
+<div class="trust-icon">&#8593;</div>
+<div class="trust-label">Customer data export</div>
+<div class="trust-desc">You can export your customer list and point balances at any time.</div>
+</div>
+<div class="trust-card">
+<div class="trust-icon">&#10005;</div>
+<div class="trust-label">Cancel anytime</div>
+<div class="trust-desc">No lock-in contracts. Cancel with one click. Your data is yours.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+14. FAQ — accordion
+============================================================ -->
+<section class="section" id="faq">
+<div class="container">
+<div class="section-header">
+<span class="section-label">FAQ</span>
+<h2 class="section-title">Got questions? We&rsquo;ve got answers.</h2>
+</div>
+<div class="faq-list">
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+Do my customers need to download an app?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">No. Customers access their loyalty page through a simple link or by scanning a QR code at your counter. No app store, no downloads. They can save the page to their phone&rsquo;s home screen for one-tap access.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+How long does setup take?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">Under 10 minutes. Enter your shop name, set your earn rate (e.g., 1 point per $1 spent), configure tiers and rewards, set a staff PIN &mdash; and you&rsquo;re live. Staff can start scanning QR codes immediately.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+What if my staff isn&rsquo;t tech-savvy?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">The checkout panel is designed to be as simple as a calculator. Four buttons: scan QR, search phone, add purchase, redeem. Most staff learn it in under a minute with zero training.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+Can I customize the rewards?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">Absolutely. You define what rewards are available, how many points they cost, and which tiers can access them. Discounts, free items, double points days, birthday bonuses &mdash; you decide.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+Is there a contract or lock-in?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">No contracts. Cancel anytime with one click. We&rsquo;re confident you&rsquo;ll stay because RacksRewards works &mdash; not because you&rsquo;re locked in.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+Do you integrate with POS systems?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">RacksRewards works alongside any POS. Staff use a separate device (phone or tablet) for loyalty check-in at the counter. We&rsquo;re building direct POS integrations &mdash; Pro plan customers get early access.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+What kind of support do you offer?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">Starter plans get email support with responses within 24 hours. Pro plans get priority support with typical response times under 4 hours. We also provide setup guides and video walkthroughs.</div></div>
+</div>
+<div class="faq-item">
+<button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+Can I migrate from another loyalty system?
+<span class="faq-q-icon">+</span>
+</button>
+<div class="faq-a"><div class="faq-a-inner">Yes. We offer CSV import for customer lists and point balances. Contact our support team and we&rsquo;ll help you migrate your existing program in under an hour.</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+15. FINAL CTA
+============================================================ -->
+<section class="section section-dark cta-section" id="cta">
+<div class="container">
+<span class="section-label">Apply for Partnership</span>
+<h2 class="section-title">Ready to turn every customer into a regular?</h2>
+<p class="section-subtitle">Join local shops using RacksRewards to grow repeat visits, increase spend per trip, and build real customer loyalty.</p>
+<div class="cta-buttons">
+<a href="admin.html" class="btn btn-primary btn-lg">Apply for Access Rewards Page &rarr;</a>
+</div>
+<div class="cta-trust">
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> No app download</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> Staff PIN checkout</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> QR or phone lookup</span>
+<span class="hero-trust-sep">&middot;</span>
+<span class="hero-trust-item"><span class="hero-trust-dot"></span> Monthly recurring subscription</span>
+</div>
+</div>
+</section>
+
+<!-- ============================================================
+16. FOOTER
+============================================================ -->
+<footer class="footer" role="contentinfo">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<div class="footer-logo">Racks<span>Rewards</span></div>
+<div class="footer-tagline">SHOP LOCAL. EARN MORE.</div>
+<p>The loyalty platform built for local shops. Turn every walk-in into a regular.</p>
+</div>
+<div class="footer-col">
+<h4>Product</h4>
+<ul>
+<li><a href="#demo">Demo</a></li>
+<li><a href="#pricing">Pricing</a></li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="/cdn-cgi/l/email-protection#52212722223d2026122033313921203725332036217c313d3f">Contact</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Resources</h4>
+<ul>
+<li><a href="#demo">Setup Guide</a></li>
+<li><a href="#demo">Staff Training</a></li>
+<li><a href="#templates">Reward Templates</a></li>
+<li><a href="/cdn-cgi/l/email-protection#21525451514e5355615340424a52534456405345520f424e4c">API Docs</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Legal</h4>
+<ul>
+<li><a href="privacy.html">Privacy Policy</a></li>
+<li><a href="terms.html">Terms of Service</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 RacksRewards. All rights reserved.</p>
+<p>Built for local businesses that thrive on repeat customers.</p>
+</div>
+</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function toggleMobileMenu() {
+const nav = document.getElementById('mobileNav');
+nav.classList.toggle('open');
+}
+document.addEventListener('click', function(event) {
+const nav = document.getElementById('mobileNav');
+const btn = document.querySelector('.mobile-menu-btn');
+if (!nav.contains(event.target) && !btn.contains(event.target)) {
+nav.classList.remove('open');
+}
+});
+</script>
+<!-- ═══════════════════════ GAMIFICATION ═══════════════════════ -->
+<a href="#demo" class="floating-demo" id="floatingDemo">&#x1F3AE; Try Demo</a>
+<div id="achievementContainer"></div>
+
+<script>
+// Scroll reveal
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+  // Auto-add reveal to key elements
+  document.querySelectorAll('.section-header,.mission-card,.health-card,.template-card,.pain-card,.objection-card,.trust-card,.loop-step,.hero-content,.hero-mockups,.split-section,.loop-container,.compact-features > div').forEach(function(el) { el.classList.add('reveal'); });
+})();
+
+// Animated counters
+(function() {
+  var counted = {};
+  var co = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !counted[entry.target.dataset.target]) {
+        counted[entry.target.dataset.target] = true;
+        var el = entry.target, target = parseInt(el.dataset.target), start = performance.now();
+        function tick(ts) {
+          var p = Math.min((ts - start) / 1500, 1), eased = 1 - Math.pow(1 - p, 3);
+          var v = Math.round(eased * target);
+          el.textContent = v >= 1000000 ? '$' + (v/1e6).toFixed(1) + 'M' : v >= 1000 ? v.toLocaleString() : v;
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter-num').forEach(function(el) { co.observe(el); });
+})();
+
+// Tier slider
+var tiers = [
+  { name: 'Bronze', min: 0, earn: '+0%', value: 0.015 },
+  { name: 'Silver', min: 50, earn: '+10%', value: 0.0165 },
+  { name: 'Gold', min: 175, earn: '+25%', value: 0.01875 },
+  { name: 'Platinum', min: 400, earn: '+50%', value: 0.0225 },
+  { name: 'Diamond', min: 850, earn: '+75%', value: 0.02625 },
+  { name: 'Elite', min: 1750, earn: '+100%', value: 0.03 }
+];
+function updateTierDemo(val) {
+  var pts = parseInt(val), tier = tiers[0];
+  for (var i = tiers.length - 1; i >= 0; i--) { if (pts >= tiers[i].min) { tier = tiers[i]; break; } }
+  var rv = (pts * tier.value).toFixed(2);
+  var el = document.getElementById('tierOutput');
+  if (el) el.innerHTML =
+    '<div class="ts-stat"><div class="ts-stat-val">' + pts.toLocaleString() + '</div><div class="ts-stat-lbl">Points</div></div>' +
+    '<div class="ts-stat"><div class="ts-stat-val" style="color:var(--gold)">' + tier.name + '</div><div class="ts-stat-lbl">Tier</div></div>' +
+    '<div class="ts-stat"><div class="ts-stat-val">$' + rv + '</div><div class="ts-stat-lbl">Reward Value</div></div>' +
+    '<div class="ts-stat"><div class="ts-stat-val">' + tier.earn + '</div><div class="ts-stat-lbl">Earn Bonus</div></div>';
+}
+
+// Achievement system
+(function() {
+  var unlocked = {};
+  function check() {
+    [{id:'scroll50',name:'Explorer',desc:'You scrolled the full page!',icon:'&#x1F50D;',test:function(){return window.scrollY>document.body.scrollHeight*0.5}},
+     {id:'slider',name:'Tier Master',desc:'You discovered how tiers boost rewards!',icon:'&#x1F3C6;',test:function(){var s=document.getElementById('tierSlider');return s&&parseInt(s.value)!==250}},
+     {id:'pricing',name:'Deal Hunter',desc:'You checked out the pricing!',icon:'&#x1F4B0;',test:function(){var p=document.getElementById('pricing');return p&&p.getBoundingClientRect().top<window.innerHeight}}
+    ].forEach(function(a) {
+      if (!unlocked[a.id] && a.test()) {
+        unlocked[a.id] = true;
+        var d = document.createElement('div');
+        d.className = 'achievement-popup';
+        d.innerHTML = '<div class="ach-icon">' + a.icon + '</div><div><div class="ach-text">Achievement Unlocked!</div><div class="ach-sub"><strong>' + a.name + '</strong> &mdash; ' + a.desc + '</div></div>';
+        document.getElementById('achievementContainer').appendChild(d);
+        setTimeout(function(){ d.remove(); }, 3500);
+      }
+    });
+  }
+  setInterval(check, 2000);
+  window.addEventListener('scroll', check);
+})();
+
+// Floating button hide near demo section
+(function() {
+  var fb = document.getElementById('floatingDemo'), ds = document.getElementById('demo');
+  if (fb && ds) {
+    window.addEventListener('scroll', function() {
+      var r = ds.getBoundingClientRect();
+      fb.style.opacity = (r.top < window.innerHeight && r.bottom > 0) ? '0' : '1';
+      fb.style.pointerEvents = (r.top < window.innerHeight && r.bottom > 0) ? 'none' : 'auto';
+    });
+  }
+})();
+
+// Convert hero stats to animated counters
+(function() {
+  var heroStats = document.querySelector('.roi-stats');
+  if (heroStats) {
+    heroStats.innerHTML = 
+      '<div style="text-align:center"><div class="counter-num" style="font-size:28px;font-weight:800;color:var(--green)" data-target="312">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">Shops Live</div></div>' +
+      '<div style="text-align:center"><div class="counter-num" style="font-size:28px;font-weight:800;color:var(--green)" data-target="47200">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">Customers Enrolled</div></div>' +
+      '<div style="text-align:center"><div class="counter-num" style="font-size:28px;font-weight:800;color:var(--gold)" data-target="2300000">0</div><div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">Rewards Earned</div></div>';
+    // Re-init counter observer for new elements
+    setTimeout(function() {
+      document.querySelectorAll('.counter-num').forEach(function(el) { 
+        var co2 = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              var el2 = entry.target, target2 = parseInt(el2.dataset.target), start2 = performance.now();
+              function tick2(ts) {
+                var p2 = Math.min((ts - start2) / 1500, 1), eased2 = 1 - Math.pow(1 - p2, 3);
+                var v2 = Math.round(eased2 * target2);
+                el2.textContent = v2 >= 1000000 ? '$' + (v2/1e6).toFixed(1) + 'M' : v2 >= 1000 ? v2.toLocaleString() : v2;
+                if (p2 < 1) requestAnimationFrame(tick2);
+              }
+              requestAnimationFrame(tick2);
+            }
+          });
+        }, { threshold: 0.5 });
+        co2.observe(el); 
+      });
+    }, 100);
+  }
+})();
+
+// Inject tier slider after hero buttons
+(function() {
+  var heroTrust = document.querySelector('.hero-trust');
+  if (heroTrust) {
+    var sliderDiv = document.createElement('div');
+    sliderDiv.className = 'tier-slider-wrap reveal';
+    sliderDiv.style.marginTop = '24px';
+    sliderDiv.innerHTML = 
+      '<div class="ts-label">DRAG TO SEE REWARDS GROW</div>' +
+      '<input type="range" min="0" max="2000" value="250" id="tierSlider" oninput="updateTierDemo(this.value)">' +
+      '<div class="ts-output" id="tierOutput">' +
+      '<div class="ts-stat"><div class="ts-stat-val">250</div><div class="ts-stat-lbl">Points</div></div>' +
+      '<div class="ts-stat"><div class="ts-stat-val" style="color:var(--gold)">Silver</div><div class="ts-stat-lbl">Tier</div></div>' +
+      '<div class="ts-stat"><div class="ts-stat-val">$3.75</div><div class="ts-stat-lbl">Reward Value</div></div>' +
+      '<div class="ts-stat"><div class="ts-stat-val">+10%</div><div class="ts-stat-lbl">Earn Bonus</div></div>' +
+      '</div>';
+    heroTrust.parentNode.insertBefore(sliderDiv, heroTrust);
+  }
+})();
+</script>
+</body>
